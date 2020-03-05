@@ -42,23 +42,25 @@ class SomInterpretation():
         sns.heatmap(z.cpu().numpy(), linewidth=0.5, annot=True)
         plt.show()
 
-    def show_heatmap(self, dim: Optional[int] = None, labels: Optional[List[str]] = None) -> None:
+    def show_feature_heatmaps(self, dim: Optional[int] = None, labels: Optional[List[str]] = None) -> None:
         "Displays a hitmap"
-        dims = [dim] if dim is not None else list(range(len(self.data.train[-1])))
-
+        dims = [dim] if dim is not None else list(range(self.data.train.shape[-1]))
         s = np.sqrt(0.0 + len(dims)).astype(int)
-        fig, axs = plt.subplots(s, s, figsize=(10, 8))
+        rows, cols = (1, len(dims)) if s * s < len(dims) else (s, s)
+        fig, axs = plt.subplots(rows, cols, figsize=(8 * cols, 6 * rows))
 
         labels = ifnone(labels, [' ' for _ in range(len(dims))])
 
         if len(dims) == 1:
             axs = [[axs]]
+        elif rows == 1 or cols == 1:
+            axs = [axs]
 
         for d in dims:
-            r = d // s
-            c = d % s
-            axs[r][c].set_title(labels[d])
-            sns.heatmap(self.w[:, d].reshape(self.map_size[:-1]), ax=axs[r][c], annot=True)
+            i = d % s
+            j = d // s
+            axs[i][j].set_title(labels[d])
+            sns.heatmap(self.w[:, d].reshape(self.map_size[:-1]), ax=axs[i][j], annot=True)
         fig.show()
 
     def show_omni_heatmap(self):
