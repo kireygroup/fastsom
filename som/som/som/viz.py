@@ -69,17 +69,18 @@ class SomScatterVisualizer(Callback):
 
 class SomStatsVisualizer(Callback):
     "Accumulates and displays SOM statistics for each epoch"
+
     def __init__(self, n_epochs: int, learn) -> None:
         self.epoch, self.n_epochs = 0, n_epochs
         self.learn, self.data = learn, learn.data.train.clone().cpu()
         self.bmu_count = learn.model.weights.shape[0] * learn.model.weights.shape[1]
         self.vars, self.means = [[] for _ in range(self.bmu_count)], [[] for _ in range(self.bmu_count)]
         self.fig, self.vars_plt, self.means_plt = None, None, None
-        
+
     def on_train_begin(self):
         "Prepares the plot"
         self._prepare_plot()
-    
+
     def on_epoch_end(self):
         "Updates statistics and plot"
         self.epoch += 1
@@ -91,7 +92,9 @@ class SomStatsVisualizer(Callback):
         # Access BMU weights
         w = self.learn.model.weights.view(-1, w_size).cpu()
         # Evaluate unique BMUs and inverse access indices
-        uniques, inverse = preds.unique(dim=0, return_inverse=True)
+        uniques, inverse, counts = preds.unique(dim=0, return_inverse=True, return_counts=True)
+        # TODO: plot counts instead of per-bucket stats
+
         # Calculate euclidean distances between each input and its BMU
         d = (w[preds] - self.data.cpu()).pow(2).sum(1).sqrt()
         # For each cluster, eval stats
@@ -103,23 +106,23 @@ class SomStatsVisualizer(Callback):
                 self.vars[b].append(var.numpy())
                 self.means[b].append(mean.numpy())
         self._update_plot()
-    
+
     def _prepare_plot(self):
         "Initializes the plot"
         plt.ion()
-        self.fig, (self.vars_plt, self.means_plt) = plt.subplots(1, 2, figsize=(15,5))
+        self.fig, (self.vars_plt, self.means_plt) = plt.subplots(1, 2, figsize=(15, 5))
         self.vars_plt.set_title('Cluster Variance')
         self.vars_plt.set_xlabel('Epoch')
         self.vars_plt.set_ylabel('Variance')
         self.vars_plt.set_xlim([0, self.n_epochs])
-        
+
         self.means_plt.set_title('Cluster Mean Distance')
         self.means_plt.set_xlabel('Epoch')
         self.means_plt.set_ylabel('Mean Distance')
         self.means_plt.set_xlim([0, self.n_epochs])
-        
+
         self.fig.show()
-    
+
     def _update_plot(self):
         "Updates the plot"
         # plt.legend(range(self.dists[0]))
@@ -127,11 +130,11 @@ class SomStatsVisualizer(Callback):
             self.vars_plt.plot(self.vars[b], label=f'Cluster {b}')
             self.means_plt.plot(self.means[b], label=f'Cluster {b}')
         self.fig.canvas.draw()
-    
+
     def _2d_idxs_to_1d(self, idxs: np.ndarray, row_size: int) -> list:
         "Turns 2D indices to 1D"
         return [el[0] * row_size + el[1] for el in idxs]
-        
+
 
 # TODO: heatmap + hitmap
 """

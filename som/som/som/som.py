@@ -21,7 +21,7 @@ class Som(Module):
     Uses PyTorch's `pairwise_distance` to run BMU calculations on the GPU.
     """
 
-    def __init__(self, size: SomSize2D, alpha=0.03, sigma=0.03) -> None:
+    def __init__(self, size: SomSize2D, alpha=0.003) -> None:
         self.size = size
         self.lr = None
         self.alpha = alpha
@@ -47,7 +47,7 @@ class Som(Module):
         # Retrieve tensor dimensions
         batch_size, in_size = x.shape
         w_size = _reduce(lambda a, b: a * b, w.shape[:-1])
-        
+
         d = self._to_device(torch.zeros(batch_size, w_size))
 
         # Reshape X and W to allow broadcasting
@@ -82,27 +82,28 @@ class Som(Module):
         # Stack the argmin 2D indices
         bmus = torch.stack((min_idx / cols, min_idx % cols), dim=1)
         return self._to_device(bmus)
-    
-    def diff(self, x: Tensor, w: Tensor) -> Tensor:
+
+    def diff_old(self, x: Tensor, w: Tensor) -> Tensor:
         "Calculates the difference between `x` and `w`, matching their sizes."
         w_size = _reduce(lambda a, b: a * b, w.shape[:-1])
         return (x.repeat(w_size, 1) - (w.view(w_size, -1).repeat(x.shape[0], *(1 for _ in range(len(x.shape)-1))))).view(-1, *w.shape)
 
-    def diff_old(self, x: Tensor, w: Tensor) -> Tensor:
+    def diff(self, x: Tensor, w: Tensor) -> Tensor:
         "Calculates the difference between `x` and `w`, matching their sizes."
         # Retrieve tensor dimensions
         batch_size, in_size = x.shape
         w_size = _reduce(lambda a, b: a * b, w.shape[:-1])
-        
+
         d = self._to_device(torch.zeros(batch_size, w_size))
 
         # Reshape X and W to allow broadcasting
         a = self._to_device(x.repeat(w_size, 1))
-        b = self._to_device(w.view(-1, in_size).repeat(batch_size, *(1 for _ in range(len(x.shape)-1))))
-        
+        b = self._to_device(
+            w.view(-1, in_size).repeat(batch_size, *(1 for _ in range(len(x.shape)-1))))
+
         # Calculate the pairwise distance
         d = a - b
-        
+
         # Cleanup GPU space
         del a
         del b
@@ -133,7 +134,7 @@ class Som(Module):
 
         return bmu_indices
 
-    def backward(self) -> None:
+    def backward(self, debug: bool = False) -> None:
         """
         Tensors:\n
         `x`                                 : batch data\n
@@ -169,20 +170,32 @@ class Som(Module):
         # First, create a tensor of indices of the same size as the weights map
         if self.indices is None:
             self.indices = self._to_device(index_tensor(self.size[:-1]))
+
         # Calculate the index-based difference from the bmu indices for each neuron
         diff = bmu_indices.view(batch_size, 1, 1, len(self.size)-1) - self.indices.unsqueeze(0).repeat(batch_size, 1, 1, 1)
-        
+
         # Then, calculate the euclidean distance of the BMU position with the other nodes
         # We also multiply it by `sigma` for scaling
         bmu_distances = (diff).pow(2).sum(-1).float().sqrt()
-        
+
         # Let's use the distances to evaluate the Gaussian neighborhood multiplier:
         neighborhood_mult = torch.exp(torch.neg(bmu_distances / (self.sigma ** 2)))
-        
+
+        a = neighborhood_mult[..., None] * self.alpha * elementwise_diffs
+
+        if debug:
+            print(f'Decay: {self.lr}')
+            print(f'Alpha: {self.alpha}')
+            print(f'Sigma: {self.sigma}')
+            print(f'Max neighborhood mult (should be 1.0): {neighborhood_mult.max()}')
+            print(f'Min neighborhood mult (should be close to 0): {neighborhood_mult.min()}')
+            print(f'Max `forward` diff: {elementwise_diffs.max()}')
+            print(f'Max update factor: {a.max()}')
+
         # Now we need to evaluate the distance of each neuron with the input
-        for delta in (neighborhood_mult[..., None] * self.alpha * elementwise_diffs):
+        for delta in a:
             self.weights = self.weights + delta
-            
+
     def get_prev_batch_output(self):
         "Retrieves the output of the previous batch in training"
         if self._diffs is not None and self._bmus is not None:
