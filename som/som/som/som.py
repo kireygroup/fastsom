@@ -4,58 +4,73 @@ import torch
 import torch.nn.functional as F
 
 from torch import nn, Tensor
-from typing import Tuple, Collection
+from typing import Tuple, Collection, Callable
 from fastai.torch_core import Module
-from functools import reduce as _reduce
+from functools import reduce
 
 from ..core import index_tensor
 
+
+__all__ = [
+    "SomSize2D",
+    "pairwise_distance",
+    "Som",
+]
+
+
 SomSize2D = Tuple[int, int, int]
+
+
+def pairwise_distance(a: Tensor, b: Tensor) -> Tensor:
+    "Calculates the pairwise distance between `a` and `b`."
+    return (a - b).pow(2).sum(-1).sqrt()
 
 
 class Som(Module):
     """
     Self-Organizing Map implementation with a Fastai-like code organization.\n
-    Uses linear decay for `alpha` and `sigma` parameters, 
+    Uses linear decay for `alpha` and `sigma` parameters,
     gaussian neighborhood function and batchwise weight update.\n
     Uses PyTorch's `pairwise_distance` to run BMU calculations on the GPU.
     """
 
-    def __init__(self, size: SomSize2D, alpha=0.003) -> None:
+    def __init__(self, size: SomSize2D, alpha=0.003, dist_fn=pairwise_distance) -> None:
         self.size = size
         self.lr = None
         self.alpha = alpha
         self.sigma = max(size[:-1]) / 2.0
         self.weights = torch.randn(size)
         self.training = False
+        self.dist_fn = dist_fn
         self.indices = None
         self.use_cuda = torch.cuda.is_available()
 
     def distance(self, x: Tensor, w: Tensor) -> Tensor:
         """
         Calculates the pairwise distance between `x` and `w` by
-        broadcasting.
-
-        Input
-        x: [N, S]
-        w: [rows, cols, S]
-
-        Output
-        d: [N, rows, cols]
+        expanding them and passing them to `dist_fn`.\n
+        \n
+        Input\n
+        x: [N, S]\n
+        w: [rows, cols, S]\n
+        \n
+        Output\n
+        d: [N, rows, cols]\n
 
         """
         # Retrieve tensor dimensions
         batch_size, in_size = x.shape
-        w_size = _reduce(lambda a, b: a * b, w.shape[:-1])
+        w_size = reduce(lambda a, b: a * b, w.shape[:-1])
 
+        # Allocate GPU space to store results
         d = self._to_device(torch.zeros(batch_size, w_size))
 
-        # Reshape X and W to allow broadcasting
+        # Reshape X and W to enable distance calculation
         a = self._to_device(x.repeat(w_size, 1))
         b = self._to_device(w.view(-1, in_size).repeat(batch_size, 1))
 
         # Calculate the pairwise distance
-        d = F.pairwise_distance(a, b)
+        d = self.dist_fn(a, b)
 
         # Cleanup GPU space
         del a
@@ -85,14 +100,14 @@ class Som(Module):
 
     def diff_old(self, x: Tensor, w: Tensor) -> Tensor:
         "Calculates the difference between `x` and `w`, matching their sizes."
-        w_size = _reduce(lambda a, b: a * b, w.shape[:-1])
+        w_size = reduce(lambda a, b: a * b, w.shape[:-1])
         return (x.repeat(w_size, 1) - (w.view(w_size, -1).repeat(x.shape[0], *(1 for _ in range(len(x.shape)-1))))).view(-1, *w.shape)
 
     def diff(self, x: Tensor, w: Tensor) -> Tensor:
         "Calculates the difference between `x` and `w`, matching their sizes."
         # Retrieve tensor dimensions
         batch_size, in_size = x.shape
-        w_size = _reduce(lambda a, b: a * b, w.shape[:-1])
+        w_size = reduce(lambda a, b: a * b, w.shape[:-1])
 
         d = self._to_device(torch.zeros(batch_size, w_size))
 
@@ -203,7 +218,7 @@ class Som(Module):
         raise RuntimeError(f'`{self.__class__.__name__}.get_prev_batch_output` should only be called during training')
 
     def __repr__(self):
-        return f'{self.__class__.__name__}(size={self.size[:-1]}, neuron_size={self.size[-1]}, alpha={self.alpha}, sigma={self.sigma})'
+        return f'{self.__class__.__name__}(size={self.size[:-1]}, neuron_size={self.size[-1]}, alpha={self.alpha}, sigma={self.sigma}), dist_fn={self.dist_fn}'
 
     def _to_device(self, a: Tensor) -> Tensor:
         "Moves a tensor to the appropriate device"

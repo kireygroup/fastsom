@@ -1,24 +1,25 @@
-ARG JUPYTER_ENV=jupyterlab
+FROM nvcr.io/nvidia/pytorch:20.02-py3
 
-FROM nvcr.io/nvidia/pytorch:20.01-py3 AS base
+RUN apt-get update
+RUN apt-get install build-essential -y
 
-# Copy over files & install requirements
-RUN mkdir -p /proj
-COPY requirements.txt /proj/requirements.txt
-WORKDIR /proj
-RUN pip install -r requirements.txt
 
 # Install unzip
 RUN apt-get install -y unzip
 
-# Create a branch stage for Jupyter Lab (+extensions)
-FROM base AS environment-jupyterlab
-RUN pip install jupyterlab jupyterlab-nvdashboard
-RUN conda install -c conda-forge nodejs
-RUN jupyter labextension install jupyterlab-nvdashboard
+# Gather environment variables
+ARG SSH_USER=root
+ARG SSH_PASS=password
 
-# Create an alternative branch stage for Jupyter Notebook
-FROM base AS environment-jupyter
+# Install and configure SSH with authentication
+RUN apt-get update \
+    && apt-get install -y openssh-server netcat \
+    && mkdir /var/run/sshd \
+    && echo "${SSH_USER}:${SSH_PASS}" | chpasswd \
+    && sed -i 's/\#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+
+# Install Jupyter Notebook
 RUN pip install jupyter notebook==5.7.8 ipywidgets
 # Install Jupyter extensions
 RUN pip install jupyter_contrib_nbextensions
@@ -26,11 +27,26 @@ RUN jupyter contrib nbextension install --user
 # Copy over the custom CSS file
 COPY custom.css /root/.ipython/profile_default/static/custom/custom.css
 
-# Now use the selected build stage as image
-FROM environment-${JUPYTER_ENV} as final-image
+# Install Jupyter Lab (+extensions)
+RUN pip install jupyterlab jupyterlab-nvdashboard
+RUN conda install -c conda-forge nodejs
+RUN jupyter labextension install jupyterlab-nvdashboard
 
-# Expose the port where the Jupyter Notebook will run
+# Copy over files & install requirements
+RUN mkdir -p /proj
+COPY som/requirements.txt /proj/requirements.txt
+WORKDIR /proj
+RUN pip install -r requirements.txt
+
+# Copy over utility scripts
+COPY scripts/ /scripts/ 
+RUN chmod +x -R /scripts/
+
+# Expose the ports for:
+# Jupyter Notebook / Lab
 EXPOSE 8888
+# SSH
+EXPOSE 22
 
-# Run the notebook
-CMD ["jupyter", "notebook", "--notebook-dir=/proj/som/nbs"]
+
+CMD ["bash", "/scripts/start.sh"]

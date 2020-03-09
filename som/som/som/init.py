@@ -2,14 +2,12 @@
 Initializers are used to define 
 initial map weights for Self-Organizing Maps.
 """
-import torch
 
+from typing import Tuple
+from functools import reduce
 from torch import Tensor
 from kmeans_pytorch import kmeans as _kmeans
-from functools import partial as _partial, reduce as _reduce
-from typing import Tuple, Callable
-
-from ..core import compose
+import torch
 
 
 class SomInitializer():
@@ -33,7 +31,7 @@ class KMeansInitializer(SomInitializer):
         `x`         : the input Tensor\n
         `size`      : the SOM size\n
         """
-        k = _reduce(lambda acc, x: x * acc, size[:-1])
+        k = reduce(lambda acc, x: x * acc, size[:-1])
         # Run the KMeans algorithm over the input
         _, cluster_centers = _kmeans(X=x, num_clusters=k, distance=self.distance, device=self.device)
         # Reshape it to fit the SOM size
@@ -44,7 +42,8 @@ class RandomInitializer(SomInitializer):
     "Initializes SOM weights randomly."
 
     def __call__(self, x: Tensor, size: Tuple, **kwargs):
-        return torch.randn(size)
+        # TODO uniform in range
+        return torch.zeros(size).uniform_(x.min(), x.max())
 
 
 """

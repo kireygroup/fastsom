@@ -1,7 +1,0 @@
-autopep8
-fastai
-kmeans-pytorch
-opencv-python
-nose2
-visdom
-seaborn

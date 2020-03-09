@@ -32,14 +32,15 @@ class SomInterpretation():
 
     def show_hitmap(self, data: Tensor = None) -> None:
         "Displays a hitmap"
+        _, ax = plt.subplots(figsize=(10, 10))
         d = ifnone(data, self.data.train)
         preds = self.learn.predict(d)
         out, counts = preds.unique(return_counts=True, dim=0)
-        z = torch.zeros(self.map_size[:-1])
+        z = torch.zeros(self.map_size[:-1]).long()
         for i, c in enumerate(out):
             z[c[0], c[1]] += counts[i]
 
-        sns.heatmap(z.cpu().numpy(), linewidth=0.5, annot=True)
+        sns.heatmap(z.cpu().numpy(), linewidth=0.5, annot=True, ax=ax, fmt='d')
         plt.show()
 
     def show_feature_heatmaps(self, dim: Optional[int] = None, labels: Optional[List[str]] = None) -> None:
@@ -67,15 +68,17 @@ class SomInterpretation():
         "Displays a colored heatmap"
         if self.pca is None:
             self.init_pca()
-        # Calculate the 3-layer PCA of the weights
-        d = self.pca.transform(self.w).reshape(*self.map_size[:-1], 3)
 
+        if self.w.shape[-1] != 3:
+            # Calculate the 3-layer PCA of the weights
+            d = self.pca.transform(self.w).reshape(*self.map_size[:-1], 3)
+        else:
+            d = self.w.reshape(*self.map_size[:-1], 3)
         # Scale the 3 layers in [0, 255]
-        colors = 255 * (d - d.min()) / (d.max() - d.min())
-        colors = colors.astype(int)
-
+        # colors = 255 * (d - d.min()) / (d.max() - d.min())
+        # colors = colors.astype(int)
         # Plot w/ colors
-        plt.imshow(colors)
+        plt.imshow(d)
 
     def init_pca(self):
         self.pca = PCA(n_components=3)

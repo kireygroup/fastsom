@@ -1,7 +1,8 @@
 {
     "python.pythonPath": "/usr/bin/python3",
     "python.linting.pylintArgs": [
-        "--max-line-length=180"
+        "--max-line-length=180",
+        "--disable=C0103"
     ],
     "python.formatting.autopep8Args": [
         "--max-line-length=180"

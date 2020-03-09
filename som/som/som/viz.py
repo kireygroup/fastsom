@@ -5,42 +5,39 @@ for Self-Organizing Maps.
 
 import torch
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 
+from typing import TYPE_CHECKING
 from torch import Tensor
 from fastai.callback import Callback
-from mpl_toolkits.mplot3d import Axes3D
 from sklearn.decomposition import PCA
+from mpl_toolkits.mplot3d import Axes3D
 
 from .som import Som
 
+if TYPE_CHECKING:
+    from .learn import SomLearner
+
+
+__all__ = [
+    "SomScatterVisualizer",
+    "SomStatsVisualizer",
+]
+
 
 class SomScatterVisualizer(Callback):
+    "`Learner` callback "
     # https://jakevdp.github.io/PythonDataScienceHandbook/04.12-three-dimensional-plotting.html
-    def __init__(self, model: Som, data: Tensor, dim: int = 2, data_color: str = '#69F0AE', weights_color: str = '#FF5722') -> None:
+
+    def __init__(self, model: Som, data: Tensor, dim: int = 2, data_color: str = '#539dcc', weights_color: str = '#e58368') -> None:
         self.model = model
         self.data = data.clone().cpu().numpy()
         self.input_el_size = data.shape[-1]
         self.dim = dim
-        self.epoch = 0
         self.data_color, self.weights_color = data_color, weights_color
+        self.pca, self.f, self.ax, self.scatter = None, None, None, None
 
-    def on_train_begin(self):
-        "Initializes the plot when the training begins"
-        self.prepare_plot()
-
-    def on_epoch_end(self):
-        "Updates the plot after each epoch"
-        self.epoch += 1
-        self.update_plot()
-
-    def on_train_end(self):
-        "Cleanup after training"
-        del self.pca
-        del self.data
-
-    def prepare_plot(self) -> None:
+    def on_train_begin(self, **kwargs):
         "Initializes the PCA on the dataset and creates the plot."
         # Init + fit the PCA
         self.pca = PCA(n_components=self.dim)
@@ -59,31 +56,63 @@ class SomScatterVisualizer(Callback):
         self.ax.scatter(*tuple([el[i] for el in d] for i in range(self.dim)), c=self.data_color)
         self.f.show()
 
-    def update_plot(self) -> None:
+    def on_epoch_end(self, **kwargs):
         "Updates the plot."
         w = self.pca.transform(self.model.weights.view(-1, self.input_el_size).cpu().numpy())
         t = tuple([el[i] for el in w] for i in range(self.dim))
         self.scatter.set_offsets(np.c_[t])
         self.f.canvas.draw()
 
+    def on_train_end(self, **kwargs):
+        "Cleanup after training"
+        del self.pca
+        del self.data
+
 
 class SomStatsVisualizer(Callback):
     "Accumulates and displays SOM statistics for each epoch"
 
-    def __init__(self, n_epochs: int, learn) -> None:
-        self.epoch, self.n_epochs = 0, n_epochs
+    def __init__(self, learn: 'SomLearner', plot_hyperparams: bool = False) -> None:
         self.learn, self.data = learn, learn.data.train.clone().cpu()
         self.bmu_count = learn.model.weights.shape[0] * learn.model.weights.shape[1]
-        self.vars, self.means = [[] for _ in range(self.bmu_count)], [[] for _ in range(self.bmu_count)]
-        self.fig, self.vars_plt, self.means_plt = None, None, None
+        self.vars, self.means, self.alphas, self.sigmas = [], [], [], []
+        self.fig, self.vars_plt, self.means_plt, self.alphas_plt, self.sigmas_plt = None, None, None, None, None
+        self.plot_hyperparams = plot_hyperparams
 
-    def on_train_begin(self):
-        "Prepares the plot"
-        self._prepare_plot()
+    def on_train_begin(self, **kwargs):
+        "Initializes the plot"
+        n_epochs = kwargs['n_epochs']
+        plt.ion()
+        subplots_size = (2, 2) if self.plot_hyperparams else (1, 2)
+        self.fig, plots = plt.subplots(*subplots_size, figsize=(15, 5))
+        plots = plots.flatten() if self.plot_hyperparams else plots
+        self.vars_plt, self.means_plt = plots[0], plots[1]
+        self.vars_plt.set_title('Cluster Count Variance')
+        self.vars_plt.set_xlabel('Epoch')
+        self.vars_plt.set_ylabel('Variance')
+        self.vars_plt.set_xlim([0, n_epochs])
 
-    def on_epoch_end(self):
+        self.means_plt.set_title('Mean of Max Distances from BMU')
+        self.means_plt.set_xlabel('Epoch')
+        self.means_plt.set_ylabel('Mean Distance')
+        self.means_plt.set_xlim([0, n_epochs])
+
+        if self.plot_hyperparams:
+            self.alphas_plt, self.sigmas_plt = plots[2], plots[3]
+            self.alphas_plt.set_title('Alpha Hyperparameter')
+            self.alphas_plt.set_xlabel('Epoch')
+            self.alphas_plt.set_ylabel('Alpha')
+            self.alphas_plt.set_xlim([0, n_epochs])
+
+            self.sigmas_plt.set_title('SIgma hyperparameter')
+            self.sigmas_plt.set_xlabel('Epoch')
+            self.sigmas_plt.set_ylabel('Sigma')
+            self.sigmas_plt.set_xlim([0, n_epochs])
+
+        self.fig.show()
+
+    def on_epoch_end(self, **kwargs):
         "Updates statistics and plot"
-        self.epoch += 1
         # Gather predictions over the dataset
         preds = self.learn.predict(self.data)
         row_size, _, w_size = self.learn.model.weights.shape
@@ -93,57 +122,38 @@ class SomStatsVisualizer(Callback):
         w = self.learn.model.weights.view(-1, w_size).cpu()
         # Evaluate unique BMUs and inverse access indices
         uniques, inverse, counts = preds.unique(dim=0, return_inverse=True, return_counts=True)
-        # TODO: plot counts instead of per-bucket stats
-
+        # Evaluate variance
+        self.vars.append(counts.float().std().numpy())
         # Calculate euclidean distances between each input and its BMU
         d = (w[preds] - self.data.cpu()).pow(2).sum(1).sqrt()
-        # For each cluster, eval stats
-        for b in range(self.bmu_count):
-            if b in uniques:
-                idxs = (inverse == b).nonzero()
-                var = w[preds[idxs.squeeze(-1)]].std()
-                mean = d[preds[idxs.squeeze(-1)]].mean()
-                self.vars[b].append(var.numpy())
-                self.means[b].append(mean.numpy())
+        max_distances = []
+        # Check max distance for each BMU
+        for b in uniques:
+            # Get indices of predictions belonging to this BMU
+            idxs = (inverse == b).nonzero()
+            if idxs.nelement() > 0:
+                # Check max distance of BMU cluster
+                cluster_max_dist = d[preds[idxs.squeeze(-1)]].max()
+                max_distances.append(cluster_max_dist.numpy())
+        self.means.append(np.mean(max_distances))
+        if self.plot_hyperparams:
+            self.alphas.append(self.learn.model.alpha)
+            self.sigmas.append(self.learn.model.sigma)
         self._update_plot()
-
-    def _prepare_plot(self):
-        "Initializes the plot"
-        plt.ion()
-        self.fig, (self.vars_plt, self.means_plt) = plt.subplots(1, 2, figsize=(15, 5))
-        self.vars_plt.set_title('Cluster Variance')
-        self.vars_plt.set_xlabel('Epoch')
-        self.vars_plt.set_ylabel('Variance')
-        self.vars_plt.set_xlim([0, self.n_epochs])
-
-        self.means_plt.set_title('Cluster Mean Distance')
-        self.means_plt.set_xlabel('Epoch')
-        self.means_plt.set_ylabel('Mean Distance')
-        self.means_plt.set_xlim([0, self.n_epochs])
-
-        self.fig.show()
 
     def _update_plot(self):
         "Updates the plot"
-        # plt.legend(range(self.dists[0]))
-        for b in range(self.bmu_count):
-            self.vars_plt.plot(self.vars[b], label=f'Cluster {b}')
-            self.means_plt.plot(self.means[b], label=f'Cluster {b}')
+        self.vars_plt.plot(self.vars, c='#589c7e')
+        self.means_plt.plot(self.means, c='#4791c5')
+        if self.plot_hyperparams:
+            self.alphas_plt.plot(self.alphas, c='#589c7e')
+            self.sigmas_plt.plot(self.sigmas, c='#4791c5')
         self.fig.canvas.draw()
 
     def _2d_idxs_to_1d(self, idxs: np.ndarray, row_size: int) -> list:
         "Turns 2D indices to 1D"
         return [el[0] * row_size + el[1] for el in idxs]
 
-
-# TODO: heatmap + hitmap
-"""
-HitMap                  : x -> predict -> position -> count by position
-HeatMap                 : x -> per ciascuna variabile, plot di una casella con il valore di ogni peso (ROWSxCOLS)
-HeatMap Omnicomprensiva : x -> PCA a 3 e uso quei 3 su 0,255 per colorazione cella
-
-"""
-__all__ = [
-    "SomScatterVisualizer",
-    "SomStatsVisualizer",
-]
+    def _1d_idxs_to_2d(self, idxs: np.ndarray, col_size: int) -> list:
+        "Turns 1D indices to 2D"
+        return [[el // col_size, el % col_size] for el in idxs]

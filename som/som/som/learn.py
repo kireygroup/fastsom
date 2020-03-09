@@ -3,19 +3,11 @@ This file contains Learners and Callbacks
 used to train Self-Organizing Maps.
 
 """
-import sys
-import torch
-
+from typing import Tuple, Optional, List
 from torch import Tensor
-from fastai.core import defaults as fastai_defaults
 from fastai.callback import Callback
-from fastai.train import Learner, LearnerCallback
-from fastai.data_block import DataBunch, Dataset
-from fastai.basic_data import DataBunch, Dataset
-from fastai.torch_core import DataLoader, Dataset, TensorDataset
-from typing import Tuple, Collection, Callable, Optional, List
 
-from fastprogress.fastprogress import master_bar, progress_bar
+from fastprogress.fastprogress import progress_bar
 
 from .som import Som
 from .init import som_initializers
@@ -42,11 +34,24 @@ class SomLinearDecayHelper(Callback):
 
 
 class SomEarlyStoppingHelper(Callback):
-    pass
+    "Early stopping helper for Self-Organizing Maps."
+
+    def __init__(self, model: Som, tol=0.0001) -> None:
+        self.tol = tol
+        self.model = model
+        self.prev_weights = None
+
+    def on_epoch_end(self, **kwargs):
+        "Checks if training should stop."
+        if self.prev_weights is not None:
+            d = self.prev_weights - self.model.weights
+            if d.max() < self.tol:
+                raise KeyboardInterrupt(f'Early Stopping due to weight update below tolerance of {self.tol}')
+        self.prev_weights = self.model.weights
 
 
 class ProgressBarHelper(Callback):
-    "Displays a progress bar that shows the epoch progress"
+    "Displays a progress bar that shows the epoch progress."
 
     def __init__(self, n_epochs: int) -> None:
         self.n_epochs = n_epochs
@@ -61,70 +66,63 @@ class ProgressBarHelper(Callback):
         self.pbar.update(self.epoch + 1)
 
 
-"""
-SOM Creation and Learner
-"""
-
-
 def create_som(data: UnsupervisedDataset, map_size: Tuple[int, int] = (10, 10), **model_kwargs) -> Som:
-    "Creates a new SOM of the given size"
+    "Creates a new SOM of the given size."
     in_size = data.train.shape[-1]
     return Som((*map_size, in_size), **model_kwargs)
 
 
 class SomLearner():
-    """
-    SOM Learner utility.
-    Handles the training loop for a Som subclass.
-    """
+    "Handles the training loop for a Som subclass."
 
     def __init__(self, data: UnsupervisedDataset, model: Som, cbs: Optional[List[Callback]] = None) -> None:
         self.data = data
         self.model = model
         self.cbs = dict(ifnone(cbs, []))
 
-    def fit(self, epochs: int, visualize: bool = True, visualize_dim: int = 2, debug: bool = False) -> None:
+    def fit(self, epochs: int, visualize: bool = True, visualize_dim: int = 2, max_batches: int = 100, plot_hyperparams: bool = False, debug: bool = False) -> None:
         "Trains the model for `epochs` epochs, optionally visualizing what's going on"
         # Initialize callbacks
         self.cbs['som-progress'] = ProgressBarHelper(epochs)
         self.cbs['som-decay'] = SomLinearDecayHelper(self.model)
+        self.cbs['som-early-stop'] = SomEarlyStoppingHelper(self.model)
         if visualize:
-            self.cbs['som-stats'] = SomStatsVisualizer(epochs, self)
+            self.cbs['som-stats'] = SomStatsVisualizer(self, plot_hyperparams=plot_hyperparams)
             self.cbs['som-scatter-viz'] = SomScatterVisualizer(self.model, self.data.train, dim=visualize_dim)
         bs = self.data.bs
         x = self.data.train
 
-        # Calculate number of iterations
-        n_iters = 1 if bs is None or bs >= x.shape[0] else x.shape[0] // bs
+        # Calculate number of iterations (optionally setting a max if random batching is enabled)
+        max_batches = max_batches if self.data.random_batching else 1 if bs is None or bs >= x.shape[0] else x.shape[0] // bs
 
         # Train start
-        self._callback('on_train_begin')
+        self._callback('on_train_begin', n_epochs=epochs)
         self.model.weights = self.model._to_device(self.model.weights)
         # Epoch start
         for epoch in range(epochs):
-            self._callback('on_epoch_begin')
+            self._callback('on_epoch_begin', epoch=epoch)
             # Batch start
-            for batch in range(n_iters):
-                b_start, b_end = bs * batch, bs * (batch + 1)
-                self._callback('on_batch_begin')
+            for batch in range(max_batches):
+                self._callback('on_batch_begin', batch=batch)
                 self.model.training = True
                 # Forward pass (find BMUs)
-                self.model.forward(x[b_start:b_end])
+                self.model.forward(self.data.grab_batch())
                 # Backward pass (update weights)
                 self.model.backward(debug=debug)
-                self._callback('on_batch_end')
-            self._callback('on_epoch_end')
+                self._callback('on_batch_end', batch=batch)
+            self._callback('on_epoch_end', epoch=epoch)
         self.model.training = False
         self._callback('on_train_end')
 
     def predict(self, x: Tensor) -> Tensor:
-        "Prediction"
+        "Runs model inference over `x`."
         self.model.training = False
         return self.model.forward(self.model._to_device(x))
 
-    def _callback(self, callback_method: str):
+    def _callback(self, callback_method: str, **kwargs):
+        "Invokes `callback_method` on each callback."
         for callback in self.cbs.values():
-            getattr(callback, callback_method)()
+            getattr(callback, callback_method)(**kwargs)
 
 
 def som_learner(data: UnsupervisedDataset,
@@ -133,8 +131,9 @@ def som_learner(data: UnsupervisedDataset,
                 model: Optional[Som] = None,
                 alpha=0.3,
                 **learn_kwargs) -> SomLearner:
-    "Creates a SOM Learner together with its model if not provided"
+    "Creates a SOM Learner (and its model, if not provided)."
     model = model if model is not None else create_som(data, map_size=map_size, alpha=alpha)
+    data.normalize()
     if init is not None:
         model.weights = som_initializers[init](data.train, (*map_size, data.train.shape[-1]))
 
