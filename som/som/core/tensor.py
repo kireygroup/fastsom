@@ -17,7 +17,7 @@ def index_tensor(size: Tuple) -> Tensor:
     return torch.ones(*size).nonzero().view(*size, -1)
 
 
-def expanded_op(self, a: Tensor, b: Tensor, fn: Callable, interleave: bool = False, device=torch.device("cuda")) -> Tensor:
+def expanded_op(a: Tensor, b: Tensor, fn: Callable, interleave: bool = False, device=torch.device("cuda")) -> Tensor:
     "Expands `a` and `b` to make sure their shapes match; then calls `fn`."
     N, D = a.shape
     M, _ = b.shape
@@ -34,9 +34,10 @@ def expanded_op(self, a: Tensor, b: Tensor, fn: Callable, interleave: bool = Fal
     res = fn(_a, _b)
 
     # Cleanup device space
+    use_cuda = _a.is_cuda
     del _a
     del _b
-    if self.use_cuda:
+    if use_cuda:
         torch.cuda.empty_cache()
 
     # Return the result

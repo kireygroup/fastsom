@@ -179,4 +179,4 @@ class Som(Module):
 
     def _to_device(self, a: Tensor) -> Tensor:
         "Moves a tensor to the appropriate device"
-        return a.cuda() if self.use_cuda else a.cpu()
+        return a.to(device=self.device)
