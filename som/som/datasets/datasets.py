@@ -10,7 +10,7 @@ from .normalizers import Normalizer, get_normalizer
 
 
 def batch_slice(bs: int, maximum: int) -> slice:
-    "Generator function. Generates contiguous slices of size `bs`"
+    "Generator function. Generates contiguous slices of size `bs`."
     curr = 0
     while True:
         yield slice(curr, curr+bs)
@@ -19,7 +19,7 @@ def batch_slice(bs: int, maximum: int) -> slice:
 
 
 def random_batch_slice(bs: int, maximum: int) -> Tensor:
-    "Generator function. Generates random slices up to `max_iters` times"
+    "Generator function. Generate uniform random long tensors that can be used to index another tensor."
     base = torch.zeros(bs)
     while True:
         # Fill `base` with uniform data

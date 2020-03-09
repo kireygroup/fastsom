@@ -7,63 +7,13 @@ from typing import Tuple, Optional, List
 from torch import Tensor
 from fastai.callback import Callback
 
-from fastprogress.fastprogress import progress_bar
-
 from .som import Som
 from .init import som_initializers
 from .viz import SomScatterVisualizer, SomStatsVisualizer
+from .callbacks import ProgressBarHelper, SomLinearDecayHelper, SomEarlyStoppingHelper
 
 from ..core import ifnone
 from ..datasets import UnsupervisedDataset
-
-
-class SomLinearDecayHelper(Callback):
-    "Callback for `SomLearner, used to linearly decrease training parameters."
-
-    def __init__(self, model: Som, decay: float = 0.997) -> None:
-        self.model, self.decay = model, decay
-
-    def on_train_begin(self, **kwargs):
-        self.model.lr = 1.0
-
-    def on_epoch_begin(self, **kwargs):
-        "Prints the current epoch & sets the epoch inside the SOM."
-        self.model.lr = self.model.lr * self.decay                  # LR decreses after each epoch
-        self.model.alpha = self.model.alpha * self.model.lr         # Alpha decreses after each epoch
-        self.model.sigma = self.model.sigma * self.model.lr         # Sigma decreses after each epoch
-
-
-class SomEarlyStoppingHelper(Callback):
-    "Early stopping helper for Self-Organizing Maps."
-
-    def __init__(self, model: Som, tol=0.0001) -> None:
-        self.tol = tol
-        self.model = model
-        self.prev_weights = None
-
-    def on_epoch_end(self, **kwargs):
-        "Checks if training should stop."
-        if self.prev_weights is not None:
-            d = self.prev_weights - self.model.weights
-            if d.max() < self.tol:
-                raise KeyboardInterrupt(f'Early Stopping due to weight update below tolerance of {self.tol}')
-        self.prev_weights = self.model.weights
-
-
-class ProgressBarHelper(Callback):
-    "Displays a progress bar that shows the epoch progress."
-
-    def __init__(self, n_epochs: int) -> None:
-        self.n_epochs = n_epochs
-        self.epoch = -1
-        self.pbar = progress_bar(range(n_epochs))
-
-    def on_train_begin(self, **kwargs):
-        self.pbar.update(0)
-
-    def on_epoch_begin(self, **kwargs):
-        self.epoch += 1
-        self.pbar.update(self.epoch + 1)
 
 
 def create_som(data: UnsupervisedDataset, map_size: Tuple[int, int] = (10, 10), **model_kwargs) -> Som:
@@ -83,7 +33,7 @@ class SomLearner():
     def fit(self, epochs: int, visualize: bool = True, visualize_dim: int = 2, max_batches: int = 100, plot_hyperparams: bool = False, debug: bool = False) -> None:
         "Trains the model for `epochs` epochs, optionally visualizing what's going on"
         # Initialize callbacks
-        self.cbs['som-progress'] = ProgressBarHelper(epochs)
+        self.cbs['som-progress'] = ProgressBarHelper()
         self.cbs['som-decay'] = SomLinearDecayHelper(self.model)
         self.cbs['som-early-stop'] = SomEarlyStoppingHelper(self.model)
         if visualize:
@@ -97,22 +47,25 @@ class SomLearner():
 
         # Train start
         self._callback('on_train_begin', n_epochs=epochs)
-        self.model.weights = self.model._to_device(self.model.weights)
+        self.model.to_device()
         # Epoch start
-        for epoch in range(epochs):
-            self._callback('on_epoch_begin', epoch=epoch)
-            # Batch start
-            for batch in range(max_batches):
-                self._callback('on_batch_begin', batch=batch)
-                self.model.training = True
-                # Forward pass (find BMUs)
-                self.model.forward(self.data.grab_batch())
-                # Backward pass (update weights)
-                self.model.backward(debug=debug)
-                self._callback('on_batch_end', batch=batch)
-            self._callback('on_epoch_end', epoch=epoch)
-        self.model.training = False
-        self._callback('on_train_end')
+        try:
+            for epoch in range(epochs):
+                self._callback('on_epoch_begin', epoch=epoch)
+                # Batch start
+                for batch in range(max_batches):
+                    self._callback('on_batch_begin', batch=batch)
+                    self.model.training = True
+                    # Forward pass (find BMUs)
+                    self.model.forward(self.data.grab_batch())
+                    # Backward pass (update weights)
+                    self.model.backward(debug=debug)
+                    self._callback('on_batch_end', batch=batch)
+                self._callback('on_epoch_end', epoch=epoch)
+            self.model.training = False
+            self._callback('on_train_end')
+        except KeyboardInterrupt as e:
+            print(e)
 
     def predict(self, x: Tensor) -> Tensor:
         "Runs model inference over `x`."
@@ -136,6 +89,7 @@ def som_learner(data: UnsupervisedDataset,
     data.normalize()
     if init is not None:
         model.weights = som_initializers[init](data.train, (*map_size, data.train.shape[-1]))
+    # TODO initialize model parameters depending on init method
 
     return SomLearner(data, model, **learn_kwargs)
 

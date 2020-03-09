@@ -26,7 +26,7 @@ __all__ = [
 
 
 class SomScatterVisualizer(Callback):
-    "`Learner` callback "
+    "`Learner` callback used to visualize an approximation of the Som weight update."
     # https://jakevdp.github.io/PythonDataScienceHandbook/04.12-three-dimensional-plotting.html
 
     def __init__(self, model: Som, data: Tensor, dim: int = 2, data_color: str = '#539dcc', weights_color: str = '#e58368') -> None:
@@ -104,7 +104,7 @@ class SomStatsVisualizer(Callback):
             self.alphas_plt.set_ylabel('Alpha')
             self.alphas_plt.set_xlim([0, n_epochs])
 
-            self.sigmas_plt.set_title('SIgma hyperparameter')
+            self.sigmas_plt.set_title('Sigma hyperparameter')
             self.sigmas_plt.set_xlabel('Epoch')
             self.sigmas_plt.set_ylabel('Sigma')
             self.sigmas_plt.set_xlim([0, n_epochs])

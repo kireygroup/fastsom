@@ -64,8 +64,8 @@ class SomInterpretation():
             sns.heatmap(self.w[:, d].reshape(self.map_size[:-1]), ax=axs[i][j], annot=True)
         fig.show()
 
-    def show_omni_heatmap(self):
-        "Displays a colored heatmap"
+    def show_weights(self):
+        "Displays a colored heatmap of the SOM weights."
         if self.pca is None:
             self.init_pca()
 
@@ -74,13 +74,10 @@ class SomInterpretation():
             d = self.pca.transform(self.w).reshape(*self.map_size[:-1], 3)
         else:
             d = self.w.reshape(*self.map_size[:-1], 3)
-        # Scale the 3 layers in [0, 255]
-        # colors = 255 * (d - d.min()) / (d.max() - d.min())
-        # colors = colors.astype(int)
-        # Plot w/ colors
         plt.imshow(d)
 
     def init_pca(self):
+        "Initializes and fits the PCA instance."
         self.pca = PCA(n_components=3)
         self.pca.fit(self.w)
 

@@ -34,7 +34,7 @@ class Som(Module):
     Uses PyTorch's `pairwise_distance` to run BMU calculations on the GPU.
     """
 
-    def __init__(self, size: SomSize2D, alpha=0.003, dist_fn=pairwise_distance) -> None:
+    def __init__(self, size: SomSize2D, alpha=0.003, dist_fn=F.pairwise_distance) -> None:
         self.size = size
         self.lr = None
         self.alpha = alpha
@@ -44,6 +44,31 @@ class Som(Module):
         self.dist_fn = dist_fn
         self.indices = None
         self.use_cuda = torch.cuda.is_available()
+
+    def expanded_op(self, a: Tensor, b: Tensor, fn: Callable, interleave: bool = False) -> Tensor:
+        "Expands `a` and `b` to make sure their shapes match; then calls `fn`."
+        N, D = a.shape
+        M, _ = b.shape
+
+        # Allocate GPU space to store results
+        res = self._to_device(torch.zeros(N, M))
+
+        # Reshape A and B to enable distance calculation.
+        # Optionally interleaves repeat method.
+        _a = self._to_device(a.repeat_interleave(M, dim=0) if interleave else a.repeat(M, 1))
+        _b = self._to_device(b.view(-1, D).repeat(N, 1))
+
+        # Invoke the function over the two Tensors
+        res = fn(_a, _b)
+
+        # Cleanup GPU space
+        del _a
+        del _b
+        if self.use_cuda:
+            torch.cuda.empty_cache()
+
+        # Return the result
+        return res
 
     def distance(self, x: Tensor, w: Tensor) -> Tensor:
         """
@@ -58,28 +83,7 @@ class Som(Module):
         d: [N, rows, cols]\n
 
         """
-        # Retrieve tensor dimensions
-        batch_size, in_size = x.shape
-        w_size = reduce(lambda a, b: a * b, w.shape[:-1])
-
-        # Allocate GPU space to store results
-        d = self._to_device(torch.zeros(batch_size, w_size))
-
-        # Reshape X and W to enable distance calculation
-        a = self._to_device(x.repeat(w_size, 1))
-        b = self._to_device(w.view(-1, in_size).repeat(batch_size, 1))
-
-        # Calculate the pairwise distance
-        d = self.dist_fn(a, b)
-
-        # Cleanup GPU space
-        del a
-        del b
-        if self.use_cuda:
-            torch.cuda.empty_cache()
-
-        # Return the reshaped distance matrix
-        return d.view(batch_size, *(w.shape[:-1]))
+        return self.expanded_op(x, w.view(-1, x.shape[-1]), self.dist_fn, interleave=True).view(-1, *w.shape[:-1])
 
     def find_bmus(self, distances: Tensor) -> Tensor:
         """
@@ -98,35 +102,9 @@ class Som(Module):
         bmus = torch.stack((min_idx / cols, min_idx % cols), dim=1)
         return self._to_device(bmus)
 
-    def diff_old(self, x: Tensor, w: Tensor) -> Tensor:
-        "Calculates the difference between `x` and `w`, matching their sizes."
-        w_size = reduce(lambda a, b: a * b, w.shape[:-1])
-        return (x.repeat(w_size, 1) - (w.view(w_size, -1).repeat(x.shape[0], *(1 for _ in range(len(x.shape)-1))))).view(-1, *w.shape)
-
     def diff(self, x: Tensor, w: Tensor) -> Tensor:
-        "Calculates the difference between `x` and `w`, matching their sizes."
-        # Retrieve tensor dimensions
-        batch_size, in_size = x.shape
-        w_size = reduce(lambda a, b: a * b, w.shape[:-1])
-
-        d = self._to_device(torch.zeros(batch_size, w_size))
-
-        # Reshape X and W to allow broadcasting
-        a = self._to_device(x.repeat(w_size, 1))
-        b = self._to_device(
-            w.view(-1, in_size).repeat(batch_size, *(1 for _ in range(len(x.shape)-1))))
-
-        # Calculate the pairwise distance
-        d = a - b
-
-        # Cleanup GPU space
-        del a
-        del b
-        if self.use_cuda:
-            torch.cuda.empty_cache()
-
-        # Return the reshaped distance matrix
-        return d.view(-1, *w.shape)
+        "Calculates the difference between `x` and `w`, expanding their sizes."
+        return self.expanded_op(x, w.view(-1, x.shape[-1]), lambda a, b: a - b, interleave=True).view(-1, *w.shape)
 
     def forward(self, x: Tensor) -> Tensor:
         """
@@ -219,6 +197,10 @@ class Som(Module):
 
     def __repr__(self):
         return f'{self.__class__.__name__}(size={self.size[:-1]}, neuron_size={self.size[-1]}, alpha={self.alpha}, sigma={self.sigma}), dist_fn={self.dist_fn}'
+
+    def to_device(self) -> None:
+        "Moves params and weights to the appropriate device."
+        self.weights = self._to_device(self.weights)
 
     def _to_device(self, a: Tensor) -> Tensor:
         "Moves a tensor to the appropriate device"

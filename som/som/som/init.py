@@ -1,5 +1,5 @@
 """
-Initializers are used to define 
+Initializers are used to define
 initial map weights for Self-Organizing Maps.
 """
 
@@ -46,9 +46,7 @@ class RandomInitializer(SomInitializer):
         return torch.zeros(size).uniform_(x.min(), x.max())
 
 
-"""
-SOM Initializers
-"""
+"SOM Initializers"
 som_initializers = {
     'kmeans_euclidean': KMeansInitializer(),
     'kmeans_cosine': KMeansInitializer(distance='cosine'),
