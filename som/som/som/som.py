@@ -8,7 +8,7 @@ from typing import Tuple, Collection, Callable
 from fastai.torch_core import Module
 from functools import reduce
 
-from ..core import index_tensor
+from ..core import index_tensor, expanded_op
 
 
 __all__ = [
@@ -43,32 +43,7 @@ class Som(Module):
         self.training = False
         self.dist_fn = dist_fn
         self.indices = None
-        self.use_cuda = torch.cuda.is_available()
-
-    def expanded_op(self, a: Tensor, b: Tensor, fn: Callable, interleave: bool = False) -> Tensor:
-        "Expands `a` and `b` to make sure their shapes match; then calls `fn`."
-        N, D = a.shape
-        M, _ = b.shape
-
-        # Allocate GPU space to store results
-        res = self._to_device(torch.zeros(N, M))
-
-        # Reshape A and B to enable distance calculation.
-        # Optionally interleaves repeat method.
-        _a = self._to_device(a.repeat_interleave(M, dim=0) if interleave else a.repeat(M, 1))
-        _b = self._to_device(b.view(-1, D).repeat(N, 1))
-
-        # Invoke the function over the two Tensors
-        res = fn(_a, _b)
-
-        # Cleanup GPU space
-        del _a
-        del _b
-        if self.use_cuda:
-            torch.cuda.empty_cache()
-
-        # Return the result
-        return res
+        self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     def distance(self, x: Tensor, w: Tensor) -> Tensor:
         """
@@ -83,7 +58,7 @@ class Som(Module):
         d: [N, rows, cols]\n
 
         """
-        return self.expanded_op(x, w.view(-1, x.shape[-1]), self.dist_fn, interleave=True).view(-1, *w.shape[:-1])
+        return expanded_op(x, w.view(-1, x.shape[-1]), self.dist_fn, interleave=True, device=self.device).view(-1, *w.shape[:-1])
 
     def find_bmus(self, distances: Tensor) -> Tensor:
         """
@@ -104,7 +79,7 @@ class Som(Module):
 
     def diff(self, x: Tensor, w: Tensor) -> Tensor:
         "Calculates the difference between `x` and `w`, expanding their sizes."
-        return self.expanded_op(x, w.view(-1, x.shape[-1]), lambda a, b: a - b, interleave=True).view(-1, *w.shape)
+        return expanded_op(x, w.view(-1, x.shape[-1]), lambda a, b: a - b, interleave=True, device=self.device).view(-1, *w.shape)
 
     def forward(self, x: Tensor) -> Tensor:
         """

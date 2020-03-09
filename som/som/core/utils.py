@@ -41,8 +41,7 @@ def setify(o: any) -> set:
 
 def compose(x: any, fns: Collection[Callable], order_key: str = '_order', **kwargs) -> any:
     """
-    Applies each function in `fns` to the output of the previous function.
-
+    Applies each function in `fns` to the output of the previous function.\n
     Function application starts from `x`, and uses `order_key` to sort the `fns` list.
 
     """

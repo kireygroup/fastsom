@@ -16,6 +16,15 @@ from ..core import ifnone
 from ..datasets import UnsupervisedDataset
 
 
+__all__ = [
+    "SomLearner",
+    "som_learner",
+    "create_som",
+    "SomLinearDecayHelper",
+    "ProgressBarHelper",
+]
+
+
 def create_som(data: UnsupervisedDataset, map_size: Tuple[int, int] = (10, 10), **model_kwargs) -> Som:
     "Creates a new SOM of the given size."
     in_size = data.train.shape[-1]
@@ -92,12 +101,3 @@ def som_learner(data: UnsupervisedDataset,
     # TODO initialize model parameters depending on init method
 
     return SomLearner(data, model, **learn_kwargs)
-
-
-__all__ = [
-    "SomLearner",
-    "som_learner",
-    "create_som",
-    "SomLinearDecayHelper",
-    "ProgressBarHelper",
-]
