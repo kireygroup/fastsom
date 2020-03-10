@@ -11,6 +11,7 @@ __all__ = [
     "SomLinearDecayHelper",
     "SomEarlyStoppingHelper",
     "ProgressBarHelper",
+    "SomLRFinder",
 ]
 
 
@@ -58,3 +59,9 @@ class ProgressBarHelper(Callback):
 
     def on_epoch_end(self, **kwargs):
         self.pbar.update(kwargs['epoch'])
+
+
+class SomLRFinder(Callback):
+
+    def __init__(self, model: Som) -> None:
+        self.model = model.clone()

@@ -1,29 +1,22 @@
 """
+This module contains the base SOM module.
 """
+from typing import Tuple, Callable
 import torch
+from torch import Tensor
 import torch.nn.functional as F
-
-from torch import nn, Tensor
-from typing import Tuple, Collection, Callable
 from fastai.torch_core import Module
-from functools import reduce
 
 from ..core import index_tensor, expanded_op
 
 
 __all__ = [
     "SomSize2D",
-    "pairwise_distance",
     "Som",
 ]
 
 
 SomSize2D = Tuple[int, int, int]
-
-
-def pairwise_distance(a: Tensor, b: Tensor) -> Tensor:
-    "Calculates the pairwise distance between `a` and `b`."
-    return (a - b).pow(2).sum(-1).sqrt()
 
 
 class Som(Module):
@@ -34,11 +27,11 @@ class Som(Module):
     Uses PyTorch's `pairwise_distance` to run BMU calculations on the GPU.
     """
 
-    def __init__(self, size: SomSize2D, alpha=0.003, dist_fn=F.pairwise_distance) -> None:
+    def __init__(self, size: SomSize2D, alpha=0.003, dist_fn: Callable = F.pairwise_distance) -> None:
         self.size = size
         self.lr = None
         self.alpha = alpha
-        self.sigma = max(size[:-1]) / 2.0
+        self.sigma = max(size[:-1])
         self.weights = torch.randn(size)
         self.training = False
         self.dist_fn = dist_fn
@@ -105,7 +98,6 @@ class Som(Module):
     def backward(self, debug: bool = False) -> None:
         """
         Tensors:\n
-        `x`                                 : batch data\n
         `weights`                           : neuron map\n
         `indices`                           : indices of each map neuron\n
         `distances`                         : distance of each input value from each map neuron\n
@@ -125,7 +117,6 @@ class Som(Module):
         `bmu_distances`                     : [B, rows, cols]
         `neighborhood_mult`                 : [B, rows, cols]\n
         `weights`                           : [rows, cols, N]\n
-        `x`                                 : [B, N]\n
         `bmu_indices.view(...)`             : [B, 1, 1, 2]\n
         `indices.unsqueeze(0).repeat(...)`  : [B, rows, cols, 2]\n
         `neighborhood_mult * alpha * dist`  : [B, rows, cols]

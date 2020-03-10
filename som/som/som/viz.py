@@ -14,6 +14,7 @@ from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 
 from .som import Som
+from .stats import cluster_stats
 
 if TYPE_CHECKING:
     from .learn import SomLearner
@@ -113,29 +114,10 @@ class SomStatsVisualizer(Callback):
 
     def on_epoch_end(self, **kwargs):
         "Updates statistics and plot"
-        # Gather predictions over the dataset
-        preds = self.learn.predict(self.data)
-        row_size, _, w_size = self.learn.model.weights.shape
-        # Turn indices in the map to 1D
-        preds = torch.tensor(self._2d_idxs_to_1d(preds.cpu().numpy().astype(int), row_size))
-        # Access BMU weights
-        w = self.learn.model.weights.view(-1, w_size).cpu()
-        # Evaluate unique BMUs and inverse access indices
-        uniques, inverse, counts = preds.unique(dim=0, return_inverse=True, return_counts=True)
-        # Evaluate variance
-        self.vars.append(counts.float().std().numpy())
-        # Calculate euclidean distances between each input and its BMU
-        d = (w[preds] - self.data.cpu()).pow(2).sum(1).sqrt()
-        max_distances = []
-        # Check max distance for each BMU
-        for b in uniques:
-            # Get indices of predictions belonging to this BMU
-            idxs = (inverse == b).nonzero()
-            if idxs.nelement() > 0:
-                # Check max distance of BMU cluster
-                cluster_max_dist = d[preds[idxs.squeeze(-1)]].max()
-                max_distances.append(cluster_max_dist.numpy())
-        self.means.append(np.mean(max_distances))
+        cluster_count_std, max_dist_mean, _ = cluster_stats(self.data, self.learn.model)
+
+        self.vars.append(cluster_count_std)
+        self.means.append(max_dist_mean)
         if self.plot_hyperparams:
             self.alphas.append(self.learn.model.alpha)
             self.sigmas.append(self.learn.model.sigma)

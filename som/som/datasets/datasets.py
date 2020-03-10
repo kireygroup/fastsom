@@ -2,11 +2,19 @@
 This module mimics Fastai dataset utilities for unsupervised data.
 
 """
-from typing import Union
+from typing import Union, Optional, List, Callable
 from torch import Tensor
+from torch.utils.data import DataLoader, TensorDataset
 import torch
 
 from .normalizers import Normalizer, get_normalizer
+
+from fastai.basic_data import DataBunch
+
+__all__ = [
+    "UnsupervisedDataset",
+    "pct_split",
+]
 
 
 def batch_slice(bs: int, maximum: int) -> slice:
@@ -103,6 +111,19 @@ class UnsupervisedDataset():
         return self.train[next(self.slicer)]
 
 
-__all__ = [
-    "UnsupervisedDataset",
-]
+TensorOrDataLoader = Union[torch.Tensor, torch.utils.data.DataLoader]
+TensorOrDataLoaderOrSplitPct = Union[TensorOrDataLoader, float]
+
+
+class UnsupervisedDataBunch(DataBunch):
+    "DataBunch without a target."
+
+    def __init__(self, train: TensorOrDataLoader, valid: Optional[TensorOrDataLoaderOrSplitPct] = None, bs: int = 64, tfms: Optional[List[Callable]] = None):
+
+        if isinstance(valid, float):
+            if not isinstance(train, Tensor):
+                raise TypeError("Training data should be passed as `Tensor` when passing valid percentage")
+            train, valid = pct_split(train, pct=valid)
+        train_dl = train if isinstance(train, DataLoader) else DataLoader(TensorDataset(train), batch_size=bs)
+        valid_dl = valid if isinstance(valid, DataLoader) else DataLoader(TensorDataset(train), batch_size=bs)
+        super().__init__(train_dl, valid_dl, device=torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"), dl_tfms=tfms)

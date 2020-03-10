@@ -6,11 +6,12 @@ used to train Self-Organizing Maps.
 from typing import Tuple, Optional, List
 from torch import Tensor
 from fastai.callback import Callback
+from fastai.basic_train import Learner
 
 from .som import Som
 from .init import som_initializers
 from .viz import SomScatterVisualizer, SomStatsVisualizer
-from .callbacks import ProgressBarHelper, SomLinearDecayHelper, SomEarlyStoppingHelper
+from .callbacks import SomLRFinder, ProgressBarHelper, SomLinearDecayHelper, SomEarlyStoppingHelper
 
 from ..core import ifnone
 from ..datasets import UnsupervisedDataset
@@ -20,8 +21,6 @@ __all__ = [
     "SomLearner",
     "som_learner",
     "create_som",
-    "SomLinearDecayHelper",
-    "ProgressBarHelper",
 ]
 
 
@@ -80,6 +79,10 @@ class SomLearner():
         "Runs model inference over `x`."
         self.model.training = False
         return self.model.forward(self.model._to_device(x))
+
+    def lr_find(self, min_lr: float = 1e-6, max_lr: float = 10.0, n_iter: int = 100, stop_div: bool = True) -> None:
+        ""
+        cb = SomLRFinder(self.model.clone())
 
     def _callback(self, callback_method: str, **kwargs):
         "Invokes `callback_method` on each callback."
