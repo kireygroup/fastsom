@@ -7,11 +7,12 @@ from typing import Tuple, Optional, List
 from torch import Tensor
 from fastai.callback import Callback
 from fastai.basic_train import Learner
+from fastai.train import *
 
 from .som import Som
 from .init import som_initializers
 from .viz import SomScatterVisualizer, SomStatsVisualizer
-from .callbacks import SomLRFinder, ProgressBarHelper, SomLinearDecayHelper, SomEarlyStoppingHelper
+from .callbacks import ProgressBarHelper, SomLinearDecayHelper, SomEarlyStoppingHelper
 
 from ..core import ifnone
 from ..datasets import UnsupervisedDataset
@@ -63,26 +64,22 @@ class SomLearner():
                 # Batch start
                 for batch in range(max_batches):
                     self._callback('on_batch_begin', batch=batch)
-                    self.model.training = True
+                    self.model.train()
                     # Forward pass (find BMUs)
                     self.model.forward(self.data.grab_batch())
                     # Backward pass (update weights)
                     self.model.backward(debug=debug)
                     self._callback('on_batch_end', batch=batch)
                 self._callback('on_epoch_end', epoch=epoch)
-            self.model.training = False
+            self.model.eval()
             self._callback('on_train_end')
         except KeyboardInterrupt as e:
             print(e)
 
     def predict(self, x: Tensor) -> Tensor:
         "Runs model inference over `x`."
-        self.model.training = False
+        self.model.eval()
         return self.model.forward(self.model._to_device(x))
-
-    def lr_find(self, min_lr: float = 1e-6, max_lr: float = 10.0, n_iter: int = 100, stop_div: bool = True) -> None:
-        ""
-        cb = SomLRFinder(self.model.clone())
 
     def _callback(self, callback_method: str, **kwargs):
         "Invokes `callback_method` on each callback."

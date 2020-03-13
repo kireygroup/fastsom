@@ -18,7 +18,7 @@ __all__ = [
 
 def cluster_stats(x: Tensor, som: Som) -> Tuple[float]:
     "Calculates cluster statistics for a Self-Organizing Map."
-    som.training = False
+    som.eval()
     # Run model predictions (BMU indices) and convert them to 1d
     preds = idxs_2d_to_1d(som.forward(x.cuda()), som.weights.shape[0]).cuda()
     w = som.weights.view(-1, som.weights.shape[-1]).cuda()
@@ -35,7 +35,7 @@ def cluster_stats(x: Tensor, som: Som) -> Tuple[float]:
             max_distances.append(cluster_max_dist.cpu().numpy())
     # Calculate how many unused clusters were found
     empty_clusters_count = w.shape[0] - len(uniques)
-    return counts.float().std().cpu().numpy(), np.mean(max_distances), float(empty_clusters_count)
+    return counts.float().std().log().cpu().numpy(), np.mean(max_distances), float(empty_clusters_count)
 
 
 def idxs_2d_to_1d(idxs: np.ndarray, row_size: int) -> list:

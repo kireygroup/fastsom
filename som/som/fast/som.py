@@ -8,11 +8,10 @@ import torch.nn.functional as F
 from fastai.torch_core import Module
 
 from ..core import index_tensor, expanded_op
-
+from .decorators import timeit
 
 __all__ = [
-    "SomSize2D",
-    "Som",
+    "SomFast",
 ]
 
 
@@ -27,7 +26,7 @@ def neigh_square(v, sigma):
     return torch.exp(torch.neg(v.pow(2) / sigma))
 
 
-class Som(Module):
+class SomFast(Module):
     """
     Self-Organizing Map implementation with a Fastai-like code organization.\n
     Uses linear decay for `alpha` and `sigma` parameters,
@@ -64,7 +63,6 @@ class Som(Module):
         \n
         Output\n
         d: [N, rows, cols]\n
-
         """
         return expanded_op(x, w.view(-1, x.shape[-1]), self.dist_fn, interleave=True, device=self.device).view(-1, *w.shape[:-1])
 
@@ -101,6 +99,7 @@ class Som(Module):
             x = self._to_device(x)
         if self.weights.device != self.device:
             self.weights = self._to_device(self.weights)
+
         # Evaluate distances between each item in `x` and each neuron of the map
         distances = self.distance(x, self.weights)
 

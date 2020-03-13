@@ -9,15 +9,12 @@ import matplotlib.pyplot as plt
 
 from typing import TYPE_CHECKING
 from torch import Tensor
-from fastai.callback import Callback
+from fastai.callback import Callback, CallbackHandler
 from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 
 from .som import Som
 from .stats import cluster_stats
-
-if TYPE_CHECKING:
-    from .learn import SomLearner
 
 
 __all__ = [
@@ -51,13 +48,14 @@ class SomScatterVisualizer(Callback):
 
         # Plot weights
         self.scatter = self.ax.scatter(*tuple([el[i] for el in w] for i in range(self.dim)), c=self.weights_color, zorder=100)
-
+        # self.ax.set_xlim([-1, 1])
+        # self.ax.set_ylim([-1, 1])
         # Plot data
         d = self.pca.transform(self.data)
         self.ax.scatter(*tuple([el[i] for el in d] for i in range(self.dim)), c=self.data_color)
         self.f.show()
 
-    def on_epoch_end(self, **kwargs):
+    def on_epoch_begin(self, **kwargs):
         "Updates the plot."
         w = self.pca.transform(self.model.weights.view(-1, self.input_el_size).cpu().numpy())
         t = tuple([el[i] for el in w] for i in range(self.dim))
@@ -67,15 +65,14 @@ class SomScatterVisualizer(Callback):
     def on_train_end(self, **kwargs):
         "Cleanup after training"
         del self.pca
-        del self.data
 
 
 class SomStatsVisualizer(Callback):
     "Accumulates and displays SOM statistics for each epoch"
 
-    def __init__(self, learn: 'SomLearner', plot_hyperparams: bool = False) -> None:
-        self.learn, self.data = learn, learn.data.train.clone().cpu()
-        self.bmu_count = learn.model.weights.shape[0] * learn.model.weights.shape[1]
+    def __init__(self, model: Som, data: Tensor, plot_hyperparams: bool = False) -> None:
+        self.model, self.data = model, data.clone().cpu()
+        self.bmu_count = model.weights.shape[0] * model.weights.shape[1]
         self.vars, self.means, self.alphas, self.sigmas = [], [], [], []
         self.fig, self.vars_plt, self.means_plt, self.alphas_plt, self.sigmas_plt = None, None, None, None, None
         self.plot_hyperparams = plot_hyperparams
@@ -88,7 +85,7 @@ class SomStatsVisualizer(Callback):
         self.fig, plots = plt.subplots(*subplots_size, figsize=(15, 5))
         plots = plots.flatten() if self.plot_hyperparams else plots
         self.vars_plt, self.means_plt = plots[0], plots[1]
-        self.vars_plt.set_title('Cluster Count Variance')
+        self.vars_plt.set_title('Log Cluster Count Variance')
         self.vars_plt.set_xlabel('Epoch')
         self.vars_plt.set_ylabel('Variance')
         self.vars_plt.set_xlim([0, n_epochs])
@@ -114,13 +111,13 @@ class SomStatsVisualizer(Callback):
 
     def on_epoch_end(self, **kwargs):
         "Updates statistics and plot"
-        cluster_count_std, max_dist_mean, _ = cluster_stats(self.data, self.learn.model)
+        cluster_count_std, max_dist_mean, _ = cluster_stats(self.data, self.model)
 
         self.vars.append(cluster_count_std)
         self.means.append(max_dist_mean)
         if self.plot_hyperparams:
-            self.alphas.append(self.learn.model.alpha)
-            self.sigmas.append(self.learn.model.sigma)
+            self.alphas.append(self.model.alpha)
+            self.sigmas.append(self.model.sigma)
         self._update_plot()
 
     def _update_plot(self):

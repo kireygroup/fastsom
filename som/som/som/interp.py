@@ -11,30 +11,32 @@ from torch import Tensor
 from typing import Optional, List
 from sklearn.decomposition import PCA
 
-from .learn import SomLearner
 from ..core import ifnone, listify
-from ..datasets import UnsupervisedDataset
+from ..datasets import UnsupervisedDataBunch
 
 
 class SomInterpretation():
     "SOM interpretation class"
 
-    def __init__(self, learn: SomLearner) -> None:
+    def __init__(self, learn) -> None:
         self.learn = learn
-        self.data: UnsupervisedDataset = learn.data
+        self.data: UnsupervisedDataBunch = learn.data
         self.map_size = learn.model.weights.shape
         self.w = learn.model.weights.clone().view(-1, self.map_size[-1]).cpu().numpy()
         self.pca = None
 
     @classmethod
-    def from_learner(cls, learn: SomLearner):
+    def from_learner(cls, learn):
         return cls(learn)
+
+    def _get_train(self):
+        return self.data.train_ds.tensors[0]
 
     def show_hitmap(self, data: Tensor = None) -> None:
         "Displays a hitmap"
         _, ax = plt.subplots(figsize=(10, 10))
-        d = ifnone(data, self.data.train)
-        preds = self.learn.predict(d)
+        d = ifnone(data, self._get_train())
+        preds = self.learn.model(d)
         out, counts = preds.unique(return_counts=True, dim=0)
         z = torch.zeros(self.map_size[:-1]).long()
         for i, c in enumerate(out):
@@ -45,7 +47,7 @@ class SomInterpretation():
 
     def show_feature_heatmaps(self, dim: Optional[int] = None, labels: Optional[List[str]] = None) -> None:
         "Displays a hitmap"
-        dims = [dim] if dim is not None else list(range(self.data.train.shape[-1]))
+        dims = [dim] if dim is not None else list(range(self._get_train().shape[-1]))
         s = np.sqrt(0.0 + len(dims)).astype(int)
         rows, cols = (1, len(dims)) if s * s < len(dims) else (s, s)
         fig, axs = plt.subplots(rows, cols, figsize=(8 * cols, 6 * rows))
@@ -74,7 +76,11 @@ class SomInterpretation():
             d = self.pca.transform(self.w).reshape(*self.map_size[:-1], 3)
         else:
             d = self.w.reshape(*self.map_size[:-1], 3)
-        plt.imshow(d)
+
+        if d.max() > 2:
+            plt.imshow(d.astype(int))
+        else:
+            plt.imshow(d)
 
     def init_pca(self):
         "Initializes and fits the PCA instance."

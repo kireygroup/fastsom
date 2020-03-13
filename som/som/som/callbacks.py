@@ -6,12 +6,10 @@ from fastprogress.fastprogress import progress_bar
 from fastai.callback import Callback
 from .som import Som
 
-
 __all__ = [
     "SomLinearDecayHelper",
     "SomEarlyStoppingHelper",
     "ProgressBarHelper",
-    "SomLRFinder",
 ]
 
 
@@ -20,9 +18,6 @@ class SomLinearDecayHelper(Callback):
 
     def __init__(self, model: Som, decay: float = 0.997) -> None:
         self.model, self.decay = model, decay
-
-    def on_train_begin(self, **kwargs):
-        self.model.lr = 1.0
 
     def on_epoch_begin(self, **kwargs):
         "Prints the current epoch & sets the epoch inside the SOM."
@@ -59,9 +54,3 @@ class ProgressBarHelper(Callback):
 
     def on_epoch_end(self, **kwargs):
         self.pbar.update(kwargs['epoch'])
-
-
-class SomLRFinder(Callback):
-
-    def __init__(self, model: Som) -> None:
-        self.model = model.clone()

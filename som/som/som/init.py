@@ -42,11 +42,11 @@ class RandomInitializer(SomInitializer):
     "Initializes SOM weights randomly."
 
     def __call__(self, x: Tensor, size: Tuple, **kwargs):
-        # TODO uniform in range
-        return torch.zeros(size).uniform_(x.min(), x.max())
+        x_min = x.min(dim=0)[0]
+        x_max = x.max(dim=0)[0]
+        return (x_max - x_min) * torch.zeros(size).uniform_(0, 1) - x_min
 
 
-"SOM Initializers"
 som_initializers = {
     'kmeans_euclidean': KMeansInitializer(),
     'kmeans_cosine': KMeansInitializer(distance='cosine'),
