@@ -17,6 +17,7 @@ __all__ = [
     "UnsupervisedDataBunch",
     "pct_split",
     "SamplerType",
+    "get_sampler",
 ]
 
 

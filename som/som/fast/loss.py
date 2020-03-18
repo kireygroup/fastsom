@@ -33,9 +33,7 @@ def cluster_loss(preds: Tensor, x: Tensor, som: Som = None, device=torch.device(
     #         max_distances.append(cluster_max_dist.cpu().numpy())
     # # Calculate how many unused clusters were found
     # empty_clusters_count = w.shape[0] - len(uniques)
-
     # loss = counts.float().std().log().cpu() + np.sqrt(np.mean(max_distances))
-
     # return BackwardRedirectTensor(loss, som.backward)
     return BackwardRedirectTensor(torch.tensor(0.0), som.backward)
 
