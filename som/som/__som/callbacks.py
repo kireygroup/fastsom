@@ -4,7 +4,7 @@ This module contains various Learner Callbacks.
 
 from fastprogress.fastprogress import progress_bar
 from fastai.callback import Callback
-from .som import Som
+from ..som import Som
 
 __all__ = [
     "SomLinearDecayHelper",

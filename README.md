@@ -1,5 +1,7 @@
 # Self - Organizing Maps
 
+This project was bootstrapped with the ![`cookiecutter-dl-docker`](htts://github.com/rsayn/cookiecutter-dl-docker) template.
+
 ## Get Started
 
 ### Prerequisites

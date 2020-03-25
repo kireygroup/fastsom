@@ -5,8 +5,8 @@ import numpy as np
 from torch import Tensor
 
 from .decorators import timeit
-from ..som.som import Som
-from ..som.stats import idxs_2d_to_1d
+from .som import Som
+from .stats import idxs_2d_to_1d
 
 
 __all__ = [

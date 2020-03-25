@@ -26,9 +26,12 @@ def expanded_op(a: Tensor, b: Tensor, fn: Callable, interleave: bool = False, de
     res = torch.zeros(N, M).to(device=device)
 
     # Reshape A and B to enable distance calculation
-    # Optionally interleaves repeat method
-    _a = a.repeat_interleave(M, dim=0) if interleave else a.repeat(M, 1).to(device=device)
-    _b = b.view(-1, D).repeat(N, 1).to(device=device)
+    # # Optionally interleaves repeat method
+    # _a = a.repeat_interleave(M, dim=0) if interleave else a.repeat(M, 1).to(device=device)
+    # _b = b.view(-1, D).repeat(N, 1).to(device=device)
+
+    _a = a.view(N, 1, -1).to(device=device)
+    _b = b.expand(N, -1, -1).to(device=device)
 
     # Invoke the function over the two Tensors
     res = fn(_a, _b)

@@ -1,7 +1,7 @@
 """
 """
 import torch
-from typing import Optional, Callable, Collection, Union
+from typing import Optional, Callable, Collection, Union, Tuple
 from functools import partial
 from fastai.basic_train import Learner
 from fastai.train import *
@@ -12,19 +12,19 @@ from fastai.torch_core import to_detach
 from fastai.tabular import TabularDataBunch
 from fastprogress.fastprogress import master_bar, progress_bar
 
-from .optim import SomOptimizer
-from .loss import cluster_loss
 from .callbacks import SomTrainingPhaseCallback
-from ..som.som import Som
-from ..datasets import UnsupervisedDataBunch
-from ..som.callbacks import SomLinearDecayHelper, SomEarlyStoppingHelper
-from ..som.viz import SomScatterVisualizer, SomStatsVisualizer
+from .initializers import som_initializers
+from .loss import cluster_loss
+from .optim import SomOptimizer
+from .som import Som
+from .viz import SomScatterVisualizer, SomStatsVisualizer
+
 from ..core import listify, ifnone
-from ..som.init import som_initializers
+from ..datasets import UnsupervisedDataBunch
 
 
 __all__ = [
-    "SomLearnerFast"
+    "SomLearner",
 ]
 
 
@@ -39,7 +39,7 @@ def to_unsupervised_databunch(self, **kwargs) -> UnsupervisedDataBunch:
 TabularDataBunch.to_unsupervised_databunch = to_unsupervised_databunch
 
 
-class SomLearnerFast(Learner):
+class SomLearner(Learner):
     "`Learner` subclass for Self-Organizing Maps."
 
     def __init__(
@@ -50,27 +50,28 @@ class SomLearnerFast(Learner):
             metrics: Collection[Callable] = None,
             visualize: bool = False,
             callbacks: Collection[Callable] = None,
-            init_weights: Optional[str] = None,
+            init_weights: str = 'random',
+            finetune_epoch_pct: float = 0.4,
+            lr: Tuple[float, float] = (0.09, 0.03),
             **learn_kwargs):
 
         train_ds = data.train_ds.tensors[0] if hasattr(data.train_ds, 'tensors') else torch.tensor(data.train_ds, dtype=float)
 
-        # Optionally initialize the model weights
-        if init_weights is not None:
-            initializer = som_initializers[init_weights]
-            model.weights = initializer(train_ds, model.weights.shape)
+        # Initialize the model weights
+        initializer = som_initializers[init_weights]
+        model.weights = initializer(train_ds, model.weights.shape)    
 
         # Setup additional mandatory callbacks
         additional_callbacks = [
-            SomTrainingPhaseCallback(model, init_weights),
-            SomEarlyStoppingHelper(model),
+            SomTrainingPhaseCallback(model, init_weights, finetune_epoch_pct=finetune_epoch_pct, lr=lr),
+            # SomEarlyStoppingHelper(model),
         ]
 
         # Setup visualization callbacks
         if visualize:
             additional_callbacks += [
                 SomScatterVisualizer(model, train_ds),
-                SomStatsVisualizer(model, train_ds, plot_hyperparams=True),
+                SomStatsVisualizer(model, train_ds, plot_hyperparams=True, plot_stats=False),
             ]
 
         # Add user-defined callbacks

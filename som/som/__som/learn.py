@@ -9,7 +9,7 @@ from fastai.callback import Callback
 from fastai.basic_train import Learner
 from fastai.train import *
 
-from .som import Som
+from ..som import Som
 from .init import som_initializers
 from .viz import SomScatterVisualizer, SomStatsVisualizer
 from .callbacks import ProgressBarHelper, SomLinearDecayHelper, SomEarlyStoppingHelper

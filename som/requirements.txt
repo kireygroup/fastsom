@@ -25,7 +25,7 @@ cffi==1.14.0
 chardet==3.0.4
 Click==7.0
 codecov==2.0.15
-conda==4.8.2
+conda==4.8.3
 conda-build==3.18.11
 conda-package-handling==1.6.0
 coverage==5.0.3

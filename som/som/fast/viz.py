@@ -70,33 +70,38 @@ class SomScatterVisualizer(Callback):
 class SomStatsVisualizer(Callback):
     "Accumulates and displays SOM statistics for each epoch"
 
-    def __init__(self, model: Som, data: Tensor, plot_hyperparams: bool = False) -> None:
+    def __init__(self, model: Som, data: Tensor, plot_hyperparams: bool = False, plot_stats: bool = True) -> None:
         self.model, self.data = model, data.clone().cpu()
         self.bmu_count = model.weights.shape[0] * model.weights.shape[1]
         self.vars, self.means, self.alphas, self.sigmas = [], [], [], []
         self.fig, self.vars_plt, self.means_plt, self.alphas_plt, self.sigmas_plt = None, None, None, None, None
-        self.plot_hyperparams = plot_hyperparams
+        self.plot_hyperparams, self.plot_stats = plot_hyperparams, plot_stats
 
     def on_train_begin(self, **kwargs):
         "Initializes the plot"
         n_epochs = kwargs['n_epochs']
         plt.ion()
-        subplots_size = (2, 2) if self.plot_hyperparams else (1, 2)
+        subplots_size = (2, 2) if self.plot_hyperparams and self.plot_stats else (1, 2)
         self.fig, plots = plt.subplots(*subplots_size, figsize=(15, 5))
         plots = plots.flatten() if self.plot_hyperparams else plots
-        self.vars_plt, self.means_plt = plots[0], plots[1]
-        self.vars_plt.set_title('Log Cluster Count Variance')
-        self.vars_plt.set_xlabel('Epoch')
-        self.vars_plt.set_ylabel('Variance')
-        self.vars_plt.set_xlim([0, n_epochs])
+        
+        if self.plot_stats:
+            self.vars_plt, self.means_plt = plots[0], plots[1]
+            self.vars_plt.set_title('Log Cluster Count Variance')
+            self.vars_plt.set_xlabel('Epoch')
+            self.vars_plt.set_ylabel('Variance')
+            self.vars_plt.set_xlim([0, n_epochs])
 
-        self.means_plt.set_title('Mean of Max Distances from BMU')
-        self.means_plt.set_xlabel('Epoch')
-        self.means_plt.set_ylabel('Mean Distance')
-        self.means_plt.set_xlim([0, n_epochs])
+            self.means_plt.set_title('Mean of Max Distances from BMU')
+            self.means_plt.set_xlabel('Epoch')
+            self.means_plt.set_ylabel('Mean Distance')
+            self.means_plt.set_xlim([0, n_epochs])
 
         if self.plot_hyperparams:
-            self.alphas_plt, self.sigmas_plt = plots[2], plots[3]
+            if self.plot_stats:
+                self.alphas_plt, self.sigmas_plt = plots[2], plots[3] 
+            else:
+                self.alphas_plt, self.sigmas_plt = plots[0], plots[1]
             self.alphas_plt.set_title('Alpha Hyperparameter')
             self.alphas_plt.set_xlabel('Epoch')
             self.alphas_plt.set_ylabel('Alpha')
@@ -111,10 +116,11 @@ class SomStatsVisualizer(Callback):
 
     def on_epoch_end(self, **kwargs):
         "Updates statistics and plot"
-        cluster_count_std, max_dist_mean, _ = cluster_stats(self.data, self.model)
-
-        self.vars.append(cluster_count_std)
-        self.means.append(max_dist_mean)
+        if self.plot_stats:
+            cluster_count_std, max_dist_mean, _ = cluster_stats(self.data, self.model)
+            self.vars.append(cluster_count_std)
+            self.means.append(max_dist_mean)
+        
         if self.plot_hyperparams:
             self.alphas.append(self.model.alpha)
             self.sigmas.append(self.model.sigma)
@@ -122,8 +128,9 @@ class SomStatsVisualizer(Callback):
 
     def _update_plot(self):
         "Updates the plot"
-        self.vars_plt.plot(self.vars, c='#589c7e')
-        self.means_plt.plot(self.means, c='#4791c5')
+        if self.plot_stats:
+            self.vars_plt.plot(self.vars, c='#589c7e')
+            self.means_plt.plot(self.means, c='#4791c5')
         if self.plot_hyperparams:
             self.alphas_plt.plot(self.alphas, c='#589c7e')
             self.sigmas_plt.plot(self.sigmas, c='#4791c5')

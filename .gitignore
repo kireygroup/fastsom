@@ -3,3 +3,8 @@ __pycache__
 ssh-credentials.conf
 data
 models
+.vscode
+build
+dist
+kg_som.egg-info
+.env
