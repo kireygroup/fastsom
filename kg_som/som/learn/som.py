@@ -8,8 +8,7 @@ from torch import Tensor
 import torch.nn.functional as F
 from fastai.torch_core import Module
 
-from .decorators import timeit
-from ..core import index_tensor, expanded_op, ifnone 
+from ..core import index_tensor, expanded_op, ifnone, timeit
 
 __all__ = [
     "Som",
@@ -17,14 +16,24 @@ __all__ = [
     "neigh_square",
     "map_diff_standard",
     "map_diff_toroidal",
+    "pdist",
+    "manhattan_dist",
 ]
 
 
 SomSize2D = Tuple[int, int, int]
 
 
-def squared_dist(a: Tensor, b: Tensor) -> Tensor:
-    return (a - b).pow(2).sum(-1).sqrt()
+def pnorm(a: Tensor, p: int = 2) -> Tensor:
+    return a.pow(p).sum(-1).pow(1/p)
+
+
+def pdist(a: Tensor, b: Tensor, p: int = 2) -> Tensor:
+    return pnorm(a - b)
+
+
+def manhattan_dist(a: Tensor, b: Tensor) -> Tensor:
+    return pdist(a, b, p=1)
 
 
 def neigh_gauss(v: Tensor, sigma: Tensor) -> Tensor:
@@ -62,25 +71,25 @@ class Som(Module):
     gaussian neighborhood function and batchwise weight update.\n
     Uses PyTorch's `pairwise_distance` to run BMU calculations on the GPU.
     """
-
     def __init__(
         self,
         size: SomSize2D,
         rec: list = None,
         alpha=0.003,
-        dist_fn: Callable = squared_dist,
+        dist_fn: Callable = pdist,
         neigh_fn: Callable = neigh_gauss,
         map_diff_fn: Callable = map_diff_toroidal,
+        map_dist_fn: Callable = partial(pnorm, p=2),
     ) -> None:
-        self.size = size
         self.rec = rec
+        self.size = size
         self.lr = torch.tensor([1.0])
         self.alpha = torch.tensor([alpha])
         self.sigma = torch.tensor([max(size[:-1]) / 2.0])
         self.weights = torch.randn(size)
-        self.dist_fn, self.neigh_fn, self.map_diff_fn = dist_fn, neigh_fn, map_diff_fn
-        self.indices = None
+        self.dist_fn, self.neigh_fn, self.map_diff_fn, self.map_dist_fn = dist_fn, neigh_fn, map_diff_fn, map_dist_fn
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        self.indices = None
         self.after_weight_init()
 
         if self.map_diff_fn.__name__ == 'map_diff_toroidal':
@@ -152,7 +161,7 @@ class Som(Module):
 
         # Then, calculate the euclidean distance of the BMU position with the other nodes
         # We also multiply it by `sigma` for scaling
-        bmu_distances = (map_position_diff).pow(2).sum(-1).float().sqrt()
+        bmu_distances = self.map_dist_fn(map_position_diff.float())
 
         # Let's use the distances to evaluate the neighborhood multiplier:
         neighborhood_mult = self.neigh_fn(bmu_distances, self.sigma)
@@ -188,7 +197,6 @@ class Som(Module):
         min_idx = distances.argmin(-1)
         # Stack the argmin 2D indices
         bmus = torch.stack([min_idx / self.size[1], min_idx % self.size[1]], dim=1)
-
         return self._to_device(bmus)
 
     def distance(self, a: Tensor, b: Tensor) -> Tensor:

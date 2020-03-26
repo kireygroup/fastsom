@@ -17,10 +17,10 @@ from .initializers import som_initializers
 from .loss import cluster_loss
 from .optim import SomOptimizer
 from .som import Som
-from .viz import SomScatterVisualizer, SomStatsVisualizer
 
 from ..core import listify, ifnone
 from ..datasets import UnsupervisedDataBunch
+from ..interp import SomScatterVisualizer, SomStatsVisualizer
 
 
 __all__ = [

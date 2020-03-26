@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE_DIR=$(pwd)/${1:-som}
+BASE_DIR=$(pwd)/${1:-kg_som}
 
 if [[ ! -d $BASE_DIR ]]
 then
@@ -19,5 +19,5 @@ docker run \
     --ipc=host \
     --gpus all \
     -p 8888:8888 -p 8787:8787 -p 8786:8786 -p 9091:22 \
-    --mount type=bind,source="$BASE_DIR",target=/proj/som \
-    fastai
+    --mount type=bind,source="$BASE_DIR",target=/proj/kg_som \
+    kg_som

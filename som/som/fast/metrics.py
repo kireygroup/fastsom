@@ -1,4 +1,0 @@
-"""
-SOM evaluation metrics
-
-"""
