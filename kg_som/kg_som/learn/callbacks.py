@@ -7,7 +7,8 @@ import torch
 from torch import Tensor
 from fastprogress.fastprogress import progress_bar
 from fastai.callback import Callback
-from .som import Som
+
+from ..som import Som
 
 __all__ = [
     "SomTrainingPhaseCallback",

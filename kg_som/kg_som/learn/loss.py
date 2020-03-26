@@ -4,10 +4,9 @@ import torch
 import numpy as np
 from torch import Tensor
 
-from .som import Som
-
 from ..core import timeit
 from ..interp import idxs_2d_to_1d
+from ..som import Som
 
 
 __all__ = [

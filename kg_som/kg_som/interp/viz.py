@@ -13,8 +13,9 @@ from fastai.callback import Callback, CallbackHandler
 from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 
-from .som import Som
-from .stats import cluster_stats
+from .metrics import cluster_stats
+
+from ..som import Som
 
 
 __all__ = [

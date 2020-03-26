@@ -16,11 +16,11 @@ from .callbacks import SomTrainingPhaseCallback
 from .initializers import som_initializers
 from .loss import cluster_loss
 from .optim import SomOptimizer
-from .som import Som
 
 from ..core import listify, ifnone
 from ..datasets import UnsupervisedDataBunch
 from ..interp import SomScatterVisualizer, SomStatsVisualizer
+from ..som import Som
 
 
 __all__ = [
