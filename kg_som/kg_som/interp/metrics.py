@@ -7,7 +7,7 @@ from torch import Tensor
 
 from typing import Tuple
 
-from ..som import Som
+from kg_som.som import Som
 
 __all__ = [
     "cluster_stats",

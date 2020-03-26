@@ -14,8 +14,7 @@ from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 
 from .metrics import cluster_stats
-
-from ..som import Som
+from kg_som.som import Som
 
 
 __all__ = [

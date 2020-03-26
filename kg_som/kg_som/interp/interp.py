@@ -14,8 +14,8 @@ from typing import Optional, List, Collection, Union
 from sklearn.decomposition import PCA
 from fastprogress.fastprogress import progress_bar
 
-from ..core import ifnone, listify
-from ..datasets import UnsupervisedDataBunch, get_sampler
+from kg_som.core import ifnone, listify
+from kg_som.datasets import UnsupervisedDataBunch, get_sampler
 
 __all__ = [
     "SomInterpretation",
