@@ -11,6 +11,6 @@ setup(name='kg_som',
       author_email='riccardo.sayn@kireygroup.com',
       description='A PyTorch+Fastai based implementation of Self-Organizing Maps',
       packages=find_packages(),
-      install_requires=['fastai', 'sklearn', 'seaborn'],
+      install_requires=['fastai', 'sklearn', 'kmeans_pytorch', 'seaborn'],
       long_description=open('README.md').read(),
       zip_safe=False)
