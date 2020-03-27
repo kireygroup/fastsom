@@ -1,5 +1,4 @@
 {
-    "python.pythonPath": ".env/bin/python",
     "python.linting.pylintArgs": [
         "--max-line-length=180",
         "--disable=C0103"

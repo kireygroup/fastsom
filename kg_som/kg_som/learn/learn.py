@@ -28,11 +28,11 @@ __all__ = [
 ]
 
 
-def to_unsupervised_databunch(self, **kwargs) -> UnsupervisedDataBunch:
+def to_unsupervised_databunch(self, bs: Optional[int] = None, **kwargs) -> UnsupervisedDataBunch:
     "Transforms a `TabularDataBunch` into an `UnsupervisedDataBunch`"
     train_ds = torch.cat([torch.cat([el[0].data[0].float(), el[0].data[1]]).unsqueeze(0) for el in [*self.train_ds]], dim=0)
     valid_ds = torch.cat([torch.cat([el[0].data[0].float(), el[0].data[1]]).unsqueeze(0) for el in [*self.valid_ds]], dim=0)
-    bs = getattr(kwargs, 'bs', 20)
+    bs = ifnone(bs, self.batch_size)
     return UnsupervisedDataBunch(train_ds, valid=valid_ds, bs=bs, **kwargs)
 
 

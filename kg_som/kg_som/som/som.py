@@ -69,7 +69,6 @@ class Som(Module):
     Self-Organizing Map implementation with a Fastai-like code organization.\n
     Uses linear decay for `alpha` and `sigma` parameters,
     gaussian neighborhood function and batchwise weight update.\n
-    Uses PyTorch's `pairwise_distance` to run BMU calculations on the GPU.
     """
     def __init__(
         self,
@@ -191,8 +190,6 @@ class Som(Module):
         Output:\n
         `bmus`:       [B, 2]
         """
-        # Retrieve size from input
-        batch_size = distances.shape[0]
         # Calculate the argmin of the tensor
         min_idx = distances.argmin(-1)
         # Stack the argmin 2D indices
