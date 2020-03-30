@@ -16,6 +16,7 @@ __all__ = [
     "neigh_square",
     "map_diff_standard",
     "map_diff_toroidal",
+    "pnorm",
     "pdist",
     "manhattan_dist",
 ]
@@ -29,7 +30,7 @@ def pnorm(a: Tensor, p: int = 2) -> Tensor:
 
 
 def pdist(a: Tensor, b: Tensor, p: int = 2) -> Tensor:
-    return pnorm(a - b)
+    return pnorm(a - b, p=p)
 
 
 def manhattan_dist(a: Tensor, b: Tensor) -> Tensor:
