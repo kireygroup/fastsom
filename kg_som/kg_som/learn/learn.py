@@ -1,6 +1,7 @@
 """
 """
 import torch
+from torch.utils.data import Dataset
 from typing import Optional, Callable, Collection, Union, Tuple
 from functools import partial
 from fastai.basic_train import Learner
@@ -28,10 +29,29 @@ __all__ = [
 ]
 
 
+def one_hot(x_cat: Tensor):
+    "Applies one-hot encoding to `x_cat`."
+    return torch.nn.functional.one_hot(x_cat).view(x_cat.shape[0], -1)
+
+
+def tabular_ds_to_lists(ds: Dataset):
+    x_cat = torch.cat([el[0].data[0].long().unsqueeze(0) for el in ds], dim=0)
+    x_cont = torch.cat([el[0].data[1].float().unsqueeze(0) for el in ds], dim=0)
+    return x_cat, x_cont
+
+
 def to_unsupervised_databunch(self, bs: Optional[int] = None, **kwargs) -> UnsupervisedDataBunch:
     "Transforms a `TabularDataBunch` into an `UnsupervisedDataBunch`"
-    train_ds = torch.cat([torch.cat([el[0].data[0].float(), el[0].data[1]]).unsqueeze(0) for el in [*self.train_ds]], dim=0)
-    valid_ds = torch.cat([torch.cat([el[0].data[0].float(), el[0].data[1]]).unsqueeze(0) for el in [*self.valid_ds]], dim=0)
+    train_x_cat, train_x_cont = tabular_ds_to_lists(self.train_ds)
+    valid_x_cat, valid_x_cont = tabular_ds_to_lists(self.valid_ds)
+
+    train_x_cat = one_hot(train_x_cat)
+    valid_x_cat = one_hot(valid_x_cat) # TODO use same OHE as training set.
+    
+    train_ds = torch.cat([train_x_cat.float(), train_x_cont], dim=1) if len(self.train_ds) > 0 else None
+#     valid_ds = torch.cat([valid_x_cat.float(), valid_x_cont], dim=1) if len(self.valid_ds) > 0 else None
+    valid_ds = torch.tensor([])
+    
     bs = ifnone(bs, self.batch_size)
     return UnsupervisedDataBunch(train_ds, valid=valid_ds, bs=bs, **kwargs)
 
