@@ -1,4 +1,6 @@
 """
+This module contains classes to perform feature conversion
+from categorical to continuous and back.
 """
 import torch
 import numpy as np

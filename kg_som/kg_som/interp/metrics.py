@@ -21,6 +21,8 @@ __all__ = [
 ]
 
 
+
+# TODO: Refactor this function
 def cluster_stats(x: Tensor, som: Som) -> Tuple[float]:
     "Calculates cluster statistics for a Self-Organizing Map."
     som.eval()
@@ -49,10 +51,12 @@ def codebook_err(xb: Tensor, pred_b: Tensor, som: Som = None) -> Tensor:
     distances = expanded_op(xb, w.to(device=xb.device), pdist)
     row_sz = som.size[0]
     preds = idxs_2d_to_1d(pred_b, row_sz)
-    _, inverse = preds.unique(dim=0, return_inverse=True)
     n_classes = som.size[0] * som.size[1]
     batch_size = xb.shape[0]
     count = 0
+    # Inverse is a reverse index: it gives us a grouping over predictions
+    # that we can use to index back into our distance tensor
+    _, inverse = preds.unique(dim=0, return_inverse=True)
     for cluster_idx in range(n_classes):
         # Get distances where records were assigned to this cluster_idx
         cluster_distances = distances[(inverse == cluster_idx).nonzero().view(-1)]
@@ -64,13 +68,12 @@ def codebook_err(xb: Tensor, pred_b: Tensor, som: Som = None) -> Tensor:
             non_cluster_distances = distances[(inverse != cluster_idx).nonzero().view(-1)]
             # And check if any of these elements has a distance from cluster_idx less than max_dist
             count += (non_cluster_distances[:, cluster_idx] < max_cluster_distance).nonzero().shape[0]
-
     return count / n_classes / batch_size
 
 
 def mean_quantization_err(xb: Tensor, pred_b: Tensor, som: Som = None) -> Tensor:
     "Mean distance of each record from its respective BMU."
-    w = som.weights.view(-1, xb.shape[-1]).cpu()
+    w = som.weights.view(-1, xb.shape[-1]).to(device=xb.device)
     row_sz = som.size[0]
     preds = idxs_2d_to_1d(pred_b, row_sz)
     return pdist(xb, w[preds], p=2).mean()
