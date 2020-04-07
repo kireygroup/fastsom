@@ -1,4 +1,5 @@
 """
+This module defines a Fastai `Learner` subclass used to train Self-Organizing Maps.
 """
 import torch
 from torch.utils.data import Dataset
@@ -10,7 +11,6 @@ from fastai.callback import Callback, CallbackHandler
 from fastai.basic_data import DataBunch
 from fastai.core import Floats, defaults, is_listy
 from fastai.torch_core import to_detach
-from fastai.tabular import TabularDataBunch
 from fastprogress.fastprogress import master_bar, progress_bar
 
 from .callbacks import SomTrainingPhaseCallback
@@ -26,31 +26,7 @@ from ..som import Som
 
 __all__ = [
     "SomLearner",
-    "tabular_ds_to_lists",
 ]
-
-
-def tabular_ds_to_lists(ds: Dataset):
-    x_cat = torch.cat([el[0].data[0].long().unsqueeze(0) for el in ds], dim=0)
-    x_cont = torch.cat([el[0].data[1].float().unsqueeze(0) for el in ds], dim=0)
-    return x_cat, x_cont
-
-
-def to_unsupervised_databunch(self, bs: Optional[int] = None, **kwargs) -> UnsupervisedDataBunch:
-    "Transforms a `TabularDataBunch` into an `UnsupervisedDataBunch`"
-    train_x_cat, train_x_cont = tabular_ds_to_lists(self.train_ds)
-    valid_x_cat, valid_x_cont = tabular_ds_to_lists(self.valid_ds)
-
-    train_ds = torch.cat([train_x_cat.float(), train_x_cont], dim=1) if len(self.train_ds) > 0 else None
-    # valid_ds = torch.cat([valid_x_cat.float(), valid_x_cont], dim=1) if len(self.valid_ds) > 0 else None
-    valid_ds = torch.tensor([])
-   
-    bs = ifnone(bs, self.batch_size)
-    return UnsupervisedDataBunch(train_ds, valid=valid_ds, bs=bs, **kwargs)
-
-
-TabularDataBunch.to_unsupervised_databunch = to_unsupervised_databunch
-
 
 class SomLearner(Learner):
     "`Learner` subclass for Self-Organizing Maps."

@@ -26,22 +26,35 @@ SomSize2D = Tuple[int, int, int]
 
 
 def pnorm(a: Tensor, p: int = 2) -> Tensor:
-    return a.pow(p).sum(-1).pow(1/p)
+    "Calculates the p-norm of `a`."
+    return a.abs().pow(p).sum(-1).pow(1/p)
 
 
 def pdist(a: Tensor, b: Tensor, p: int = 2) -> Tensor:
+    "Calculates the p-distance between `a` and `b`."
     return pnorm(a - b, p=p)
 
 
 def manhattan_dist(a: Tensor, b: Tensor) -> Tensor:
+    "Calculates the Manhattan distance of `a` and `b`."
     return pdist(a, b, p=1)
 
 
 def neigh_gauss(v: Tensor, sigma: Tensor) -> Tensor:
+    "Calculates the gaussian of `v` with `sigma` scaling."
     return torch.exp(torch.neg(v / sigma))
 
 
+def neigh_rhomb(v: Tensor, sigma: Tensor) -> Tensor:
+    """
+    Calculates a rhomb-shaped scaler using `v` and `sigma`.\n
+    Note: Manhattan distance should be used with this neighborhood function.
+    """
+    return torch.exp(torch.neg(torch.sqrt(v) / sigma))
+
+
 def neigh_square(v: Tensor, sigma: Tensor) -> Tensor:
+    "Calculates a square-shaped scaler using `v` and `sigma`."
     return torch.exp(torch.neg(v.pow(2) / sigma))
 
 
@@ -68,8 +81,7 @@ def map_diff_toroidal(exp_bmus: Tensor, exp_weights: Tensor, map_size: SomSize2D
 class Som(Module):
     """
     Self-Organizing Map implementation with a Fastai-like code organization.\n
-    Uses linear decay for `alpha` and `sigma` parameters,
-    gaussian neighborhood function and batchwise weight update.\n
+    Has customizable distance / neighborhood functions and hyperparameter scaling (via `Callback`s).
     """
     def __init__(
         self,
@@ -78,8 +90,8 @@ class Som(Module):
         alpha=0.003,
         dist_fn: Callable = pdist,
         neigh_fn: Callable = neigh_gauss,
-        map_diff_fn: Callable = map_diff_toroidal,
-        map_dist_fn: Callable = partial(pnorm, p=2),
+        map_diff_fn: Callable = map_diff_standard,
+        map_dist_fn: Callable = pnorm,
     ) -> None:
         self.rec = rec
         self.size = size
@@ -121,37 +133,12 @@ class Som(Module):
 
         return bmu_indices
 
-    def backward(self, debug: bool = False) -> None:
-        """
-        Tensors:\n
-        `weights`                           : neuron map\n
-        `indices`                           : indices of each map neuron\n
-        `map_position_diff`                 : distance of each input value from each map neuron\n
-        `bmu_indices`                       : index of the BMU for each batch\n
-        `diff`                              : difference between each neuron's position in the map and the BMU of each batch\n
-        `bmu_distances`                     : euclidean form of `diff`\n
-        `neighborhood_mult`                 : scaled gaussian multiplier for each neuron in the map and each batch\n
-        \n
-        `bmu_indices.view(...)`             : reshape of `bmu_indices` for broadcasting over `indices`\n
-        `indices.unsqueeze(0).repeat(...)`  : reshape of `indices` for broadcasting over `bmu_indices`\n
-        `neighborhood_mult * alpha * dist`  : weight delta for each neuron for each batch\n
-        \n
-        Shapes:\n
-        `indices`                           : [rows, cols, 2]\n
-        `distances`                         : [B, rows, cols]\n
-        `map_position_diff`                 : [B, 2]\n
-        `bmu_distances`                     : [B, rows, cols]\n
-        `neighborhood_mult`                 : [B, rows, cols]\n
-        `weights`                           : [rows, cols, N]\n
-        `bmu_indices.view(...)`             : [B, 1, 1, 2]\n
-        `indices.unsqueeze(0).repeat(...)`  : [B, rows, cols, 2]\n
-        `delta`                             : [B, rows, cols]
-        """
+    def backward(self) -> None:
+        "Updates weights based on BMUs and indices calculated in the forward"
         # Retrieve the current batch outputs and batch size
         bmu_indices, elementwise_diffs = self.get_prev_batch_output()
         batch_size = bmu_indices.shape[0]
 
-        # Calculate the distance between the BMU and each node of the network
         # First, create a tensor of indices of the same size as the weights map
         if self.indices is None:
             self.indices = self._to_device(index_tensor(self.size[:-1]))
@@ -166,15 +153,6 @@ class Som(Module):
         # Let's use the distances to evaluate the neighborhood multiplier:
         neighborhood_mult = self.neigh_fn(bmu_distances, self.sigma)
         delta = neighborhood_mult.unsqueeze(-1) * self.alpha * elementwise_diffs
-
-        if debug:
-            print(f'Decay: {self.lr}')
-            print(f'Alpha: {self.alpha}')
-            print(f'Sigma: {self.sigma}')
-            print(f'Max neighborhood mult (should be 1.0): {neighborhood_mult.max()}')
-            print(f'Min neighborhood mult (should be close to 0): {neighborhood_mult.min()}')
-            print(f'Max `forward` diff: {elementwise_diffs.max()}')
-            print(f'Max update factor: {a.max()}')
 
         # Update weights (divide by batch size to avoid exploding weights)
         self.weights += (delta.sum(dim=0) / batch_size)

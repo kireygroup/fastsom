@@ -39,15 +39,14 @@ def cluster_loss(preds: Tensor, x: Tensor, som: Som = None, device=torch.device(
 
 
 class BackwardRedirectTensor(Tensor):
-    "A Tensor that calls a given function instead of regular `backward`."
+    "A Tensor that calls a custom function instead of PyTorch's `backward`."
     @staticmethod
-    def __new__(cls, x, redir_fn, *args, **kwargs):
+    def __new__(cls, x: Tensor, redir_fn, *args, **kwargs):
         return super().__new__(cls, x.numpy(), *args, **kwargs)
 
-    def __init__(self, x, redir_fn):
+    def __init__(self, x: Tensor, redir_fn):
         super().__init__()
         self.redir_fn = redir_fn
 
     def backward(self, gradient=None, retain_graph=None, create_graph=False):
-        # print(f'{self.__class__.__name__}.backward has been called')
         self.redir_fn()

@@ -7,9 +7,24 @@ from typing import Collection, Callable
 from functools import reduce
 
 
+__all__ = [
+    "ifnone",
+    "ifindict",
+    "is_iterable",
+    "listify",
+    "setify",
+    "compose",
+    "enum_eq",
+]
+
 def ifnone(o: any, default: any) -> any:
     "Returns `o` if it is not `None`; returns `default` otherwise."
     return o if o is not None else default
+
+
+def ifindict(d: dict, k: str, default: any) -> any:
+    "Returns the value of `k` inside `d` if it exists; returns `default` otherwise."
+    return d[k] if k in d else default
 
 
 def is_iterable(o: any) -> bool:
@@ -49,10 +64,8 @@ def compose(x: any, fns: Collection[Callable], order_key: str = '_order', **kwar
     return reduce(lambda x, fn: fn(x), sorted_fns, x)
 
 
-__all__ = [
-    "ifnone",
-    "is_iterable",
-    "listify",
-    "setify",
-    "compose",
-]
+def enum_eq(enum, value) -> bool:
+    "Checks equality of `enum` and `value`."
+    return (enum == value or enum.value == value)
+
+
