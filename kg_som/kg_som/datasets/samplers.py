@@ -17,8 +17,8 @@ __all__ = [
 
 class SamplerType(Enum):
     "Enum used to pick PyTorch Samplers."
-    RANDOM = 'rand'
-    SHUFFLE = 'shuffle'
+    RANDOM     = 'random'
+    SHUFFLE    = 'shuffle'
     SEQUENTIAL = 'seq'
 
 
@@ -28,9 +28,9 @@ SamplerTypeOrString = Union[str, SamplerType]
 def get_sampler(st: SamplerTypeOrString, dataset: Dataset, bs: int) -> Sampler:
     "Creates the correct PyTorch sampler for the given `SamplerType`."
     if enum_eq(SamplerType.RANDOM, st):
-        return RandomSampler(dataset, replacement=False, num_samples=bs)
-    elif enum_eq(SamplerType.SHUFFLE, st):
         return RandomSampler(dataset, replacement=True, num_samples=bs)
+    elif enum_eq(SamplerType.SHUFFLE, st):
+        return RandomSampler(dataset, replacement=False)
     elif enum_eq(SamplerType.SEQUENTIAL, st):
         return SequentialSampler(dataset)
     else:

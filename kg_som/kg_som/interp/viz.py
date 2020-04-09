@@ -13,13 +13,16 @@ from fastai.callback import Callback, CallbackHandler
 from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 
-from .metrics import cluster_stats
 from kg_som.som import Som
+
+from .metrics import cluster_stats
+from ..core import idxs_1d_to_2d, idxs_2d_to_1d
 
 
 __all__ = [
     "SomScatterVisualizer",
     "SomStatsVisualizer",
+    "SomBmuVisualizer",
 ]
 
 
@@ -34,6 +37,7 @@ class SomScatterVisualizer(Callback):
         self.dim = dim
         self.data_color, self.weights_color = data_color, weights_color
         self.pca, self.f, self.ax, self.scatter = None, None, None, None
+        self.plot_on_batch = False
 
     def on_train_begin(self, **kwargs):
         "Initializes the PCA on the dataset and creates the plot."
@@ -55,12 +59,20 @@ class SomScatterVisualizer(Callback):
         self.ax.scatter(*tuple([el[i] for el in d] for i in range(self.dim)), c=self.data_color)
         self.f.show()
 
-    def on_epoch_begin(self, **kwargs):
-        "Updates the plot."
+    def _update_plot(self):
         w = self.pca.transform(self.model.weights.view(-1, self.input_el_size).cpu().numpy())
         t = tuple([el[i] for el in w] for i in range(self.dim))
         self.scatter.set_offsets(np.c_[t])
         self.f.canvas.draw()
+
+    def on_epoch_begin(self, **kwargs):
+        "Updates the plot."
+        if not self.plot_on_batch:
+            self._update_plot()
+
+    def on_batch_begin(self, **kwargs):
+        if self.plot_on_batch:
+            self._update_plot()
 
     def on_train_end(self, **kwargs):
         "Cleanup after training"
@@ -143,3 +155,41 @@ class SomStatsVisualizer(Callback):
     def _1d_idxs_to_2d(self, idxs: np.ndarray, col_size: int) -> list:
         "Turns 1D indices to 2D"
         return [[el // col_size, el % col_size] for el in idxs]
+
+
+class SomBmuVisualizer(Callback):
+    def __init__(self, model: Som) -> None:
+        self.model = model
+        self.epoch_counts = torch.zeros(self.model.size[0] * self.model.size[1])
+        self.total_counts = torch.zeros(self.model.size[0] * self.model.size[1])
+        self.fig, self.ax = None, None
+
+    def on_batch_end(self, **kwargs):
+        "Saves BMU hit counts for this batch."
+        bmus = self.model.get_prev_batch_output()[0]
+        unique_bmus, bmu_counts = idxs_2d_to_1d(bmus, self.model.size[0]).unique(dim=0, return_counts=True)
+        self.epoch_counts[unique_bmus] += bmu_counts
+
+    def on_epoch_end(self, **kwargs):
+        "Updates total BMU counter and esets epoch counter."
+        self._update_plot()
+        self.total_counts += self.epoch_counts
+        self.epoch_counts = torch.zeros(self.model.size[0] * self.model.size[1])
+
+    def on_train_end(self, **kwargs):
+        "Cleanup after training."
+        self.epoch_counts = torch.zeros(self.model.size[0] * self.model.size[1])
+        self.total_counts = torch.zeros(self.model.size[0] * self.model.size[1])
+        self.fig = None
+        self.ax = None
+
+    def _update_plot(self, **kwargs):
+        "Updates the plot."
+        imsize = self.model.size[:-1]
+        if self.fig is None:
+            self.fig = plt.figure()
+            self.ax = plt.imshow(self.epoch_counts.view(imsize).cpu().numpy())
+            self.fig.show()
+        else:
+            self.ax.set_data(self.epoch_counts.view(imsize).cpu().numpy())
+            self.fig.canvas.draw()

@@ -6,8 +6,7 @@ from torch import Tensor
 from functools import partial
 from typing import Callable
 
-from ..core import timeit
-from ..interp import idxs_2d_to_1d
+from ..core import timeit, idxs_2d_to_1d
 from ..som import Som
 from ..interp import mean_quantization_err, topologic_err, codebook_err
 
@@ -15,9 +14,6 @@ from ..interp import mean_quantization_err, topologic_err, codebook_err
 __all__ = [
     "SomLoss",
     "BackwardRedirectTensor",
-    "som_topologic_loss",
-    "som_codebook_loss",
-    "som_mean_quantization_loss",
 ]
 
 class SomLoss(Callable):
@@ -36,7 +32,7 @@ class BackwardRedirectTensor(Tensor):
     "A Tensor that calls a custom function instead of PyTorch's `backward`."
     @staticmethod
     def __new__(cls, x: Tensor, redir_fn, *args, **kwargs):
-        return super().__new__(cls, x.numpy(), *args, **kwargs)
+        return super().__new__(cls, x.cpu().numpy(), *args, **kwargs)
 
     def __init__(self, x: Tensor, redir_fn):
         super().__init__()
@@ -44,8 +40,3 @@ class BackwardRedirectTensor(Tensor):
 
     def backward(self, gradient=None, retain_graph=None, create_graph=False):
         self.redir_fn()
-
-
-som_topologic_loss = partial(SomLoss, topologic_err)
-som_codebook_loss = partial(SomLoss, codebook_err)
-som_mean_quantization_loss = partial(SomLoss, mean_quantization_err)

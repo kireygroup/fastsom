@@ -88,15 +88,16 @@ class SomInterpretation():
 
     def show_weights(self):
         "Shows a colored heatmap of the SOM weights."
-        if self.pca is None:
-            self.init_pca()
         if self.w.shape[-1] != 3:
+            if self.pca is None: 
+                self.init_pca()
             # Calculate the 3-layer PCA of the weights
             d = self.pca.transform(self.w).reshape(*self.map_size[:-1], 3)
         else:
             d = self.w.reshape(*self.map_size[:-1], 3)
-
-        plt.imshow(((d - d.min(0)) / d.ptp(0) * 255).astype(int))
+        # Scale d between 0 and 255
+        scaled_d = ((d - d.min(0)) / d.ptp(0) * 255).astype(int)
+        plt.imshow(scaled_d)
 
     def init_pca(self):
         "Initializes and fits the PCA instance."

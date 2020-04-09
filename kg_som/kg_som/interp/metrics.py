@@ -9,12 +9,10 @@ from typing import Tuple
 
 from kg_som.som import Som, pdist
 
-from ..core import expanded_op
+from ..core import expanded_op, idxs_2d_to_1d, idxs_1d_to_2d
 
 __all__ = [
     "cluster_stats",
-    "idxs_2d_to_1d",
-    "idxs_1d_to_2d",
     "codebook_err",
     "mean_quantization_err",
     "topologic_err",
@@ -45,7 +43,7 @@ def cluster_stats(x: Tensor, som: Som) -> Tuple[float]:
     return counts.float().std().log().cpu().numpy(), np.mean(max_distances), float(empty_clusters_count)
 
 
-def codebook_err(xb: Tensor, pred_b: Tensor, som: Som = None) -> Tensor:
+def codebook_err(pred_b: Tensor, xb: Tensor, som: Som = None) -> Tensor:
     "Counts the number of records not belonging to each cluster that are closer than that cluster's furthest record."    
     w = som.weights.view(-1, xb.shape[-1])
     distances = expanded_op(xb, w.to(device=xb.device), pdist)
@@ -63,15 +61,15 @@ def codebook_err(xb: Tensor, pred_b: Tensor, som: Som = None) -> Tensor:
         # If there is at least one element in this cluster
         if len(cluster_distances) > 0:
             # Grab the furthest element in the cluster
-            max_cluster_distance = cluster_distances[:,cluster_idx].max()
+            max_cluster_distance = cluster_distances[:, cluster_idx].max()
             # Now retrieve the non-cluster distances:
             non_cluster_distances = distances[(inverse != cluster_idx).nonzero().view(-1)]
             # And check if any of these elements has a distance from cluster_idx less than max_dist
             count += (non_cluster_distances[:, cluster_idx] < max_cluster_distance).nonzero().shape[0]
-    return count / n_classes / batch_size
+    return torch.tensor(count / n_classes / batch_size).to(device=xb.device)
 
 
-def mean_quantization_err(xb: Tensor, pred_b: Tensor, som: Som = None) -> Tensor:
+def mean_quantization_err(pred_b: Tensor, xb: Tensor, som: Som = None) -> Tensor:
     "Mean distance of each record from its respective BMU."
     w = som.weights.view(-1, xb.shape[-1]).to(device=xb.device)
     row_sz = som.size[0]
@@ -79,7 +77,7 @@ def mean_quantization_err(xb: Tensor, pred_b: Tensor, som: Som = None) -> Tensor
     return pdist(xb, w[preds], p=2).mean()
 
 
-def topologic_err(xb: Tensor, pred_b: Tensor, som: Som = None, thresh: int = 4) -> Tensor:
+def topologic_err(pred_B: Tensor, xb: Tensor, som: Som = None, thresh: int = 4) -> Tensor:
     """
     Min vec distance of each record with every class and checks if the second-to-min value belongs in the first-best neighborhood.
     If not, it gets added as an error.
@@ -94,14 +92,4 @@ def topologic_err(xb: Tensor, pred_b: Tensor, som: Som = None, thresh: int = 4) 
     # Calculate index-based euclidean distance between first and second closest weights for each record
     map_distances = pdist(top_2_2d_idxs[:, 0], top_2_2d_idxs[:, 1], p=2)
     # Count how many distances are below the threshold
-    return (map_distances <= thresh).int().sum(-1)
-
-
-def idxs_2d_to_1d(idxs: np.ndarray, row_size: int) -> list:
-    "Turns 2D indices to 1D"
-    return torch.tensor([el[0] * row_size + el[1] for el in idxs])
-
-
-def idxs_1d_to_2d(idxs: np.ndarray, col_size: int) -> list:
-    "Turns 1D indices to 2D"
-    return torch.tensor([[el // col_size, el % col_size] for el in idxs])
+    return (map_distances <= thresh).int().float().sum(-1).to(device=xb.device)
