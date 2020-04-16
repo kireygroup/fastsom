@@ -22,15 +22,22 @@ __all__ = [
 ]
 
 
+def rescale(d):
+    return ((d - d.min(0)) / d.ptp(0) * 255).astype(int)
+
+
+
 class SomInterpretation():
     "SOM interpretation class"
 
     def __init__(self, learn) -> None:
         self.learn = learn
-        self.data: UnsupervisedDataBunch = learn.data
+        self.data = learn.data
         self.map_size = learn.model.weights.shape
-        self.w = learn.model.weights.clone().view(-1, self.map_size[-1]).cpu().numpy()
         self.pca = None
+        self.w = learn.model.weights.clone().view(-1, self.map_size[-1]).cpu()
+        if self.data.normalizer is not None:
+            self.w = self.data.denormalize(self.w).numpy()
 
     @classmethod
     def from_learner(cls, learn):
@@ -95,9 +102,12 @@ class SomInterpretation():
             d = self.pca.transform(self.w).reshape(*self.map_size[:-1], 3)
         else:
             d = self.w.reshape(*self.map_size[:-1], 3)
+
+        d = rescale(self.w)
+        plt.imshow(d.reshape(self.learn.model.size))
         # Scale d between 0 and 255
-        scaled_d = ((d - d.min(0)) / d.ptp(0) * 255).astype(int)
-        plt.imshow(scaled_d)
+        # scaled_d = ((d - d.min(0)) / d.ptp(0) * 255).astype(int)
+        # plt.imshow(scaled_d)
 
     def init_pca(self):
         "Initializes and fits the PCA instance."

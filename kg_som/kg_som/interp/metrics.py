@@ -77,7 +77,7 @@ def mean_quantization_err(pred_b: Tensor, xb: Tensor, som: Som = None) -> Tensor
     return pdist(xb, w[preds], p=2).mean()
 
 
-def topologic_err(pred_B: Tensor, xb: Tensor, som: Som = None, thresh: int = 4) -> Tensor:
+def topologic_err(pred_b: Tensor, xb: Tensor, som: Som = None, thresh: int = 4) -> Tensor:
     """
     Min vec distance of each record with every class and checks if the second-to-min value belongs in the first-best neighborhood.
     If not, it gets added as an error.
@@ -91,5 +91,5 @@ def topologic_err(pred_B: Tensor, xb: Tensor, som: Som = None, thresh: int = 4) 
     top_2_2d_idxs = idxs_1d_to_2d(closest_2_indices.cpu().numpy(), col_sz).float()
     # Calculate index-based euclidean distance between first and second closest weights for each record
     map_distances = pdist(top_2_2d_idxs[:, 0], top_2_2d_idxs[:, 1], p=2)
-    # Count how many distances are below the threshold
-    return (map_distances <= thresh).int().float().sum(-1).to(device=xb.device)
+    # Count how many distances are above the threshold
+    return (map_distances >= thresh).int().float().sum(-1).to(device=xb.device)

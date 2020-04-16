@@ -8,7 +8,8 @@ from torch import Tensor
 from fastprogress.fastprogress import progress_bar
 from fastai.callback import Callback
 from fastai.basic_train import Learner
-from typing import Union, Tuple, Collection
+from typing import Union, Tuple, Collection, Callable, Dict
+from functools import partial
 
 from ..som import Som, neigh_gauss, neigh_square
 from ..core import ifindict
@@ -19,6 +20,7 @@ __all__ = [
     "ExperimentalSomTrainer",
     "LinearDecaySomTrainer",
     "OneCycleEmulatorSomTrainer",
+    "SomEarlyStoppingCallback",
 ]
 
 
@@ -120,9 +122,9 @@ class ExperimentalSomTrainer(SomTrainer):
         self.n_epochs = kwargs['n_epochs']
         self.iter = 0
         iterations = len(self.learn.data.train_dl) * self.n_epochs if self.update_on_batch else self.n_epochs
-        phase_1_iters = int(iterations * 0.4)
-        phase_2_iters = int(iterations * 0.2)
-        phase_3_iters = int(iterations * 0.4)
+        phase_1_iters = int(iterations * 0.15)
+        phase_2_iters = int(iterations * 0.5)
+        phase_3_iters = int(iterations * 0.35)
 
         # alphas_1 = np.linspace(self.min_lr, self.min_lr, num=phase_1_iters)
         # alphas_2 = np.linspace(self.min_lr, self.mid_lr, num=phase_2_iters)
@@ -216,3 +218,51 @@ class OneCycleEmulatorSomTrainer(SomTrainer):
         self.model.alpha = torch.tensor(self.alphas[self.iter])
         self.model.sigma = torch.tensor(self.sigmas[self.iter])
         self.iter += 1
+
+
+default_early_stopping_thresholds = dict(
+    topologic_err=10.0,
+    codebook_err=0.02,
+)
+
+class SomEarlyStoppingCallback(Callback):
+    "Performs early stopping checks based on given metric-wise thresholds."
+   
+    def __init__(self, thresh: Dict[str, float] = default_early_stopping_thresholds):
+        self.metric_names = []
+        self.thresh = thresh
+
+    def _get_func_name(self, func: Callable) -> str:
+        "Returns function name, optionally unwrapping partial function applications."
+        while isinstance(func, partial):
+            func = func.func
+        if isinstance(func, Callable):
+            return func.__name__
+        raise ValueError('`func` is not a function')
+
+
+    def on_train_begin(self, **kwargs):
+        metrics = ifindict(kwargs, 'metrics', [])
+        self.metric_names = [self._get_func_name(m) for m in metrics]
+
+    def on_epoch_end(self, **kwargs):
+        "Performs early stopping checks."
+        last_metric_values = ifindict(kwargs, 'last_metrics', [])
+        should_stop = [metric_value < self.thresh[metric_name] for metric_name, metric_value in zip(self.metric_names, last_metric_values)]
+
+        return {
+            'stop_training': all(should_stop)
+        }
+            
+
+
+class UntilWhenSomTrainer(SomTrainer):
+    ""
+
+    def __init__(self, model: Som, init_method: str, lr: Collection[float], *args, **kwargs) -> None:
+        self.model, self.init_method, self.lr = model, init_method, lr
+        self.finetune_epoch_pct = ifindict(kwargs, 'finetune_epoch_pct', 0.4)
+        self._finetune_start = None                     # First finetuning epoch
+        self._rough_radiuses = None                     # Rough training radiuses
+        self._finetune_radiuses = None                  # Finetune training radiuses
+        self._backup_neigh_fn = model.neigh_fn

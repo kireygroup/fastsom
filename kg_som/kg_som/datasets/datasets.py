@@ -13,6 +13,8 @@ from .normalizers import Normalizer, get_normalizer
 from .samplers import SamplerType, get_sampler, SamplerTypeOrString
 from .cat_encoders import CatEncoder
 
+from ..core import ifnone
+
 
 __all__ = [
     "UnsupervisedDataBunch",
@@ -41,6 +43,8 @@ class UnsupervisedDataBunch(DataBunch):
                  cat_enc: Optional[CatEncoder] = None,
                  **kwargs):
         self.cat_enc = cat_enc
+        self.normalizer = None
+
         if isinstance(train, DataLoader):
             train_dl, valid_dl = train, valid
         else:
@@ -60,18 +64,26 @@ class UnsupervisedDataBunch(DataBunch):
         # Initialize Fastai's DataBunch
         super().__init__(train_dl, valid_dl, device=torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"), dl_tfms=tfms, **kwargs)
 
-    def normalize(self, normalizer: str = 'minmax') -> None:
-        "Normalizes both `train_ds` and `valid_ds`"
-        normalizer = get_normalizer(normalizer)
+    def normalize(self, normalizer: str = 'var') -> None:
+        "Normalizes both `train_ds` and `valid_ds`."
+        save_stats = self.normalizer is None
+        self.normalizer = ifnone(self.normalizer, get_normalizer(normalizer))
 
         train = self.train_ds.tensors[0]
-        norm_train = normalizer.normalize(train)
+        norm_train = self.normalizer.normalize(train, save=save_stats)
         self.train_ds.tensors = [norm_train, norm_train]
 
         if self.valid_ds is not None:
             valid = self.valid_ds.tensors[0]
-            norm_valid = normalizer.normalize_by(train, valid)
+            norm_valid = self.normalizer.normalize_by(train, valid)
             self.valid_ds.tensors = [norm_valid, norm_valid]
+
+    def denormalize(self, data: Tensor) -> Tensor:
+        "Denormalizes a `Tensor` using own normalizer."
+        if self.normalizer is None:
+            return data
+        return self.normalizer.denormalize(data)
+
 
 
 def batch_slice(bs: int, maximum: int) -> slice:
