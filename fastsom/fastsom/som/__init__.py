@@ -1,3 +1,0 @@
-"""
-"""
-from .som import *
