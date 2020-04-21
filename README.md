@@ -4,7 +4,7 @@ A PyTorch and Fastai based implementation of Self-Organizing Maps.
 
 ## Overview
 
-This project was bootstrapped with the [`cookiecutter-dl-docker`](htts://github.com/rsayn/cookiecutter-dl-docker) template.
+This project was bootstrapped with the [cookiecutter-dl-docker](https://github.com/rsayn/cookiecutter-dl-docker) template.
 
 ### Install as a depencency
 
