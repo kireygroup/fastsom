@@ -67,7 +67,7 @@ def linkcode_resolve(domain, info):
     if not info['module']:
         return None
     filename = info['module'].replace('.', '/')
-    return "https://github.com/kireygroup/fastsom/%s.py" % filename
+    return "https://github.com/kireygroup/fastsom/blob/master/fastsom/%s.py" % filename
 
 
 # Napoleon config
