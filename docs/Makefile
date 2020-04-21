@@ -18,3 +18,17 @@ help:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+docs:
+	@rm -rf build/
+	@make html
+	@find build/html/examples -type f -exec sed -i 's/<navlinks class="/<navlinks class="nav-links /g' {} + 
+	@find build/html/examples -type f -exec sed -i 's/<navlinks>/<navlinks class="nav-links"> /g' {} + 
+	@find build/html/examples -type f -exec sed -i 's/<navbar /<navbar class="navbar" /g' {} + 
+	@find build/html/examples -type f -exec sed -i 's/<sidebar /<sidebar class="sidebar" /g' {} + 
+	@find build/html/examples -type f -exec sed -i 's/<page/<div class="page"/g' {} + 
+	@find build/html/examples -type f -exec sed -i 's/<\/page/<\/div/g' {} +
+	@mv build/html/_static build/html/static
+	@mv build/html/_images build/html/images
+	@find build/html -type f -exec sed -i 's/_static/static/g' {} +
+	@find build/html -type f -exec sed -i 's/_images/images/g' {} +
