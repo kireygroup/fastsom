@@ -1,0 +1,5 @@
+
+/* Fix theme incompatibility with notebook styles */
+span.n, span.p, span.nb, pre {
+  color: #2c3e50 !important;
+}

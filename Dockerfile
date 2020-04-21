@@ -34,7 +34,7 @@ RUN jupyter labextension install jupyterlab-nvdashboard
 
 # Copy over files & install requirements
 RUN mkdir -p /proj
-COPY kg_som/requirements.txt /proj/requirements.txt
+COPY fastsom/requirements.txt /proj/requirements.txt
 WORKDIR /proj
 RUN pip install -r requirements.txt
 

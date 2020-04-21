@@ -9,4 +9,4 @@ while read -r SSH_USER SSH_PASS; do
 done < "$input"
 
 # Builds the root folder Dockerfile
-docker build $BASE_DIR -t kg_som --build-arg SSH_USER=$SSH_USER --build-arg SSH_PASS=$SSH_PASS
+docker build $BASE_DIR -t fastsom --build-arg SSH_USER=$SSH_USER --build-arg SSH_PASS=$SSH_PASS

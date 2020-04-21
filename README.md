@@ -1,12 +1,26 @@
-# Self - Organizing Maps
+# Fastsom
 
-This project was bootstrapped with the ![`cookiecutter-dl-docker`](htts://github.com/rsayn/cookiecutter-dl-docker) template.
+A PyTorch and Fastai based implementation of Self-Organizing Maps.
 
-## Get Started
+## Overview
+
+This project was bootstrapped with the [`cookiecutter-dl-docker`](htts://github.com/rsayn/cookiecutter-dl-docker) template.
+
+### Install as a depencency
+
+To install this package, you can either use the [PyPi package](https://pypi.org/) via `pip` or clone the repository and then install as follows:
+
+```bash
+python setup.py install
+```
+
+### Run examples locally
 
 ### Prerequisites
 
-To run this project you need to install Docker or Nvidia-Docker.
+To run examples for this project you can either use Docker / Nvidia-Docker or recreate the environment on your local machine by using the provided `requirements.txt`.
+
+Steps for Docker are described below.
 
 ### Build the image
 
@@ -45,6 +59,6 @@ bin/
 
 With Visual Studio Code and PyCharm, it is possible to use the container Python interpreter for development.
 
-An SSH server has been configured to allow connection via PyCharm's remote interpreter feature.
+An SSH server has been configured inside the container to allow connection via PyCharm's remote interpreter feature.
 
 In Visual Studio Code, this can be done via the [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).

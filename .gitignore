@@ -6,5 +6,5 @@ models
 .vscode
 build
 dist
-kg_som.egg-info
+fastsom.egg-info
 .env
