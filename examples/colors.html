@@ -1,0 +1,2986 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>SOM Training on RGB Colors Dataset</title>
+    
+      <link rel="stylesheet" href="../static/pygments.css">
+      <link rel="stylesheet" href="../static/theme.css">
+      <link rel="stylesheet" href="../static/sphinx_press_theme.css">
+          <link rel="stylesheet" href="../static/css/notebook_fix.css" type="text/css" />
+      
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../static/documentation_options.js"></script>
+
+      <!-- sphinx script_files -->
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/doctools.js"></script>
+        <script src="../static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+      
+      <script src="../static/theme-vendors.js"></script>
+      <script src="../static/theme.js" defer></script>
+    
+  <link rel="index" title="Index" href="../genindex.html" />
+  <link rel="search" title="Search" href="../search.html" />
+  <link rel="next" title="SOM Training on IRIS Dataset" href="iris.html" />
+  <link rel="prev" title="fastsom.som" href="../som.html" /> 
+  </head>
+
+  <body>
+    <div id="app" class="theme-container" :class="pageClasses"><navbar class="navbar" @toggle-sidebar="toggleSidebar">
+  <router-link to="../index.html" class="home-link">
+    
+      <span class="site-name">fastsom</span>
+    
+  </router-link>
+
+  <div class="links">
+    <navlinks class="nav-links can-hide">
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+    </navlinks>
+  </div>
+</navbar>
+
+      
+      <div class="sidebar-mask" @click="toggleSidebar(false)">
+      </div>
+        <sidebar class="sidebar" @toggle-sidebar="toggleSidebar">
+          
+          <navlinks class="nav-links"> 
+            
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+            
+          </navlinks><div id="searchbox" class="searchbox" role="search">
+  <div class="caption"><span class="caption-text">Quick search</span>
+    <div class="searchformwrapper">
+      <form class="search" action="../search.html" method="get">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div><div class="sidebar-links" role="navigation" aria-label="main navigation">
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">API</a></span>
+      </p>
+      <ul class="">
+        
+          <li class="toctree-l1 "><a href="../core/core.html" class="reference internal ">fastsom.core</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../datasets/datasets.html" class="reference internal ">fastsom.datasets</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../interp/interp.html" class="reference internal ">fastsom.interp</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../learn/learn.html" class="reference internal ">fastsom.learn</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../som.html" class="reference internal ">fastsom.som</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">Examples</a></span>
+      </p>
+      <ul class="current">
+        
+          <li class="toctree-l1 current"><a href="#" class="reference internal current">SOM Training on RGB Colors Dataset</a>
+
+            
+              <ul>
+                
+                  <li class="toctree-l2"><a href="#Creating-the-DataBunch" class="reference internal">Creating the DataBunch</a></li>
+                
+                  <li class="toctree-l2"><a href="#Normalization" class="reference internal">Normalization</a></li>
+                
+                  <li class="toctree-l2"><a href="#Creating-the-Learner" class="reference internal">Creating the Learner</a></li>
+                
+                  <li class="toctree-l2"><a href="#Training-the-model" class="reference internal">Training the model</a></li>
+                
+                  <li class="toctree-l2"><a href="#Interpretation" class="reference internal">Interpretation</a></li>
+                
+              </ul>
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="iris.html" class="reference internal ">SOM Training on IRIS Dataset</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+</div>
+        </sidebar>
+
+      <div class="page">
+          <div class="body-header" role="navigation" aria-label="navigation">
+  
+  <ul class="breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+    
+    <li>SOM Training on RGB Colors Dataset</li>
+  </ul>
+  
+
+  <ul class="page-nav">
+  <li class="prev">
+    <a href="../som.html"
+       title="previous chapter">← fastsom.som</a>
+  </li>
+  <li class="next">
+    <a href="iris.html"
+       title="next chapter">SOM Training on IRIS Dataset →</a>
+  </li>
+</ul>
+  
+</div>
+<hr>
+          <div class="content" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container,
+div.nbinput.container div.prompt,
+div.nbinput.container div.input_area,
+div.nbinput.container div[class*=highlight],
+div.nbinput.container div[class*=highlight] pre,
+div.nboutput.container,
+div.nboutput.container div.prompt,
+div.nboutput.container div.output_area,
+div.nboutput.container div[class*=highlight],
+div.nboutput.container div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    min-width: 7ex;
+    padding-top: 0.3rem;
+    padding-right: 0.3rem;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 0.3rem;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<div class="section" id="SOM-Training-on-RGB-Colors-Dataset">
+<h1>SOM Training on RGB Colors Dataset<a class="headerlink" href="#SOM-Training-on-RGB-Colors-Dataset" title="Permalink to this headline">¶</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">fastsom</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Creating-the-DataBunch">
+<h2>Creating the DataBunch<a class="headerlink" href="#Creating-the-DataBunch" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">colors</span><span class="p">():</span>
+    <span class="c1"># Set color dataset</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="nb">float</span><span class="p">)</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="mi">0</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="mi">1</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="mi">0</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="mi">1</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Red&#39;</span><span class="p">,</span> <span class="s1">&#39;Green&#39;</span><span class="p">,</span> <span class="s1">&#39;Blue&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">labels</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">colors</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">db</span> <span class="o">=</span> <span class="n">UnsupervisedDataBunch</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">valid</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">sampler</span><span class="o">=</span><span class="s1">&#39;shuffle&#39;</span><span class="p">,</span> <span class="n">bs</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Normalization">
+<h2>Normalization<a class="headerlink" href="#Normalization" title="Permalink to this headline">¶</a></h2>
+<p>For this step we will use the variance normalizer, which in our tests seems to work really well with Self-Organizing Maps.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">db</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="s1">&#39;var&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">d</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">train_ds</span><span class="o">.</span><span class="n">tensors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">d</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">d</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(tensor([ 2.3896e-16,  3.1403e-16, -6.3441e-18], dtype=torch.float64),
+ tensor([1.0000, 1.0000, 1.0000], dtype=torch.float64))
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Creating-the-Learner">
+<h2>Creating the Learner<a class="headerlink" href="#Creating-the-Learner" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="n">som</span> <span class="o">=</span> <span class="n">Som</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+
+<span class="n">learn</span> <span class="o">=</span> <span class="n">SomLearner</span><span class="p">(</span><span class="n">db</span><span class="p">,</span>
+    <span class="n">som</span><span class="p">,</span>
+    <span class="n">lr</span><span class="o">=</span><span class="p">[</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="n">topologic_err</span><span class="p">],</span>
+    <span class="n">visualize</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;weights&#39;</span><span class="p">],</span>
+    <span class="n">trainer</span><span class="o">=</span><span class="n">ExperimentalSomTrainer</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Training-the-model">
+<h2>Training the model<a class="headerlink" href="#Training-the-model" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> notebook
+<span class="n">learn</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="output_javascript"></div>
+<script type="text/javascript">
+var element = document.currentScript.previousSibling.previousSibling;
+/* Put everything inside the global mpl namespace */
+window.mpl = {};
+
+
+mpl.get_websocket_type = function() {
+    if (typeof(WebSocket) !== 'undefined') {
+        return WebSocket;
+    } else if (typeof(MozWebSocket) !== 'undefined') {
+        return MozWebSocket;
+    } else {
+        alert('Your browser does not have WebSocket support. ' +
+              'Please try Chrome, Safari or Firefox ≥ 6. ' +
+              'Firefox 4 and 5 are also supported but you ' +
+              'have to enable WebSockets in about:config.');
+    };
+}
+
+mpl.figure = function(figure_id, websocket, ondownload, parent_element) {
+    this.id = figure_id;
+
+    this.ws = websocket;
+
+    this.supports_binary = (this.ws.binaryType != undefined);
+
+    if (!this.supports_binary) {
+        var warnings = document.getElementById("mpl-warnings");
+        if (warnings) {
+            warnings.style.display = 'block';
+            warnings.textContent = (
+                "This browser does not support binary websocket messages. " +
+                    "Performance may be slow.");
+        }
+    }
+
+    this.imageObj = new Image();
+
+    this.context = undefined;
+    this.message = undefined;
+    this.canvas = undefined;
+    this.rubberband_canvas = undefined;
+    this.rubberband_context = undefined;
+    this.format_dropdown = undefined;
+
+    this.image_mode = 'full';
+
+    this.root = $('<div/>');
+    this._root_extra_style(this.root)
+    this.root.attr('style', 'display: inline-block');
+
+    $(parent_element).append(this.root);
+
+    this._init_header(this);
+    this._init_canvas(this);
+    this._init_toolbar(this);
+
+    var fig = this;
+
+    this.waiting = false;
+
+    this.ws.onopen =  function () {
+            fig.send_message("supports_binary", {value: fig.supports_binary});
+            fig.send_message("send_image_mode", {});
+            if (mpl.ratio != 1) {
+                fig.send_message("set_dpi_ratio", {'dpi_ratio': mpl.ratio});
+            }
+            fig.send_message("refresh", {});
+        }
+
+    this.imageObj.onload = function() {
+            if (fig.image_mode == 'full') {
+                // Full images could contain transparency (where diff images
+                // almost always do), so we need to clear the canvas so that
+                // there is no ghosting.
+                fig.context.clearRect(0, 0, fig.canvas.width, fig.canvas.height);
+            }
+            fig.context.drawImage(fig.imageObj, 0, 0);
+        };
+
+    this.imageObj.onunload = function() {
+        fig.ws.close();
+    }
+
+    this.ws.onmessage = this._make_on_message_function(this);
+
+    this.ondownload = ondownload;
+}
+
+mpl.figure.prototype._init_header = function() {
+    var titlebar = $(
+        '<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ' +
+        'ui-helper-clearfix"/>');
+    var titletext = $(
+        '<div class="ui-dialog-title" style="width: 100%; ' +
+        'text-align: center; padding: 3px;"/>');
+    titlebar.append(titletext)
+    this.root.append(titlebar);
+    this.header = titletext[0];
+}
+
+
+
+mpl.figure.prototype._canvas_extra_style = function(canvas_div) {
+
+}
+
+
+mpl.figure.prototype._root_extra_style = function(canvas_div) {
+
+}
+
+mpl.figure.prototype._init_canvas = function() {
+    var fig = this;
+
+    var canvas_div = $('<div/>');
+
+    canvas_div.attr('style', 'position: relative; clear: both; outline: 0');
+
+    function canvas_keyboard_event(event) {
+        return fig.key_event(event, event['data']);
+    }
+
+    canvas_div.keydown('key_press', canvas_keyboard_event);
+    canvas_div.keyup('key_release', canvas_keyboard_event);
+    this.canvas_div = canvas_div
+    this._canvas_extra_style(canvas_div)
+    this.root.append(canvas_div);
+
+    var canvas = $('<canvas/>');
+    canvas.addClass('mpl-canvas');
+    canvas.attr('style', "left: 0; top: 0; z-index: 0; outline: 0")
+
+    this.canvas = canvas[0];
+    this.context = canvas[0].getContext("2d");
+
+    var backingStore = this.context.backingStorePixelRatio ||
+    this.context.webkitBackingStorePixelRatio ||
+    this.context.mozBackingStorePixelRatio ||
+    this.context.msBackingStorePixelRatio ||
+    this.context.oBackingStorePixelRatio ||
+    this.context.backingStorePixelRatio || 1;
+
+    mpl.ratio = (window.devicePixelRatio || 1) / backingStore;
+
+    var rubberband = $('<canvas/>');
+    rubberband.attr('style', "position: absolute; left: 0; top: 0; z-index: 1;")
+
+    var pass_mouse_events = true;
+
+    canvas_div.resizable({
+        start: function(event, ui) {
+            pass_mouse_events = false;
+        },
+        resize: function(event, ui) {
+            fig.request_resize(ui.size.width, ui.size.height);
+        },
+        stop: function(event, ui) {
+            pass_mouse_events = true;
+            fig.request_resize(ui.size.width, ui.size.height);
+        },
+    });
+
+    function mouse_event_fn(event) {
+        if (pass_mouse_events)
+            return fig.mouse_event(event, event['data']);
+    }
+
+    rubberband.mousedown('button_press', mouse_event_fn);
+    rubberband.mouseup('button_release', mouse_event_fn);
+    // Throttle sequential mouse events to 1 every 20ms.
+    rubberband.mousemove('motion_notify', mouse_event_fn);
+
+    rubberband.mouseenter('figure_enter', mouse_event_fn);
+    rubberband.mouseleave('figure_leave', mouse_event_fn);
+
+    canvas_div.on("wheel", function (event) {
+        event = event.originalEvent;
+        event['data'] = 'scroll'
+        if (event.deltaY < 0) {
+            event.step = 1;
+        } else {
+            event.step = -1;
+        }
+        mouse_event_fn(event);
+    });
+
+    canvas_div.append(canvas);
+    canvas_div.append(rubberband);
+
+    this.rubberband = rubberband;
+    this.rubberband_canvas = rubberband[0];
+    this.rubberband_context = rubberband[0].getContext("2d");
+    this.rubberband_context.strokeStyle = "#000000";
+
+    this._resize_canvas = function(width, height) {
+        // Keep the size of the canvas, canvas container, and rubber band
+        // canvas in synch.
+        canvas_div.css('width', width)
+        canvas_div.css('height', height)
+
+        canvas.attr('width', width * mpl.ratio);
+        canvas.attr('height', height * mpl.ratio);
+        canvas.attr('style', 'width: ' + width + 'px; height: ' + height + 'px;');
+
+        rubberband.attr('width', width);
+        rubberband.attr('height', height);
+    }
+
+    // Set the figure to an initial 600x600px, this will subsequently be updated
+    // upon first draw.
+    this._resize_canvas(600, 600);
+
+    // Disable right mouse context menu.
+    $(this.rubberband_canvas).bind("contextmenu",function(e){
+        return false;
+    });
+
+    function set_focus () {
+        canvas.focus();
+        canvas_div.focus();
+    }
+
+    window.setTimeout(set_focus, 100);
+}
+
+mpl.figure.prototype._init_toolbar = function() {
+    var fig = this;
+
+    var nav_element = $('<div/>');
+    nav_element.attr('style', 'width: 100%');
+    this.root.append(nav_element);
+
+    // Define a callback function for later on.
+    function toolbar_event(event) {
+        return fig.toolbar_button_onclick(event['data']);
+    }
+    function toolbar_mouse_event(event) {
+        return fig.toolbar_button_onmouseover(event['data']);
+    }
+
+    for(var toolbar_ind in mpl.toolbar_items) {
+        var name = mpl.toolbar_items[toolbar_ind][0];
+        var tooltip = mpl.toolbar_items[toolbar_ind][1];
+        var image = mpl.toolbar_items[toolbar_ind][2];
+        var method_name = mpl.toolbar_items[toolbar_ind][3];
+
+        if (!name) {
+            // put a spacer in here.
+            continue;
+        }
+        var button = $('<button/>');
+        button.addClass('ui-button ui-widget ui-state-default ui-corner-all ' +
+                        'ui-button-icon-only');
+        button.attr('role', 'button');
+        button.attr('aria-disabled', 'false');
+        button.click(method_name, toolbar_event);
+        button.mouseover(tooltip, toolbar_mouse_event);
+
+        var icon_img = $('<span/>');
+        icon_img.addClass('ui-button-icon-primary ui-icon');
+        icon_img.addClass(image);
+        icon_img.addClass('ui-corner-all');
+
+        var tooltip_span = $('<span/>');
+        tooltip_span.addClass('ui-button-text');
+        tooltip_span.html(tooltip);
+
+        button.append(icon_img);
+        button.append(tooltip_span);
+
+        nav_element.append(button);
+    }
+
+    var fmt_picker_span = $('<span/>');
+
+    var fmt_picker = $('<select/>');
+    fmt_picker.addClass('mpl-toolbar-option ui-widget ui-widget-content');
+    fmt_picker_span.append(fmt_picker);
+    nav_element.append(fmt_picker_span);
+    this.format_dropdown = fmt_picker[0];
+
+    for (var ind in mpl.extensions) {
+        var fmt = mpl.extensions[ind];
+        var option = $(
+            '<option/>', {selected: fmt === mpl.default_extension}).html(fmt);
+        fmt_picker.append(option);
+    }
+
+    // Add hover states to the ui-buttons
+    $( ".ui-button" ).hover(
+        function() { $(this).addClass("ui-state-hover");},
+        function() { $(this).removeClass("ui-state-hover");}
+    );
+
+    var status_bar = $('<span class="mpl-message"/>');
+    nav_element.append(status_bar);
+    this.message = status_bar[0];
+}
+
+mpl.figure.prototype.request_resize = function(x_pixels, y_pixels) {
+    // Request matplotlib to resize the figure. Matplotlib will then trigger a resize in the client,
+    // which will in turn request a refresh of the image.
+    this.send_message('resize', {'width': x_pixels, 'height': y_pixels});
+}
+
+mpl.figure.prototype.send_message = function(type, properties) {
+    properties['type'] = type;
+    properties['figure_id'] = this.id;
+    this.ws.send(JSON.stringify(properties));
+}
+
+mpl.figure.prototype.send_draw_message = function() {
+    if (!this.waiting) {
+        this.waiting = true;
+        this.ws.send(JSON.stringify({type: "draw", figure_id: this.id}));
+    }
+}
+
+
+mpl.figure.prototype.handle_save = function(fig, msg) {
+    var format_dropdown = fig.format_dropdown;
+    var format = format_dropdown.options[format_dropdown.selectedIndex].value;
+    fig.ondownload(fig, format);
+}
+
+
+mpl.figure.prototype.handle_resize = function(fig, msg) {
+    var size = msg['size'];
+    if (size[0] != fig.canvas.width || size[1] != fig.canvas.height) {
+        fig._resize_canvas(size[0], size[1]);
+        fig.send_message("refresh", {});
+    };
+}
+
+mpl.figure.prototype.handle_rubberband = function(fig, msg) {
+    var x0 = msg['x0'] / mpl.ratio;
+    var y0 = (fig.canvas.height - msg['y0']) / mpl.ratio;
+    var x1 = msg['x1'] / mpl.ratio;
+    var y1 = (fig.canvas.height - msg['y1']) / mpl.ratio;
+    x0 = Math.floor(x0) + 0.5;
+    y0 = Math.floor(y0) + 0.5;
+    x1 = Math.floor(x1) + 0.5;
+    y1 = Math.floor(y1) + 0.5;
+    var min_x = Math.min(x0, x1);
+    var min_y = Math.min(y0, y1);
+    var width = Math.abs(x1 - x0);
+    var height = Math.abs(y1 - y0);
+
+    fig.rubberband_context.clearRect(
+        0, 0, fig.canvas.width / mpl.ratio, fig.canvas.height / mpl.ratio);
+
+    fig.rubberband_context.strokeRect(min_x, min_y, width, height);
+}
+
+mpl.figure.prototype.handle_figure_label = function(fig, msg) {
+    // Updates the figure title.
+    fig.header.textContent = msg['label'];
+}
+
+mpl.figure.prototype.handle_cursor = function(fig, msg) {
+    var cursor = msg['cursor'];
+    switch(cursor)
+    {
+    case 0:
+        cursor = 'pointer';
+        break;
+    case 1:
+        cursor = 'default';
+        break;
+    case 2:
+        cursor = 'crosshair';
+        break;
+    case 3:
+        cursor = 'move';
+        break;
+    }
+    fig.rubberband_canvas.style.cursor = cursor;
+}
+
+mpl.figure.prototype.handle_message = function(fig, msg) {
+    fig.message.textContent = msg['message'];
+}
+
+mpl.figure.prototype.handle_draw = function(fig, msg) {
+    // Request the server to send over a new figure.
+    fig.send_draw_message();
+}
+
+mpl.figure.prototype.handle_image_mode = function(fig, msg) {
+    fig.image_mode = msg['mode'];
+}
+
+mpl.figure.prototype.updated_canvas_event = function() {
+    // Called whenever the canvas gets updated.
+    this.send_message("ack", {});
+}
+
+// A function to construct a web socket function for onmessage handling.
+// Called in the figure constructor.
+mpl.figure.prototype._make_on_message_function = function(fig) {
+    return function socket_on_message(evt) {
+        if (evt.data instanceof Blob) {
+            /* FIXME: We get "Resource interpreted as Image but
+             * transferred with MIME type text/plain:" errors on
+             * Chrome.  But how to set the MIME type?  It doesn't seem
+             * to be part of the websocket stream */
+            evt.data.type = "image/png";
+
+            /* Free the memory for the previous frames */
+            if (fig.imageObj.src) {
+                (window.URL || window.webkitURL).revokeObjectURL(
+                    fig.imageObj.src);
+            }
+
+            fig.imageObj.src = (window.URL || window.webkitURL).createObjectURL(
+                evt.data);
+            fig.updated_canvas_event();
+            fig.waiting = false;
+            return;
+        }
+        else if (typeof evt.data === 'string' && evt.data.slice(0, 21) == "data:image/png;base64") {
+            fig.imageObj.src = evt.data;
+            fig.updated_canvas_event();
+            fig.waiting = false;
+            return;
+        }
+
+        var msg = JSON.parse(evt.data);
+        var msg_type = msg['type'];
+
+        // Call the  "handle_{type}" callback, which takes
+        // the figure and JSON message as its only arguments.
+        try {
+            var callback = fig["handle_" + msg_type];
+        } catch (e) {
+            console.log("No handler for the '" + msg_type + "' message type: ", msg);
+            return;
+        }
+
+        if (callback) {
+            try {
+                // console.log("Handling '" + msg_type + "' message: ", msg);
+                callback(fig, msg);
+            } catch (e) {
+                console.log("Exception inside the 'handler_" + msg_type + "' callback:", e, e.stack, msg);
+            }
+        }
+    };
+}
+
+// from http://stackoverflow.com/questions/1114465/getting-mouse-location-in-canvas
+mpl.findpos = function(e) {
+    //this section is from http://www.quirksmode.org/js/events_properties.html
+    var targ;
+    if (!e)
+        e = window.event;
+    if (e.target)
+        targ = e.target;
+    else if (e.srcElement)
+        targ = e.srcElement;
+    if (targ.nodeType == 3) // defeat Safari bug
+        targ = targ.parentNode;
+
+    // jQuery normalizes the pageX and pageY
+    // pageX,Y are the mouse positions relative to the document
+    // offset() returns the position of the element relative to the document
+    var x = e.pageX - $(targ).offset().left;
+    var y = e.pageY - $(targ).offset().top;
+
+    return {"x": x, "y": y};
+};
+
+/*
+ * return a copy of an object with only non-object keys
+ * we need this to avoid circular references
+ * http://stackoverflow.com/a/24161582/3208463
+ */
+function simpleKeys (original) {
+  return Object.keys(original).reduce(function (obj, key) {
+    if (typeof original[key] !== 'object')
+        obj[key] = original[key]
+    return obj;
+  }, {});
+}
+
+mpl.figure.prototype.mouse_event = function(event, name) {
+    var canvas_pos = mpl.findpos(event)
+
+    if (name === 'button_press')
+    {
+        this.canvas.focus();
+        this.canvas_div.focus();
+    }
+
+    var x = canvas_pos.x * mpl.ratio;
+    var y = canvas_pos.y * mpl.ratio;
+
+    this.send_message(name, {x: x, y: y, button: event.button,
+                             step: event.step,
+                             guiEvent: simpleKeys(event)});
+
+    /* This prevents the web browser from automatically changing to
+     * the text insertion cursor when the button is pressed.  We want
+     * to control all of the cursor setting manually through the
+     * 'cursor' event from matplotlib */
+    event.preventDefault();
+    return false;
+}
+
+mpl.figure.prototype._key_event_extra = function(event, name) {
+    // Handle any extra behaviour associated with a key event
+}
+
+mpl.figure.prototype.key_event = function(event, name) {
+
+    // Prevent repeat events
+    if (name == 'key_press')
+    {
+        if (event.which === this._key)
+            return;
+        else
+            this._key = event.which;
+    }
+    if (name == 'key_release')
+        this._key = null;
+
+    var value = '';
+    if (event.ctrlKey && event.which != 17)
+        value += "ctrl+";
+    if (event.altKey && event.which != 18)
+        value += "alt+";
+    if (event.shiftKey && event.which != 16)
+        value += "shift+";
+
+    value += 'k';
+    value += event.which.toString();
+
+    this._key_event_extra(event, name);
+
+    this.send_message(name, {key: value,
+                             guiEvent: simpleKeys(event)});
+    return false;
+}
+
+mpl.figure.prototype.toolbar_button_onclick = function(name) {
+    if (name == 'download') {
+        this.handle_save(this, null);
+    } else {
+        this.send_message("toolbar_button", {name: name});
+    }
+};
+
+mpl.figure.prototype.toolbar_button_onmouseover = function(tooltip) {
+    this.message.textContent = tooltip;
+};
+mpl.toolbar_items = [["Home", "Reset original view", "fa fa-home icon-home", "home"], ["Back", "Back to previous view", "fa fa-arrow-left icon-arrow-left", "back"], ["Forward", "Forward to next view", "fa fa-arrow-right icon-arrow-right", "forward"], ["", "", "", ""], ["Pan", "Pan axes with left mouse, zoom with right", "fa fa-arrows icon-move", "pan"], ["Zoom", "Zoom to rectangle", "fa fa-square-o icon-check-empty", "zoom"], ["", "", "", ""], ["Download", "Download plot", "fa fa-floppy-o icon-save", "download"]];
+
+mpl.extensions = ["eps", "jpeg", "pdf", "png", "ps", "raw", "svg", "tif"];
+
+mpl.default_extension = "png";var comm_websocket_adapter = function(comm) {
+    // Create a "websocket"-like object which calls the given IPython comm
+    // object with the appropriate methods. Currently this is a non binary
+    // socket, so there is still some room for performance tuning.
+    var ws = {};
+
+    ws.close = function() {
+        comm.close()
+    };
+    ws.send = function(m) {
+        //console.log('sending', m);
+        comm.send(m);
+    };
+    // Register the callback with on_msg.
+    comm.on_msg(function(msg) {
+        //console.log('receiving', msg['content']['data'], msg);
+        // Pass the mpl event to the overridden (by mpl) onmessage function.
+        ws.onmessage(msg['content']['data'])
+    });
+    return ws;
+}
+
+mpl.mpl_figure_comm = function(comm, msg) {
+    // This is the function which gets called when the mpl process
+    // starts-up an IPython Comm through the "matplotlib" channel.
+
+    var id = msg.content.data.id;
+    // Get hold of the div created by the display call when the Comm
+    // socket was opened in Python.
+    var element = $("#" + id);
+    var ws_proxy = comm_websocket_adapter(comm)
+
+    function ondownload(figure, format) {
+        window.open(figure.imageObj.src);
+    }
+
+    var fig = new mpl.figure(id, ws_proxy,
+                           ondownload,
+                           element.get(0));
+
+    // Call onopen now - mpl needs it, as it is assuming we've passed it a real
+    // web socket which is closed, not our websocket->open comm proxy.
+    ws_proxy.onopen();
+
+    fig.parent_element = element.get(0);
+    fig.cell_info = mpl.find_output_cell("<div id='" + id + "'></div>");
+    if (!fig.cell_info) {
+        console.error("Failed to find cell for figure", id, fig);
+        return;
+    }
+
+    var output_index = fig.cell_info[2]
+    var cell = fig.cell_info[0];
+
+};
+
+mpl.figure.prototype.handle_close = function(fig, msg) {
+    var width = fig.canvas.width/mpl.ratio
+    fig.root.unbind('remove')
+
+    // Update the output cell to use the data from the current canvas.
+    fig.push_to_output();
+    var dataURL = fig.canvas.toDataURL();
+    // Re-enable the keyboard manager in IPython - without this line, in FF,
+    // the notebook keyboard shortcuts fail.
+    IPython.keyboard_manager.enable()
+    $(fig.parent_element).html('<img src="' + dataURL + '" width="' + width + '">');
+    fig.close_ws(fig, msg);
+}
+
+mpl.figure.prototype.close_ws = function(fig, msg){
+    fig.send_message('closing', msg);
+    // fig.ws.close()
+}
+
+mpl.figure.prototype.push_to_output = function(remove_interactive) {
+    // Turn the data on the canvas into data in the output cell.
+    var width = this.canvas.width/mpl.ratio
+    var dataURL = this.canvas.toDataURL();
+    this.cell_info[1]['text/html'] = '<img src="' + dataURL + '" width="' + width + '">';
+}
+
+mpl.figure.prototype.updated_canvas_event = function() {
+    // Tell IPython that the notebook contents must change.
+    IPython.notebook.set_dirty(true);
+    this.send_message("ack", {});
+    var fig = this;
+    // Wait a second, then push the new image to the DOM so
+    // that it is saved nicely (might be nice to debounce this).
+    setTimeout(function () { fig.push_to_output() }, 1000);
+}
+
+mpl.figure.prototype._init_toolbar = function() {
+    var fig = this;
+
+    var nav_element = $('<div/>');
+    nav_element.attr('style', 'width: 100%');
+    this.root.append(nav_element);
+
+    // Define a callback function for later on.
+    function toolbar_event(event) {
+        return fig.toolbar_button_onclick(event['data']);
+    }
+    function toolbar_mouse_event(event) {
+        return fig.toolbar_button_onmouseover(event['data']);
+    }
+
+    for(var toolbar_ind in mpl.toolbar_items){
+        var name = mpl.toolbar_items[toolbar_ind][0];
+        var tooltip = mpl.toolbar_items[toolbar_ind][1];
+        var image = mpl.toolbar_items[toolbar_ind][2];
+        var method_name = mpl.toolbar_items[toolbar_ind][3];
+
+        if (!name) { continue; };
+
+        var button = $('<button class="btn btn-default" href="#" title="' + name + '"><i class="fa ' + image + ' fa-lg"></i></button>');
+        button.click(method_name, toolbar_event);
+        button.mouseover(tooltip, toolbar_mouse_event);
+        nav_element.append(button);
+    }
+
+    // Add the status bar.
+    var status_bar = $('<span class="mpl-message" style="text-align:right; float: right;"/>');
+    nav_element.append(status_bar);
+    this.message = status_bar[0];
+
+    // Add the close button to the window.
+    var buttongrp = $('<div class="btn-group inline pull-right"></div>');
+    var button = $('<button class="btn btn-mini btn-primary" href="#" title="Stop Interaction"><i class="fa fa-power-off icon-remove icon-large"></i></button>');
+    button.click(function (evt) { fig.handle_close(fig, {}); } );
+    button.mouseover('Stop Interaction', toolbar_mouse_event);
+    buttongrp.append(button);
+    var titlebar = this.root.find($('.ui-dialog-titlebar'));
+    titlebar.prepend(buttongrp);
+}
+
+mpl.figure.prototype._root_extra_style = function(el){
+    var fig = this
+    el.on("remove", function(){
+    fig.close_ws(fig, {});
+    });
+}
+
+mpl.figure.prototype._canvas_extra_style = function(el){
+    // this is important to make the div 'focusable
+    el.attr('tabindex', 0)
+    // reach out to IPython and tell the keyboard manager to turn it's self
+    // off when our div gets focus
+
+    // location in version 3
+    if (IPython.notebook.keyboard_manager) {
+        IPython.notebook.keyboard_manager.register_events(el);
+    }
+    else {
+        // location in version 2
+        IPython.keyboard_manager.register_events(el);
+    }
+
+}
+
+mpl.figure.prototype._key_event_extra = function(event, name) {
+    var manager = IPython.notebook.keyboard_manager;
+    if (!manager)
+        manager = IPython.keyboard_manager;
+
+    // Check for shift+enter
+    if (event.shiftKey && event.which == 13) {
+        this.canvas_div.blur();
+        // select the cell after this one
+        var index = IPython.notebook.find_cell_index(this.cell_info[0]);
+        IPython.notebook.select(index + 1);
+    }
+}
+
+mpl.figure.prototype.handle_save = function(fig, msg) {
+    fig.ondownload(fig, null);
+}
+
+
+mpl.find_output_cell = function(html_output) {
+    // Return the cell and output element which can be found *uniquely* in the notebook.
+    // Note - this is a bit hacky, but it is done because the "notebook_saving.Notebook"
+    // IPython event is triggered only after the cells have been serialised, which for
+    // our purposes (turning an active figure into a static one), is too late.
+    var cells = IPython.notebook.get_cells();
+    var ncells = cells.length;
+    for (var i=0; i<ncells; i++) {
+        var cell = cells[i];
+        if (cell.cell_type === 'code'){
+            for (var j=0; j<cell.output_area.outputs.length; j++) {
+                var data = cell.output_area.outputs[j];
+                if (data.data) {
+                    // IPython >= 3 moved mimebundle to data attribute of output
+                    data = data.data;
+                }
+                if (data['text/html'] == html_output) {
+                    return [cell, data, j];
+                }
+            }
+        }
+    }
+}
+
+// Register the function which deals with the matplotlib target/channel.
+// The kernel may be null if the page has been refreshed.
+if (IPython.notebook.kernel != null) {
+    IPython.notebook.kernel.comm_manager.register_target('matplotlib', mpl.mpl_figure_comm);
+}
+
+</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<img src="data:image/png;base64,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" width="432"></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th>epoch</th>
+      <th>train_loss</th>
+      <th>valid_loss</th>
+      <th>topologic_err</th>
+      <th>time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>1.650058</td>
+      <td>1.236506</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>1.355656</td>
+      <td>1.068928</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>1.185822</td>
+      <td>1.037629</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>1.072064</td>
+      <td>1.026925</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>1.014226</td>
+      <td>1.030034</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>0.976400</td>
+      <td>1.015444</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>0.944191</td>
+      <td>1.038827</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>0.924332</td>
+      <td>1.034140</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>0.909263</td>
+      <td>1.026976</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>0.894357</td>
+      <td>1.046265</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>0.881774</td>
+      <td>1.038104</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>0.874295</td>
+      <td>1.031240</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>0.864626</td>
+      <td>1.017960</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>0.857354</td>
+      <td>1.023529</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td>0.848642</td>
+      <td>1.027078</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td>0.842234</td>
+      <td>1.016133</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>0.835980</td>
+      <td>1.031487</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>17</td>
+      <td>0.829067</td>
+      <td>1.035305</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>18</td>
+      <td>0.829603</td>
+      <td>1.030252</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>19</td>
+      <td>0.825831</td>
+      <td>1.028758</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>20</td>
+      <td>0.821234</td>
+      <td>1.029034</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>21</td>
+      <td>0.818457</td>
+      <td>1.042535</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>22</td>
+      <td>0.813902</td>
+      <td>1.026379</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>23</td>
+      <td>0.809975</td>
+      <td>1.025594</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td>0.802984</td>
+      <td>1.024572</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>25</td>
+      <td>0.800385</td>
+      <td>1.026124</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>26</td>
+      <td>0.795779</td>
+      <td>1.020518</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>27</td>
+      <td>0.791637</td>
+      <td>1.011163</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>28</td>
+      <td>0.788292</td>
+      <td>1.003203</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>29</td>
+      <td>0.782609</td>
+      <td>0.998722</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>30</td>
+      <td>0.779776</td>
+      <td>0.996919</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>31</td>
+      <td>0.777542</td>
+      <td>0.978557</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>0.772883</td>
+      <td>0.971039</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>33</td>
+      <td>0.766260</td>
+      <td>0.969000</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>34</td>
+      <td>0.757967</td>
+      <td>0.969144</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>35</td>
+      <td>0.750392</td>
+      <td>0.959032</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>36</td>
+      <td>0.743152</td>
+      <td>0.946996</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>37</td>
+      <td>0.733898</td>
+      <td>0.937002</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>38</td>
+      <td>0.727869</td>
+      <td>0.915512</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>39</td>
+      <td>0.719091</td>
+      <td>0.894675</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>40</td>
+      <td>0.709261</td>
+      <td>0.883543</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>41</td>
+      <td>0.697093</td>
+      <td>0.871590</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>42</td>
+      <td>0.687842</td>
+      <td>0.851548</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>43</td>
+      <td>0.675314</td>
+      <td>0.833003</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>44</td>
+      <td>0.664727</td>
+      <td>0.823780</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>45</td>
+      <td>0.657272</td>
+      <td>0.792989</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>46</td>
+      <td>0.646971</td>
+      <td>0.783277</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>47</td>
+      <td>0.636553</td>
+      <td>0.771995</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>48</td>
+      <td>0.627501</td>
+      <td>0.753509</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>49</td>
+      <td>0.617338</td>
+      <td>0.731417</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>50</td>
+      <td>0.606919</td>
+      <td>0.711954</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>51</td>
+      <td>0.597858</td>
+      <td>0.702006</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>52</td>
+      <td>0.588909</td>
+      <td>0.675346</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>53</td>
+      <td>0.578175</td>
+      <td>0.662777</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>54</td>
+      <td>0.563781</td>
+      <td>0.648044</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>55</td>
+      <td>0.551419</td>
+      <td>0.631205</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>56</td>
+      <td>0.538054</td>
+      <td>0.620260</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>57</td>
+      <td>0.525274</td>
+      <td>0.605979</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>58</td>
+      <td>0.516326</td>
+      <td>0.588275</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>59</td>
+      <td>0.503894</td>
+      <td>0.577780</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>60</td>
+      <td>0.492800</td>
+      <td>0.563306</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>61</td>
+      <td>0.481678</td>
+      <td>0.551709</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>62</td>
+      <td>0.470016</td>
+      <td>0.538001</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>63</td>
+      <td>0.458725</td>
+      <td>0.527030</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>64</td>
+      <td>0.448070</td>
+      <td>0.513635</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>65</td>
+      <td>0.437092</td>
+      <td>0.504226</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>66</td>
+      <td>0.427116</td>
+      <td>0.500935</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>67</td>
+      <td>0.418680</td>
+      <td>0.497533</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>68</td>
+      <td>0.409015</td>
+      <td>0.494663</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>69</td>
+      <td>0.399995</td>
+      <td>0.491192</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>70</td>
+      <td>0.392494</td>
+      <td>0.487772</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>71</td>
+      <td>0.387077</td>
+      <td>0.484558</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>72</td>
+      <td>0.380538</td>
+      <td>0.482047</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>73</td>
+      <td>0.375956</td>
+      <td>0.479588</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>74</td>
+      <td>0.370467</td>
+      <td>0.476253</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>75</td>
+      <td>0.366237</td>
+      <td>0.473729</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>76</td>
+      <td>0.360693</td>
+      <td>0.471484</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>77</td>
+      <td>0.355290</td>
+      <td>0.469302</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>78</td>
+      <td>0.350775</td>
+      <td>0.466475</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>79</td>
+      <td>0.345044</td>
+      <td>0.464123</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>80</td>
+      <td>0.340998</td>
+      <td>0.460764</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>81</td>
+      <td>0.337043</td>
+      <td>0.458512</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>82</td>
+      <td>0.333564</td>
+      <td>0.456203</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>83</td>
+      <td>0.331987</td>
+      <td>0.454133</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>84</td>
+      <td>0.328825</td>
+      <td>0.452109</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>85</td>
+      <td>0.324474</td>
+      <td>0.450210</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>86</td>
+      <td>0.320453</td>
+      <td>0.448532</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>87</td>
+      <td>0.317351</td>
+      <td>0.447033</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>88</td>
+      <td>0.314427</td>
+      <td>0.445369</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>89</td>
+      <td>0.311458</td>
+      <td>0.443512</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>90</td>
+      <td>0.308798</td>
+      <td>0.440840</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>91</td>
+      <td>0.308250</td>
+      <td>0.439368</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>92</td>
+      <td>0.305469</td>
+      <td>0.437928</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>93</td>
+      <td>0.304009</td>
+      <td>0.435661</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>94</td>
+      <td>0.301279</td>
+      <td>0.433316</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>95</td>
+      <td>0.299181</td>
+      <td>0.430840</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>96</td>
+      <td>0.297946</td>
+      <td>0.428421</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>97</td>
+      <td>0.297285</td>
+      <td>0.426698</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>98</td>
+      <td>0.294224</td>
+      <td>0.424809</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>99</td>
+      <td>0.291527</td>
+      <td>0.423311</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+  </tbody>
+</table></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="output_javascript"></div>
+<script type="text/javascript">
+var element = document.currentScript.previousSibling.previousSibling;
+/* Put everything inside the global mpl namespace */
+window.mpl = {};
+
+
+mpl.get_websocket_type = function() {
+    if (typeof(WebSocket) !== 'undefined') {
+        return WebSocket;
+    } else if (typeof(MozWebSocket) !== 'undefined') {
+        return MozWebSocket;
+    } else {
+        alert('Your browser does not have WebSocket support. ' +
+              'Please try Chrome, Safari or Firefox ≥ 6. ' +
+              'Firefox 4 and 5 are also supported but you ' +
+              'have to enable WebSockets in about:config.');
+    };
+}
+
+mpl.figure = function(figure_id, websocket, ondownload, parent_element) {
+    this.id = figure_id;
+
+    this.ws = websocket;
+
+    this.supports_binary = (this.ws.binaryType != undefined);
+
+    if (!this.supports_binary) {
+        var warnings = document.getElementById("mpl-warnings");
+        if (warnings) {
+            warnings.style.display = 'block';
+            warnings.textContent = (
+                "This browser does not support binary websocket messages. " +
+                    "Performance may be slow.");
+        }
+    }
+
+    this.imageObj = new Image();
+
+    this.context = undefined;
+    this.message = undefined;
+    this.canvas = undefined;
+    this.rubberband_canvas = undefined;
+    this.rubberband_context = undefined;
+    this.format_dropdown = undefined;
+
+    this.image_mode = 'full';
+
+    this.root = $('<div/>');
+    this._root_extra_style(this.root)
+    this.root.attr('style', 'display: inline-block');
+
+    $(parent_element).append(this.root);
+
+    this._init_header(this);
+    this._init_canvas(this);
+    this._init_toolbar(this);
+
+    var fig = this;
+
+    this.waiting = false;
+
+    this.ws.onopen =  function () {
+            fig.send_message("supports_binary", {value: fig.supports_binary});
+            fig.send_message("send_image_mode", {});
+            if (mpl.ratio != 1) {
+                fig.send_message("set_dpi_ratio", {'dpi_ratio': mpl.ratio});
+            }
+            fig.send_message("refresh", {});
+        }
+
+    this.imageObj.onload = function() {
+            if (fig.image_mode == 'full') {
+                // Full images could contain transparency (where diff images
+                // almost always do), so we need to clear the canvas so that
+                // there is no ghosting.
+                fig.context.clearRect(0, 0, fig.canvas.width, fig.canvas.height);
+            }
+            fig.context.drawImage(fig.imageObj, 0, 0);
+        };
+
+    this.imageObj.onunload = function() {
+        fig.ws.close();
+    }
+
+    this.ws.onmessage = this._make_on_message_function(this);
+
+    this.ondownload = ondownload;
+}
+
+mpl.figure.prototype._init_header = function() {
+    var titlebar = $(
+        '<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ' +
+        'ui-helper-clearfix"/>');
+    var titletext = $(
+        '<div class="ui-dialog-title" style="width: 100%; ' +
+        'text-align: center; padding: 3px;"/>');
+    titlebar.append(titletext)
+    this.root.append(titlebar);
+    this.header = titletext[0];
+}
+
+
+
+mpl.figure.prototype._canvas_extra_style = function(canvas_div) {
+
+}
+
+
+mpl.figure.prototype._root_extra_style = function(canvas_div) {
+
+}
+
+mpl.figure.prototype._init_canvas = function() {
+    var fig = this;
+
+    var canvas_div = $('<div/>');
+
+    canvas_div.attr('style', 'position: relative; clear: both; outline: 0');
+
+    function canvas_keyboard_event(event) {
+        return fig.key_event(event, event['data']);
+    }
+
+    canvas_div.keydown('key_press', canvas_keyboard_event);
+    canvas_div.keyup('key_release', canvas_keyboard_event);
+    this.canvas_div = canvas_div
+    this._canvas_extra_style(canvas_div)
+    this.root.append(canvas_div);
+
+    var canvas = $('<canvas/>');
+    canvas.addClass('mpl-canvas');
+    canvas.attr('style', "left: 0; top: 0; z-index: 0; outline: 0")
+
+    this.canvas = canvas[0];
+    this.context = canvas[0].getContext("2d");
+
+    var backingStore = this.context.backingStorePixelRatio ||
+    this.context.webkitBackingStorePixelRatio ||
+    this.context.mozBackingStorePixelRatio ||
+    this.context.msBackingStorePixelRatio ||
+    this.context.oBackingStorePixelRatio ||
+    this.context.backingStorePixelRatio || 1;
+
+    mpl.ratio = (window.devicePixelRatio || 1) / backingStore;
+
+    var rubberband = $('<canvas/>');
+    rubberband.attr('style', "position: absolute; left: 0; top: 0; z-index: 1;")
+
+    var pass_mouse_events = true;
+
+    canvas_div.resizable({
+        start: function(event, ui) {
+            pass_mouse_events = false;
+        },
+        resize: function(event, ui) {
+            fig.request_resize(ui.size.width, ui.size.height);
+        },
+        stop: function(event, ui) {
+            pass_mouse_events = true;
+            fig.request_resize(ui.size.width, ui.size.height);
+        },
+    });
+
+    function mouse_event_fn(event) {
+        if (pass_mouse_events)
+            return fig.mouse_event(event, event['data']);
+    }
+
+    rubberband.mousedown('button_press', mouse_event_fn);
+    rubberband.mouseup('button_release', mouse_event_fn);
+    // Throttle sequential mouse events to 1 every 20ms.
+    rubberband.mousemove('motion_notify', mouse_event_fn);
+
+    rubberband.mouseenter('figure_enter', mouse_event_fn);
+    rubberband.mouseleave('figure_leave', mouse_event_fn);
+
+    canvas_div.on("wheel", function (event) {
+        event = event.originalEvent;
+        event['data'] = 'scroll'
+        if (event.deltaY < 0) {
+            event.step = 1;
+        } else {
+            event.step = -1;
+        }
+        mouse_event_fn(event);
+    });
+
+    canvas_div.append(canvas);
+    canvas_div.append(rubberband);
+
+    this.rubberband = rubberband;
+    this.rubberband_canvas = rubberband[0];
+    this.rubberband_context = rubberband[0].getContext("2d");
+    this.rubberband_context.strokeStyle = "#000000";
+
+    this._resize_canvas = function(width, height) {
+        // Keep the size of the canvas, canvas container, and rubber band
+        // canvas in synch.
+        canvas_div.css('width', width)
+        canvas_div.css('height', height)
+
+        canvas.attr('width', width * mpl.ratio);
+        canvas.attr('height', height * mpl.ratio);
+        canvas.attr('style', 'width: ' + width + 'px; height: ' + height + 'px;');
+
+        rubberband.attr('width', width);
+        rubberband.attr('height', height);
+    }
+
+    // Set the figure to an initial 600x600px, this will subsequently be updated
+    // upon first draw.
+    this._resize_canvas(600, 600);
+
+    // Disable right mouse context menu.
+    $(this.rubberband_canvas).bind("contextmenu",function(e){
+        return false;
+    });
+
+    function set_focus () {
+        canvas.focus();
+        canvas_div.focus();
+    }
+
+    window.setTimeout(set_focus, 100);
+}
+
+mpl.figure.prototype._init_toolbar = function() {
+    var fig = this;
+
+    var nav_element = $('<div/>');
+    nav_element.attr('style', 'width: 100%');
+    this.root.append(nav_element);
+
+    // Define a callback function for later on.
+    function toolbar_event(event) {
+        return fig.toolbar_button_onclick(event['data']);
+    }
+    function toolbar_mouse_event(event) {
+        return fig.toolbar_button_onmouseover(event['data']);
+    }
+
+    for(var toolbar_ind in mpl.toolbar_items) {
+        var name = mpl.toolbar_items[toolbar_ind][0];
+        var tooltip = mpl.toolbar_items[toolbar_ind][1];
+        var image = mpl.toolbar_items[toolbar_ind][2];
+        var method_name = mpl.toolbar_items[toolbar_ind][3];
+
+        if (!name) {
+            // put a spacer in here.
+            continue;
+        }
+        var button = $('<button/>');
+        button.addClass('ui-button ui-widget ui-state-default ui-corner-all ' +
+                        'ui-button-icon-only');
+        button.attr('role', 'button');
+        button.attr('aria-disabled', 'false');
+        button.click(method_name, toolbar_event);
+        button.mouseover(tooltip, toolbar_mouse_event);
+
+        var icon_img = $('<span/>');
+        icon_img.addClass('ui-button-icon-primary ui-icon');
+        icon_img.addClass(image);
+        icon_img.addClass('ui-corner-all');
+
+        var tooltip_span = $('<span/>');
+        tooltip_span.addClass('ui-button-text');
+        tooltip_span.html(tooltip);
+
+        button.append(icon_img);
+        button.append(tooltip_span);
+
+        nav_element.append(button);
+    }
+
+    var fmt_picker_span = $('<span/>');
+
+    var fmt_picker = $('<select/>');
+    fmt_picker.addClass('mpl-toolbar-option ui-widget ui-widget-content');
+    fmt_picker_span.append(fmt_picker);
+    nav_element.append(fmt_picker_span);
+    this.format_dropdown = fmt_picker[0];
+
+    for (var ind in mpl.extensions) {
+        var fmt = mpl.extensions[ind];
+        var option = $(
+            '<option/>', {selected: fmt === mpl.default_extension}).html(fmt);
+        fmt_picker.append(option);
+    }
+
+    // Add hover states to the ui-buttons
+    $( ".ui-button" ).hover(
+        function() { $(this).addClass("ui-state-hover");},
+        function() { $(this).removeClass("ui-state-hover");}
+    );
+
+    var status_bar = $('<span class="mpl-message"/>');
+    nav_element.append(status_bar);
+    this.message = status_bar[0];
+}
+
+mpl.figure.prototype.request_resize = function(x_pixels, y_pixels) {
+    // Request matplotlib to resize the figure. Matplotlib will then trigger a resize in the client,
+    // which will in turn request a refresh of the image.
+    this.send_message('resize', {'width': x_pixels, 'height': y_pixels});
+}
+
+mpl.figure.prototype.send_message = function(type, properties) {
+    properties['type'] = type;
+    properties['figure_id'] = this.id;
+    this.ws.send(JSON.stringify(properties));
+}
+
+mpl.figure.prototype.send_draw_message = function() {
+    if (!this.waiting) {
+        this.waiting = true;
+        this.ws.send(JSON.stringify({type: "draw", figure_id: this.id}));
+    }
+}
+
+
+mpl.figure.prototype.handle_save = function(fig, msg) {
+    var format_dropdown = fig.format_dropdown;
+    var format = format_dropdown.options[format_dropdown.selectedIndex].value;
+    fig.ondownload(fig, format);
+}
+
+
+mpl.figure.prototype.handle_resize = function(fig, msg) {
+    var size = msg['size'];
+    if (size[0] != fig.canvas.width || size[1] != fig.canvas.height) {
+        fig._resize_canvas(size[0], size[1]);
+        fig.send_message("refresh", {});
+    };
+}
+
+mpl.figure.prototype.handle_rubberband = function(fig, msg) {
+    var x0 = msg['x0'] / mpl.ratio;
+    var y0 = (fig.canvas.height - msg['y0']) / mpl.ratio;
+    var x1 = msg['x1'] / mpl.ratio;
+    var y1 = (fig.canvas.height - msg['y1']) / mpl.ratio;
+    x0 = Math.floor(x0) + 0.5;
+    y0 = Math.floor(y0) + 0.5;
+    x1 = Math.floor(x1) + 0.5;
+    y1 = Math.floor(y1) + 0.5;
+    var min_x = Math.min(x0, x1);
+    var min_y = Math.min(y0, y1);
+    var width = Math.abs(x1 - x0);
+    var height = Math.abs(y1 - y0);
+
+    fig.rubberband_context.clearRect(
+        0, 0, fig.canvas.width / mpl.ratio, fig.canvas.height / mpl.ratio);
+
+    fig.rubberband_context.strokeRect(min_x, min_y, width, height);
+}
+
+mpl.figure.prototype.handle_figure_label = function(fig, msg) {
+    // Updates the figure title.
+    fig.header.textContent = msg['label'];
+}
+
+mpl.figure.prototype.handle_cursor = function(fig, msg) {
+    var cursor = msg['cursor'];
+    switch(cursor)
+    {
+    case 0:
+        cursor = 'pointer';
+        break;
+    case 1:
+        cursor = 'default';
+        break;
+    case 2:
+        cursor = 'crosshair';
+        break;
+    case 3:
+        cursor = 'move';
+        break;
+    }
+    fig.rubberband_canvas.style.cursor = cursor;
+}
+
+mpl.figure.prototype.handle_message = function(fig, msg) {
+    fig.message.textContent = msg['message'];
+}
+
+mpl.figure.prototype.handle_draw = function(fig, msg) {
+    // Request the server to send over a new figure.
+    fig.send_draw_message();
+}
+
+mpl.figure.prototype.handle_image_mode = function(fig, msg) {
+    fig.image_mode = msg['mode'];
+}
+
+mpl.figure.prototype.updated_canvas_event = function() {
+    // Called whenever the canvas gets updated.
+    this.send_message("ack", {});
+}
+
+// A function to construct a web socket function for onmessage handling.
+// Called in the figure constructor.
+mpl.figure.prototype._make_on_message_function = function(fig) {
+    return function socket_on_message(evt) {
+        if (evt.data instanceof Blob) {
+            /* FIXME: We get "Resource interpreted as Image but
+             * transferred with MIME type text/plain:" errors on
+             * Chrome.  But how to set the MIME type?  It doesn't seem
+             * to be part of the websocket stream */
+            evt.data.type = "image/png";
+
+            /* Free the memory for the previous frames */
+            if (fig.imageObj.src) {
+                (window.URL || window.webkitURL).revokeObjectURL(
+                    fig.imageObj.src);
+            }
+
+            fig.imageObj.src = (window.URL || window.webkitURL).createObjectURL(
+                evt.data);
+            fig.updated_canvas_event();
+            fig.waiting = false;
+            return;
+        }
+        else if (typeof evt.data === 'string' && evt.data.slice(0, 21) == "data:image/png;base64") {
+            fig.imageObj.src = evt.data;
+            fig.updated_canvas_event();
+            fig.waiting = false;
+            return;
+        }
+
+        var msg = JSON.parse(evt.data);
+        var msg_type = msg['type'];
+
+        // Call the  "handle_{type}" callback, which takes
+        // the figure and JSON message as its only arguments.
+        try {
+            var callback = fig["handle_" + msg_type];
+        } catch (e) {
+            console.log("No handler for the '" + msg_type + "' message type: ", msg);
+            return;
+        }
+
+        if (callback) {
+            try {
+                // console.log("Handling '" + msg_type + "' message: ", msg);
+                callback(fig, msg);
+            } catch (e) {
+                console.log("Exception inside the 'handler_" + msg_type + "' callback:", e, e.stack, msg);
+            }
+        }
+    };
+}
+
+// from http://stackoverflow.com/questions/1114465/getting-mouse-location-in-canvas
+mpl.findpos = function(e) {
+    //this section is from http://www.quirksmode.org/js/events_properties.html
+    var targ;
+    if (!e)
+        e = window.event;
+    if (e.target)
+        targ = e.target;
+    else if (e.srcElement)
+        targ = e.srcElement;
+    if (targ.nodeType == 3) // defeat Safari bug
+        targ = targ.parentNode;
+
+    // jQuery normalizes the pageX and pageY
+    // pageX,Y are the mouse positions relative to the document
+    // offset() returns the position of the element relative to the document
+    var x = e.pageX - $(targ).offset().left;
+    var y = e.pageY - $(targ).offset().top;
+
+    return {"x": x, "y": y};
+};
+
+/*
+ * return a copy of an object with only non-object keys
+ * we need this to avoid circular references
+ * http://stackoverflow.com/a/24161582/3208463
+ */
+function simpleKeys (original) {
+  return Object.keys(original).reduce(function (obj, key) {
+    if (typeof original[key] !== 'object')
+        obj[key] = original[key]
+    return obj;
+  }, {});
+}
+
+mpl.figure.prototype.mouse_event = function(event, name) {
+    var canvas_pos = mpl.findpos(event)
+
+    if (name === 'button_press')
+    {
+        this.canvas.focus();
+        this.canvas_div.focus();
+    }
+
+    var x = canvas_pos.x * mpl.ratio;
+    var y = canvas_pos.y * mpl.ratio;
+
+    this.send_message(name, {x: x, y: y, button: event.button,
+                             step: event.step,
+                             guiEvent: simpleKeys(event)});
+
+    /* This prevents the web browser from automatically changing to
+     * the text insertion cursor when the button is pressed.  We want
+     * to control all of the cursor setting manually through the
+     * 'cursor' event from matplotlib */
+    event.preventDefault();
+    return false;
+}
+
+mpl.figure.prototype._key_event_extra = function(event, name) {
+    // Handle any extra behaviour associated with a key event
+}
+
+mpl.figure.prototype.key_event = function(event, name) {
+
+    // Prevent repeat events
+    if (name == 'key_press')
+    {
+        if (event.which === this._key)
+            return;
+        else
+            this._key = event.which;
+    }
+    if (name == 'key_release')
+        this._key = null;
+
+    var value = '';
+    if (event.ctrlKey && event.which != 17)
+        value += "ctrl+";
+    if (event.altKey && event.which != 18)
+        value += "alt+";
+    if (event.shiftKey && event.which != 16)
+        value += "shift+";
+
+    value += 'k';
+    value += event.which.toString();
+
+    this._key_event_extra(event, name);
+
+    this.send_message(name, {key: value,
+                             guiEvent: simpleKeys(event)});
+    return false;
+}
+
+mpl.figure.prototype.toolbar_button_onclick = function(name) {
+    if (name == 'download') {
+        this.handle_save(this, null);
+    } else {
+        this.send_message("toolbar_button", {name: name});
+    }
+};
+
+mpl.figure.prototype.toolbar_button_onmouseover = function(tooltip) {
+    this.message.textContent = tooltip;
+};
+mpl.toolbar_items = [["Home", "Reset original view", "fa fa-home icon-home", "home"], ["Back", "Back to previous view", "fa fa-arrow-left icon-arrow-left", "back"], ["Forward", "Forward to next view", "fa fa-arrow-right icon-arrow-right", "forward"], ["", "", "", ""], ["Pan", "Pan axes with left mouse, zoom with right", "fa fa-arrows icon-move", "pan"], ["Zoom", "Zoom to rectangle", "fa fa-square-o icon-check-empty", "zoom"], ["", "", "", ""], ["Download", "Download plot", "fa fa-floppy-o icon-save", "download"]];
+
+mpl.extensions = ["eps", "jpeg", "pdf", "png", "ps", "raw", "svg", "tif"];
+
+mpl.default_extension = "png";var comm_websocket_adapter = function(comm) {
+    // Create a "websocket"-like object which calls the given IPython comm
+    // object with the appropriate methods. Currently this is a non binary
+    // socket, so there is still some room for performance tuning.
+    var ws = {};
+
+    ws.close = function() {
+        comm.close()
+    };
+    ws.send = function(m) {
+        //console.log('sending', m);
+        comm.send(m);
+    };
+    // Register the callback with on_msg.
+    comm.on_msg(function(msg) {
+        //console.log('receiving', msg['content']['data'], msg);
+        // Pass the mpl event to the overridden (by mpl) onmessage function.
+        ws.onmessage(msg['content']['data'])
+    });
+    return ws;
+}
+
+mpl.mpl_figure_comm = function(comm, msg) {
+    // This is the function which gets called when the mpl process
+    // starts-up an IPython Comm through the "matplotlib" channel.
+
+    var id = msg.content.data.id;
+    // Get hold of the div created by the display call when the Comm
+    // socket was opened in Python.
+    var element = $("#" + id);
+    var ws_proxy = comm_websocket_adapter(comm)
+
+    function ondownload(figure, format) {
+        window.open(figure.imageObj.src);
+    }
+
+    var fig = new mpl.figure(id, ws_proxy,
+                           ondownload,
+                           element.get(0));
+
+    // Call onopen now - mpl needs it, as it is assuming we've passed it a real
+    // web socket which is closed, not our websocket->open comm proxy.
+    ws_proxy.onopen();
+
+    fig.parent_element = element.get(0);
+    fig.cell_info = mpl.find_output_cell("<div id='" + id + "'></div>");
+    if (!fig.cell_info) {
+        console.error("Failed to find cell for figure", id, fig);
+        return;
+    }
+
+    var output_index = fig.cell_info[2]
+    var cell = fig.cell_info[0];
+
+};
+
+mpl.figure.prototype.handle_close = function(fig, msg) {
+    var width = fig.canvas.width/mpl.ratio
+    fig.root.unbind('remove')
+
+    // Update the output cell to use the data from the current canvas.
+    fig.push_to_output();
+    var dataURL = fig.canvas.toDataURL();
+    // Re-enable the keyboard manager in IPython - without this line, in FF,
+    // the notebook keyboard shortcuts fail.
+    IPython.keyboard_manager.enable()
+    $(fig.parent_element).html('<img src="' + dataURL + '" width="' + width + '">');
+    fig.close_ws(fig, msg);
+}
+
+mpl.figure.prototype.close_ws = function(fig, msg){
+    fig.send_message('closing', msg);
+    // fig.ws.close()
+}
+
+mpl.figure.prototype.push_to_output = function(remove_interactive) {
+    // Turn the data on the canvas into data in the output cell.
+    var width = this.canvas.width/mpl.ratio
+    var dataURL = this.canvas.toDataURL();
+    this.cell_info[1]['text/html'] = '<img src="' + dataURL + '" width="' + width + '">';
+}
+
+mpl.figure.prototype.updated_canvas_event = function() {
+    // Tell IPython that the notebook contents must change.
+    IPython.notebook.set_dirty(true);
+    this.send_message("ack", {});
+    var fig = this;
+    // Wait a second, then push the new image to the DOM so
+    // that it is saved nicely (might be nice to debounce this).
+    setTimeout(function () { fig.push_to_output() }, 1000);
+}
+
+mpl.figure.prototype._init_toolbar = function() {
+    var fig = this;
+
+    var nav_element = $('<div/>');
+    nav_element.attr('style', 'width: 100%');
+    this.root.append(nav_element);
+
+    // Define a callback function for later on.
+    function toolbar_event(event) {
+        return fig.toolbar_button_onclick(event['data']);
+    }
+    function toolbar_mouse_event(event) {
+        return fig.toolbar_button_onmouseover(event['data']);
+    }
+
+    for(var toolbar_ind in mpl.toolbar_items){
+        var name = mpl.toolbar_items[toolbar_ind][0];
+        var tooltip = mpl.toolbar_items[toolbar_ind][1];
+        var image = mpl.toolbar_items[toolbar_ind][2];
+        var method_name = mpl.toolbar_items[toolbar_ind][3];
+
+        if (!name) { continue; };
+
+        var button = $('<button class="btn btn-default" href="#" title="' + name + '"><i class="fa ' + image + ' fa-lg"></i></button>');
+        button.click(method_name, toolbar_event);
+        button.mouseover(tooltip, toolbar_mouse_event);
+        nav_element.append(button);
+    }
+
+    // Add the status bar.
+    var status_bar = $('<span class="mpl-message" style="text-align:right; float: right;"/>');
+    nav_element.append(status_bar);
+    this.message = status_bar[0];
+
+    // Add the close button to the window.
+    var buttongrp = $('<div class="btn-group inline pull-right"></div>');
+    var button = $('<button class="btn btn-mini btn-primary" href="#" title="Stop Interaction"><i class="fa fa-power-off icon-remove icon-large"></i></button>');
+    button.click(function (evt) { fig.handle_close(fig, {}); } );
+    button.mouseover('Stop Interaction', toolbar_mouse_event);
+    buttongrp.append(button);
+    var titlebar = this.root.find($('.ui-dialog-titlebar'));
+    titlebar.prepend(buttongrp);
+}
+
+mpl.figure.prototype._root_extra_style = function(el){
+    var fig = this
+    el.on("remove", function(){
+    fig.close_ws(fig, {});
+    });
+}
+
+mpl.figure.prototype._canvas_extra_style = function(el){
+    // this is important to make the div 'focusable
+    el.attr('tabindex', 0)
+    // reach out to IPython and tell the keyboard manager to turn it's self
+    // off when our div gets focus
+
+    // location in version 3
+    if (IPython.notebook.keyboard_manager) {
+        IPython.notebook.keyboard_manager.register_events(el);
+    }
+    else {
+        // location in version 2
+        IPython.keyboard_manager.register_events(el);
+    }
+
+}
+
+mpl.figure.prototype._key_event_extra = function(event, name) {
+    var manager = IPython.notebook.keyboard_manager;
+    if (!manager)
+        manager = IPython.keyboard_manager;
+
+    // Check for shift+enter
+    if (event.shiftKey && event.which == 13) {
+        this.canvas_div.blur();
+        // select the cell after this one
+        var index = IPython.notebook.find_cell_index(this.cell_info[0]);
+        IPython.notebook.select(index + 1);
+    }
+}
+
+mpl.figure.prototype.handle_save = function(fig, msg) {
+    fig.ondownload(fig, null);
+}
+
+
+mpl.find_output_cell = function(html_output) {
+    // Return the cell and output element which can be found *uniquely* in the notebook.
+    // Note - this is a bit hacky, but it is done because the "notebook_saving.Notebook"
+    // IPython event is triggered only after the cells have been serialised, which for
+    // our purposes (turning an active figure into a static one), is too late.
+    var cells = IPython.notebook.get_cells();
+    var ncells = cells.length;
+    for (var i=0; i<ncells; i++) {
+        var cell = cells[i];
+        if (cell.cell_type === 'code'){
+            for (var j=0; j<cell.output_area.outputs.length; j++) {
+                var data = cell.output_area.outputs[j];
+                if (data.data) {
+                    // IPython >= 3 moved mimebundle to data attribute of output
+                    data = data.data;
+                }
+                if (data['text/html'] == html_output) {
+                    return [cell, data, j];
+                }
+            }
+        }
+    }
+}
+
+// Register the function which deals with the matplotlib target/channel.
+// The kernel may be null if the page has been refreshed.
+if (IPython.notebook.kernel != null) {
+    IPython.notebook.kernel.comm_manager.register_target('matplotlib', mpl.mpl_figure_comm);
+}
+
+</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAbAAAAEgCAYAAADVKCZpAAAB+UlEQVR4nO3BMQEAAADCoPVP7WkJoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4AaZiQAB1KMUfAAAAABJRU5ErkJggg==" width="432"></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">learn</span><span class="o">.</span><span class="n">recorder</span><span class="o">.</span><span class="n">plot_losses</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../images/examples_colors_13_0.png" src="../images/examples_colors_13_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Interpretation">
+<h2>Interpretation<a class="headerlink" href="#Interpretation" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">interp</span> <span class="o">=</span> <span class="n">SomInterpretation</span><span class="o">.</span><span class="n">from_learner</span><span class="p">(</span><span class="n">learn</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="n">interp</span><span class="o">.</span><span class="n">show_hitmap</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../images/examples_colors_16_0.png" src="../images/examples_colors_16_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="n">interp</span><span class="o">.</span><span class="n">show_feature_heatmaps</span><span class="p">(</span><span class="n">cont_labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">recategorize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='3' class='' max='3', style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [3/3 00:00<00:00]
+</div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/usr/local/lib/python3.6/dist-packages/fastsom-0.1-py3.6.egg/fastsom/interp/interp.py:158: UserWarning: Matplotlib is currently using module://ipykernel.pylab.backend_inline, which is a non-GUI backend, so cannot show the figure.
+  fig.show()
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../images/examples_colors_17_2.png" src="../images/examples_colors_17_2.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="n">interp</span><span class="o">.</span><span class="n">show_weights</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../images/examples_colors_18_0.png" src="../images/examples_colors_18_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          <div class="page-nav">
+            <div class="inner"><ul class="page-nav">
+  <li class="prev">
+    <a href="../som.html"
+       title="previous chapter">← fastsom.som</a>
+  </li>
+  <li class="next">
+    <a href="iris.html"
+       title="next chapter">SOM Training on IRIS Dataset →</a>
+  </li>
+</ul><div class="footer" role="contentinfo">
+      &#169; Copyright 2020, Kirey Group.
+    <br>
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.2 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+</div>
+            </div>
+          </div>
+      </div>
+    </div>
+    
+    
+  </body>
+</html>

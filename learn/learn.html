@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>fastsom.learn</title>
+    
+      <link rel="stylesheet" href="../static/pygments.css">
+      <link rel="stylesheet" href="../static/theme.css">
+      <link rel="stylesheet" href="../static/sphinx_press_theme.css">
+          <link rel="stylesheet" href="../static/css/notebook_fix.css" type="text/css" />
+      
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../static/documentation_options.js"></script>
+
+      <!-- sphinx script_files -->
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/doctools.js"></script>
+        <script src="../static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+      
+      <script src="../static/theme-vendors.js"></script>
+      <script src="../static/theme.js" defer></script>
+    
+  <link rel="index" title="Index" href="../genindex.html" />
+  <link rel="search" title="Search" href="../search.html" />
+  <link rel="next" title="fastsom.som" href="../som.html" />
+  <link rel="prev" title="fastsom.interp" href="../interp/interp.html" /> 
+  </head>
+
+  <body>
+    <div id="app" class="theme-container" :class="pageClasses"><navbar @toggle-sidebar="toggleSidebar">
+  <router-link to="../index.html" class="home-link">
+    
+      <span class="site-name">fastsom</span>
+    
+  </router-link>
+
+  <div class="links">
+    <navlinks class="can-hide">
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+    </navlinks>
+  </div>
+</navbar>
+
+      
+      <div class="sidebar-mask" @click="toggleSidebar(false)">
+      </div>
+        <sidebar @toggle-sidebar="toggleSidebar">
+          
+          <navlinks>
+            
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+            
+          </navlinks><div id="searchbox" class="searchbox" role="search">
+  <div class="caption"><span class="caption-text">Quick search</span>
+    <div class="searchformwrapper">
+      <form class="search" action="../search.html" method="get">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div><div class="sidebar-links" role="navigation" aria-label="main navigation">
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">API</a></span>
+      </p>
+      <ul class="current">
+        
+          <li class="toctree-l1 "><a href="../core/core.html" class="reference internal ">fastsom.core</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../datasets/datasets.html" class="reference internal ">fastsom.datasets</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../interp/interp.html" class="reference internal ">fastsom.interp</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 current"><a href="#" class="reference internal current">fastsom.learn</a>
+
+            
+              <ul>
+                
+                  <li class="toctree-l2"><a href="#learner" class="reference internal">Learner</a></li>
+                
+                  <li class="toctree-l2"><a href="#som-training-strategies" class="reference internal">SOM Training strategies</a></li>
+                
+                  <li class="toctree-l2"><a href="#initialization-methods" class="reference internal">Initialization methods</a></li>
+                
+              </ul>
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../som.html" class="reference internal ">fastsom.som</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">Examples</a></span>
+      </p>
+      <ul class="">
+        
+          <li class="toctree-l1 "><a href="../examples/colors.html" class="reference internal ">SOM Training on RGB Colors Dataset</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../examples/iris.html" class="reference internal ">SOM Training on IRIS Dataset</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+</div>
+        </sidebar>
+
+      <page>
+          <div class="body-header" role="navigation" aria-label="navigation">
+  
+  <ul class="breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+    
+    <li>fastsom.learn</li>
+  </ul>
+  
+
+  <ul class="page-nav">
+  <li class="prev">
+    <a href="../interp/interp.html"
+       title="previous chapter">← fastsom.interp</a>
+  </li>
+  <li class="next">
+    <a href="../som.html"
+       title="next chapter">fastsom.som →</a>
+  </li>
+</ul>
+  
+</div>
+<hr>
+          <div class="content" role="main">
+            
+  <div class="section" id="fastsom-learn">
+<h1>fastsom.learn<a class="headerlink" href="#fastsom-learn" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="learner">
+<h2>Learner<a class="headerlink" href="#learner" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="fastsom.learn.learn.SomLearner">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.learn.</code><code class="sig-name descname">SomLearner</code><span class="sig-paren">(</span><em class="sig-param">data: fastsom.datasets.datasets.UnsupervisedDataBunch</em>, <em class="sig-param">model: fastsom.som.som.Som</em>, <em class="sig-param">init_weights: str = 'random'</em>, <em class="sig-param">trainer: Type[fastsom.learn.callbacks.SomTrainer] = &lt;class 'fastsom.learn.callbacks.ExperimentalSomTrainer'&gt;</em>, <em class="sig-param">trainer_args: Dict = {}</em>, <em class="sig-param">lr: Collection[float] = (0.09</em>, <em class="sig-param">0.03)</em>, <em class="sig-param">visualize: List[str] = []</em>, <em class="sig-param">metrics: Collection[Callable] = None</em>, <em class="sig-param">callbacks: Collection[fastai.callback.Callback] = None</em>, <em class="sig-param">loss_func: Callable = &lt;function mean_quantization_err&gt;</em>, <em class="sig-param">opt_func: Callable = &lt;class 'fastsom.learn.optim.SomOptimizer'&gt;</em>, <em class="sig-param">**learn_kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/learn.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.learn.SomLearner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learner subclass used to train Self-Organizing Maps.</p>
+<p>All keyword arguments not listed below are forwarded to the <cite>Learner</cite> parent class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference internal" href="../datasets/datasets.html#fastsom.datasets.datasets.UnsupervisedDataBunch" title="fastsom.datasets.datasets.UnsupervisedDataBunch"><em>UnsupervisedDataBunch</em></a>) – Contains train and validations datasets, along with sampling and normalization utils.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="../som.html#fastsom.som.som.Som" title="fastsom.som.som.Som"><em>Som</em></a>) – The Self-Organizing Map model.</p></li>
+<li><p><strong>visualize</strong> (<em>List</em><em>[</em><em>str</em><em>] </em><em>default=</em><em>[</em><em>]</em>) – A list of elements to be visualized while training. Available values are ‘weights’, ‘hyperparams’ and ‘bmus’.</p></li>
+<li><p><strong>init_weights</strong> (<em>str default='random'</em>) – SOM weight initialization strategy. Defaults to random sampling in the train dataset space.</p></li>
+<li><p><strong>trainer</strong> (<em>Type</em><em>[</em><a class="reference internal" href="#fastsom.learn.callbacks.SomTrainer" title="fastsom.learn.callbacks.SomTrainer"><em>SomTrainer</em></a><em>] </em><em>default=ExperimentalSomTrainer</em>) – The class that should be used to define SOM training behaviour such as hyperparameter scaling.</p></li>
+<li><p><strong>trainer_args</strong> (<em>Dict default=dict</em><em>(</em><em>)</em>) – Keyword arguments to be passed to the trainer upon initialization.</p></li>
+<li><p><strong>lr</strong> (<em>Collection</em><em>[</em><em>float</em><em>]</em>) – A collection of learning rate values. This will be passed to the SomTrainer.</p></li>
+<li><p><strong>metrics</strong> (<em>Collection</em><em>[</em><em>Callable</em><em>] </em><em>default=None</em>) – A list of metric functions to be evaluated after each iteration.</p></li>
+<li><p><strong>callbacks</strong> (<em>Collection</em><em>[</em><em>Callback</em><em>] </em><em>default=None</em>) – A list of custom Fastai Callbacks.</p></li>
+<li><p><strong>loss_func</strong> (<em>Callable default=mean_quantization_err</em>) – The loss function (actually a metric, since SOMs are unsupervised)</p></li>
+<li><p><strong>opt_func</strong> (<em>Callable</em><em> (</em><em>unused</em><em>)</em>) – Unused parameter, left out for experimental purpouses.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="fastsom.learn.learn.SomLearner.codebook_to_df">
+<code class="sig-name descname">codebook_to_df</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cat_values</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Dict<span class="p">[</span>int<span class="p">, </span>str<span class="p">]</span><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cat_as_str</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/learn.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.learn.SomLearner.codebook_to_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exports the SOM model codebook as a Pandas DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cat_values</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Dict</em><em>[</em><em>int</em><em>, </em><em>str</em><em>] </em><em>default=None</em>) – Nested dict of per-feature value-to-string mappings.</p></li>
+<li><p><strong>cat_as_str</strong> (<em>bool default=True</em>) – If true, maps categorical variables into their original values using cat_values.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">codebook_to_df</span><span class="p">(</span><span class="n">cat_values</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">feature_a</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="mi">0</span><span class="o">=</span><span class="s1">&#39;Feature A - Value Zero&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="o">=</span><span class="s1">&#39;Feature A - Value One&#39;</span><span class="p">)))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="som-training-strategies">
+<h2>SOM Training strategies<a class="headerlink" href="#som-training-strategies" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="fastsom.learn.callbacks.SomTrainer">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.callbacks.</code><code class="sig-name descname">SomTrainer</code><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.SomTrainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for SOM training strategy callbacks.</p>
+<dl class="py method">
+<dt id="fastsom.learn.callbacks.SomTrainer.from_model">
+<em class="property">classmethod </em><code class="sig-name descname">from_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span></em>, <em class="sig-param"><span class="n">init_method</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">lr</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.SomTrainer.from_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new instance from model.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.learn.callbacks.ExperimentalSomTrainer">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.callbacks.</code><code class="sig-name descname">ExperimentalSomTrainer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span></em>, <em class="sig-param"><span class="n">init_method</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">lr</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.ExperimentalSomTrainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Experimental SOM callback for hyperparameter scaling.
+Seems to work well in practice when compared with traditional linear decay.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="../som.html#fastsom.som.som.Som" title="fastsom.som.som.Som"><em>Som</em></a>) – The SOM model.</p></li>
+<li><p><strong>init_method</strong> (<em>str</em>) – The weight initialization strategy to be used. Available values are ‘random’ and ‘kmeans’.</p></li>
+<li><p><strong>lr</strong> (<em>Collection</em><em>[</em><em>float</em><em>]</em>) – A collection of LR values. For this Trainer, it should contain three values, one for each phase.</p></li>
+<li><p><strong>update_on_batch</strong> (<em>bool default=False</em>) – Whether to update hyperparameters on each batch. If false, update is performed on each epoch.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="fastsom.learn.callbacks.ExperimentalSomTrainer.on_batch_begin">
+<code class="sig-name descname">on_batch_begin</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.ExperimentalSomTrainer.on_batch_begin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advances one step if the trainer is configured to update on each batch.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.learn.callbacks.ExperimentalSomTrainer.on_epoch_begin">
+<code class="sig-name descname">on_epoch_begin</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.ExperimentalSomTrainer.on_epoch_begin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advances one step if the trainer is configured to update on each epoch.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.learn.callbacks.ExperimentalSomTrainer.on_train_begin">
+<code class="sig-name descname">on_train_begin</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.ExperimentalSomTrainer.on_train_begin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup per-iteration values based on the number of epochs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.learn.callbacks.ExperimentalSomTrainer.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.ExperimentalSomTrainer.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advances one step in the training schedule.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.learn.callbacks.TwoPhaseSomTrainer">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.callbacks.</code><code class="sig-name descname">TwoPhaseSomTrainer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span></em>, <em class="sig-param"><span class="n">init_method</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">lr</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.TwoPhaseSomTrainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback for <cite>SomLearner</cite>, used to switch between rough and finetuning training phase parameters.</p>
+<p>This was heavily inspired by the training strategy used in <a class="reference external" href="https://github.com/sevamoo/SOMPY">https://github.com/sevamoo/SOMPY</a>.</p>
+<dl class="py method">
+<dt id="fastsom.learn.callbacks.TwoPhaseSomTrainer.on_epoch_begin">
+<code class="sig-name descname">on_epoch_begin</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.TwoPhaseSomTrainer.on_epoch_begin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates hyperparameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.learn.callbacks.TwoPhaseSomTrainer.on_train_begin">
+<code class="sig-name descname">on_train_begin</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.TwoPhaseSomTrainer.on_train_begin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the finetune training iteration start, as well as the radius decays for the two phases.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.learn.callbacks.LinearDecaySomTrainer">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.callbacks.</code><code class="sig-name descname">LinearDecaySomTrainer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span></em>, <em class="sig-param"><span class="n">init_method</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">lr</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.LinearDecaySomTrainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Training callback for self-organizing maps. Updates alpha and sigma parameters with linear correction.</p>
+<dl class="py method">
+<dt id="fastsom.learn.callbacks.LinearDecaySomTrainer.on_epoch_begin">
+<code class="sig-name descname">on_epoch_begin</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.LinearDecaySomTrainer.on_epoch_begin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates hyperparameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.learn.callbacks.LinearDecaySomTrainer.on_train_begin">
+<code class="sig-name descname">on_train_begin</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.LinearDecaySomTrainer.on_train_begin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the epoch count.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="initialization-methods">
+<h2>Initialization methods<a class="headerlink" href="#initialization-methods" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="fastsom.learn.initializers.SomInitializer">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.initializers.</code><code class="sig-name descname">SomInitializer</code><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/initializers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.initializers.SomInitializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>SOM weight initializer base class.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.learn.initializers.KMeansInitializer">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.initializers.</code><code class="sig-name descname">KMeansInitializer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">distance</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'euclidean'</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/initializers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.initializers.KMeansInitializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes SOM weights using KMeans.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.learn.initializers.RandomInitializer">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.initializers.</code><code class="sig-name descname">RandomInitializer</code><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/initializers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.initializers.RandomInitializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes SOM weights randomly.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          <div class="page-nav">
+            <div class="inner"><ul class="page-nav">
+  <li class="prev">
+    <a href="../interp/interp.html"
+       title="previous chapter">← fastsom.interp</a>
+  </li>
+  <li class="next">
+    <a href="../som.html"
+       title="next chapter">fastsom.som →</a>
+  </li>
+</ul><div class="footer" role="contentinfo">
+      &#169; Copyright 2020, Kirey Group.
+    <br>
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.2 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+</div>
+            </div>
+          </div>
+      </page>
+    </div>
+    
+    
+  </body>
+</html>

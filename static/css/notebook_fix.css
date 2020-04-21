@@ -1,0 +1,6 @@
+
+/* Fix theme incompatibility with notebook styles */
+.nbinput span.n, .nbinput span.p, .nbinput span.nb, .nbinput pre,
+.nboutput span.n, .nboutput span.p, .nboutput span.nb, .nboutput pre {
+  color: #2c3e50 !important;
+}

@@ -1,0 +1,2874 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>SOM Training on IRIS Dataset</title>
+    
+      <link rel="stylesheet" href="../static/pygments.css">
+      <link rel="stylesheet" href="../static/theme.css">
+      <link rel="stylesheet" href="../static/sphinx_press_theme.css">
+          <link rel="stylesheet" href="../static/css/notebook_fix.css" type="text/css" />
+      
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../static/documentation_options.js"></script>
+
+      <!-- sphinx script_files -->
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/doctools.js"></script>
+        <script src="../static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+      
+      <script src="../static/theme-vendors.js"></script>
+      <script src="../static/theme.js" defer></script>
+    
+  <link rel="index" title="Index" href="../genindex.html" />
+  <link rel="search" title="Search" href="../search.html" />
+  <link rel="prev" title="SOM Training on RGB Colors Dataset" href="colors.html" /> 
+  </head>
+
+  <body>
+    <div id="app" class="theme-container" :class="pageClasses"><navbar class="navbar" @toggle-sidebar="toggleSidebar">
+  <router-link to="../index.html" class="home-link">
+    
+      <span class="site-name">fastsom</span>
+    
+  </router-link>
+
+  <div class="links">
+    <navlinks class="nav-links can-hide">
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+    </navlinks>
+  </div>
+</navbar>
+
+      
+      <div class="sidebar-mask" @click="toggleSidebar(false)">
+      </div>
+        <sidebar class="sidebar" @toggle-sidebar="toggleSidebar">
+          
+          <navlinks class="nav-links"> 
+            
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+            
+          </navlinks><div id="searchbox" class="searchbox" role="search">
+  <div class="caption"><span class="caption-text">Quick search</span>
+    <div class="searchformwrapper">
+      <form class="search" action="../search.html" method="get">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div><div class="sidebar-links" role="navigation" aria-label="main navigation">
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">API</a></span>
+      </p>
+      <ul class="">
+        
+          <li class="toctree-l1 "><a href="../core/core.html" class="reference internal ">fastsom.core</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../datasets/datasets.html" class="reference internal ">fastsom.datasets</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../interp/interp.html" class="reference internal ">fastsom.interp</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../learn/learn.html" class="reference internal ">fastsom.learn</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../som.html" class="reference internal ">fastsom.som</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">Examples</a></span>
+      </p>
+      <ul class="current">
+        
+          <li class="toctree-l1 "><a href="colors.html" class="reference internal ">SOM Training on RGB Colors Dataset</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 current"><a href="#" class="reference internal current">SOM Training on IRIS Dataset</a>
+
+            
+              <ul>
+                
+                  <li class="toctree-l2"><a href="#Creating-the-DataBunch" class="reference internal">Creating the DataBunch</a></li>
+                
+                  <li class="toctree-l2"><a href="#Normalization" class="reference internal">Normalization</a></li>
+                
+                  <li class="toctree-l2"><a href="#Creating-the-Learner" class="reference internal">Creating the Learner</a></li>
+                
+                  <li class="toctree-l2"><a href="#Training-the-model" class="reference internal">Training the model</a></li>
+                
+                  <li class="toctree-l2"><a href="#Interpretation" class="reference internal">Interpretation</a></li>
+                
+              </ul>
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+</div>
+        </sidebar>
+
+      <div class="page">
+          <div class="body-header" role="navigation" aria-label="navigation">
+  
+  <ul class="breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+    
+    <li>SOM Training on IRIS Dataset</li>
+  </ul>
+  
+
+  <ul class="page-nav">
+  <li class="prev">
+    <a href="colors.html"
+       title="previous chapter">← SOM Training on RGB Colors Dataset</a>
+  </li>
+</ul>
+  
+</div>
+<hr>
+          <div class="content" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container,
+div.nbinput.container div.prompt,
+div.nbinput.container div.input_area,
+div.nbinput.container div[class*=highlight],
+div.nbinput.container div[class*=highlight] pre,
+div.nboutput.container,
+div.nboutput.container div.prompt,
+div.nboutput.container div.output_area,
+div.nboutput.container div[class*=highlight],
+div.nboutput.container div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    min-width: 7ex;
+    padding-top: 0.3rem;
+    padding-right: 0.3rem;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 0.3rem;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<div class="section" id="SOM-Training-on-IRIS-Dataset">
+<h1>SOM Training on IRIS Dataset<a class="headerlink" href="#SOM-Training-on-IRIS-Dataset" title="Permalink to this headline">¶</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>import torch
+import matplotlib
+from sklearn.datasets import load_iris
+from fastsom import *
+
+</pre></div>
+</div>
+</div>
+<div class="section" id="Creating-the-DataBunch">
+<h2>Creating the DataBunch<a class="headerlink" href="#Creating-the-DataBunch" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>def iris():
+    &quot;Loads the IRIS dataset into two tensors.&quot;
+    iris = load_iris()
+    x = torch.tensor(iris.data)
+    y = torch.tensor(iris.target)
+    labels = iris.feature_names
+
+    return x, y, labels
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>x, y, labels = iris()
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>db = UnsupervisedDataBunch(x, valid=0.05, sampler=&#39;shuffle&#39;, bs=50)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Normalization">
+<h2>Normalization<a class="headerlink" href="#Normalization" title="Permalink to this headline">¶</a></h2>
+<p>For this step we will use the variance normalizer, which in our tests seems to work really well with Self-Organizing Maps.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>db.normalize(&#39;var&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>d = db.train_ds.tensors[0]
+d.mean(0), d.std(0)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(tensor([-9.0538e-16,  1.6262e-16,  1.7982e-17, -5.2853e-16],
+        dtype=torch.float64),
+ tensor([1.0000, 1.0000, 1.0000, 1.0000], dtype=torch.float64))
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Creating-the-Learner">
+<h2>Creating the Learner<a class="headerlink" href="#Creating-the-Learner" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>size = (8, 8, 4)
+
+som = Som(size)
+
+learn = SomLearner(db,
+    som,
+    lr=[0.6, 0.3, 0.1],
+    metrics=[topologic_err],
+    visualize=[&#39;weights&#39;],
+    trainer=ExperimentalSomTrainer)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Training-the-model">
+<h2>Training the model<a class="headerlink" href="#Training-the-model" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>%matplotlib notebook
+learn.fit(200)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="output_javascript"></div>
+<script type="text/javascript">
+var element = document.currentScript.previousSibling.previousSibling;
+/* Put everything inside the global mpl namespace */
+window.mpl = {};
+
+
+mpl.get_websocket_type = function() {
+    if (typeof(WebSocket) !== 'undefined') {
+        return WebSocket;
+    } else if (typeof(MozWebSocket) !== 'undefined') {
+        return MozWebSocket;
+    } else {
+        alert('Your browser does not have WebSocket support. ' +
+              'Please try Chrome, Safari or Firefox ≥ 6. ' +
+              'Firefox 4 and 5 are also supported but you ' +
+              'have to enable WebSockets in about:config.');
+    };
+}
+
+mpl.figure = function(figure_id, websocket, ondownload, parent_element) {
+    this.id = figure_id;
+
+    this.ws = websocket;
+
+    this.supports_binary = (this.ws.binaryType != undefined);
+
+    if (!this.supports_binary) {
+        var warnings = document.getElementById("mpl-warnings");
+        if (warnings) {
+            warnings.style.display = 'block';
+            warnings.textContent = (
+                "This browser does not support binary websocket messages. " +
+                    "Performance may be slow.");
+        }
+    }
+
+    this.imageObj = new Image();
+
+    this.context = undefined;
+    this.message = undefined;
+    this.canvas = undefined;
+    this.rubberband_canvas = undefined;
+    this.rubberband_context = undefined;
+    this.format_dropdown = undefined;
+
+    this.image_mode = 'full';
+
+    this.root = $('<div/>');
+    this._root_extra_style(this.root)
+    this.root.attr('style', 'display: inline-block');
+
+    $(parent_element).append(this.root);
+
+    this._init_header(this);
+    this._init_canvas(this);
+    this._init_toolbar(this);
+
+    var fig = this;
+
+    this.waiting = false;
+
+    this.ws.onopen =  function () {
+            fig.send_message("supports_binary", {value: fig.supports_binary});
+            fig.send_message("send_image_mode", {});
+            if (mpl.ratio != 1) {
+                fig.send_message("set_dpi_ratio", {'dpi_ratio': mpl.ratio});
+            }
+            fig.send_message("refresh", {});
+        }
+
+    this.imageObj.onload = function() {
+            if (fig.image_mode == 'full') {
+                // Full images could contain transparency (where diff images
+                // almost always do), so we need to clear the canvas so that
+                // there is no ghosting.
+                fig.context.clearRect(0, 0, fig.canvas.width, fig.canvas.height);
+            }
+            fig.context.drawImage(fig.imageObj, 0, 0);
+        };
+
+    this.imageObj.onunload = function() {
+        fig.ws.close();
+    }
+
+    this.ws.onmessage = this._make_on_message_function(this);
+
+    this.ondownload = ondownload;
+}
+
+mpl.figure.prototype._init_header = function() {
+    var titlebar = $(
+        '<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ' +
+        'ui-helper-clearfix"/>');
+    var titletext = $(
+        '<div class="ui-dialog-title" style="width: 100%; ' +
+        'text-align: center; padding: 3px;"/>');
+    titlebar.append(titletext)
+    this.root.append(titlebar);
+    this.header = titletext[0];
+}
+
+
+
+mpl.figure.prototype._canvas_extra_style = function(canvas_div) {
+
+}
+
+
+mpl.figure.prototype._root_extra_style = function(canvas_div) {
+
+}
+
+mpl.figure.prototype._init_canvas = function() {
+    var fig = this;
+
+    var canvas_div = $('<div/>');
+
+    canvas_div.attr('style', 'position: relative; clear: both; outline: 0');
+
+    function canvas_keyboard_event(event) {
+        return fig.key_event(event, event['data']);
+    }
+
+    canvas_div.keydown('key_press', canvas_keyboard_event);
+    canvas_div.keyup('key_release', canvas_keyboard_event);
+    this.canvas_div = canvas_div
+    this._canvas_extra_style(canvas_div)
+    this.root.append(canvas_div);
+
+    var canvas = $('<canvas/>');
+    canvas.addClass('mpl-canvas');
+    canvas.attr('style', "left: 0; top: 0; z-index: 0; outline: 0")
+
+    this.canvas = canvas[0];
+    this.context = canvas[0].getContext("2d");
+
+    var backingStore = this.context.backingStorePixelRatio ||
+    this.context.webkitBackingStorePixelRatio ||
+    this.context.mozBackingStorePixelRatio ||
+    this.context.msBackingStorePixelRatio ||
+    this.context.oBackingStorePixelRatio ||
+    this.context.backingStorePixelRatio || 1;
+
+    mpl.ratio = (window.devicePixelRatio || 1) / backingStore;
+
+    var rubberband = $('<canvas/>');
+    rubberband.attr('style', "position: absolute; left: 0; top: 0; z-index: 1;")
+
+    var pass_mouse_events = true;
+
+    canvas_div.resizable({
+        start: function(event, ui) {
+            pass_mouse_events = false;
+        },
+        resize: function(event, ui) {
+            fig.request_resize(ui.size.width, ui.size.height);
+        },
+        stop: function(event, ui) {
+            pass_mouse_events = true;
+            fig.request_resize(ui.size.width, ui.size.height);
+        },
+    });
+
+    function mouse_event_fn(event) {
+        if (pass_mouse_events)
+            return fig.mouse_event(event, event['data']);
+    }
+
+    rubberband.mousedown('button_press', mouse_event_fn);
+    rubberband.mouseup('button_release', mouse_event_fn);
+    // Throttle sequential mouse events to 1 every 20ms.
+    rubberband.mousemove('motion_notify', mouse_event_fn);
+
+    rubberband.mouseenter('figure_enter', mouse_event_fn);
+    rubberband.mouseleave('figure_leave', mouse_event_fn);
+
+    canvas_div.on("wheel", function (event) {
+        event = event.originalEvent;
+        event['data'] = 'scroll'
+        if (event.deltaY < 0) {
+            event.step = 1;
+        } else {
+            event.step = -1;
+        }
+        mouse_event_fn(event);
+    });
+
+    canvas_div.append(canvas);
+    canvas_div.append(rubberband);
+
+    this.rubberband = rubberband;
+    this.rubberband_canvas = rubberband[0];
+    this.rubberband_context = rubberband[0].getContext("2d");
+    this.rubberband_context.strokeStyle = "#000000";
+
+    this._resize_canvas = function(width, height) {
+        // Keep the size of the canvas, canvas container, and rubber band
+        // canvas in synch.
+        canvas_div.css('width', width)
+        canvas_div.css('height', height)
+
+        canvas.attr('width', width * mpl.ratio);
+        canvas.attr('height', height * mpl.ratio);
+        canvas.attr('style', 'width: ' + width + 'px; height: ' + height + 'px;');
+
+        rubberband.attr('width', width);
+        rubberband.attr('height', height);
+    }
+
+    // Set the figure to an initial 600x600px, this will subsequently be updated
+    // upon first draw.
+    this._resize_canvas(600, 600);
+
+    // Disable right mouse context menu.
+    $(this.rubberband_canvas).bind("contextmenu",function(e){
+        return false;
+    });
+
+    function set_focus () {
+        canvas.focus();
+        canvas_div.focus();
+    }
+
+    window.setTimeout(set_focus, 100);
+}
+
+mpl.figure.prototype._init_toolbar = function() {
+    var fig = this;
+
+    var nav_element = $('<div/>');
+    nav_element.attr('style', 'width: 100%');
+    this.root.append(nav_element);
+
+    // Define a callback function for later on.
+    function toolbar_event(event) {
+        return fig.toolbar_button_onclick(event['data']);
+    }
+    function toolbar_mouse_event(event) {
+        return fig.toolbar_button_onmouseover(event['data']);
+    }
+
+    for(var toolbar_ind in mpl.toolbar_items) {
+        var name = mpl.toolbar_items[toolbar_ind][0];
+        var tooltip = mpl.toolbar_items[toolbar_ind][1];
+        var image = mpl.toolbar_items[toolbar_ind][2];
+        var method_name = mpl.toolbar_items[toolbar_ind][3];
+
+        if (!name) {
+            // put a spacer in here.
+            continue;
+        }
+        var button = $('<button/>');
+        button.addClass('ui-button ui-widget ui-state-default ui-corner-all ' +
+                        'ui-button-icon-only');
+        button.attr('role', 'button');
+        button.attr('aria-disabled', 'false');
+        button.click(method_name, toolbar_event);
+        button.mouseover(tooltip, toolbar_mouse_event);
+
+        var icon_img = $('<span/>');
+        icon_img.addClass('ui-button-icon-primary ui-icon');
+        icon_img.addClass(image);
+        icon_img.addClass('ui-corner-all');
+
+        var tooltip_span = $('<span/>');
+        tooltip_span.addClass('ui-button-text');
+        tooltip_span.html(tooltip);
+
+        button.append(icon_img);
+        button.append(tooltip_span);
+
+        nav_element.append(button);
+    }
+
+    var fmt_picker_span = $('<span/>');
+
+    var fmt_picker = $('<select/>');
+    fmt_picker.addClass('mpl-toolbar-option ui-widget ui-widget-content');
+    fmt_picker_span.append(fmt_picker);
+    nav_element.append(fmt_picker_span);
+    this.format_dropdown = fmt_picker[0];
+
+    for (var ind in mpl.extensions) {
+        var fmt = mpl.extensions[ind];
+        var option = $(
+            '<option/>', {selected: fmt === mpl.default_extension}).html(fmt);
+        fmt_picker.append(option);
+    }
+
+    // Add hover states to the ui-buttons
+    $( ".ui-button" ).hover(
+        function() { $(this).addClass("ui-state-hover");},
+        function() { $(this).removeClass("ui-state-hover");}
+    );
+
+    var status_bar = $('<span class="mpl-message"/>');
+    nav_element.append(status_bar);
+    this.message = status_bar[0];
+}
+
+mpl.figure.prototype.request_resize = function(x_pixels, y_pixels) {
+    // Request matplotlib to resize the figure. Matplotlib will then trigger a resize in the client,
+    // which will in turn request a refresh of the image.
+    this.send_message('resize', {'width': x_pixels, 'height': y_pixels});
+}
+
+mpl.figure.prototype.send_message = function(type, properties) {
+    properties['type'] = type;
+    properties['figure_id'] = this.id;
+    this.ws.send(JSON.stringify(properties));
+}
+
+mpl.figure.prototype.send_draw_message = function() {
+    if (!this.waiting) {
+        this.waiting = true;
+        this.ws.send(JSON.stringify({type: "draw", figure_id: this.id}));
+    }
+}
+
+
+mpl.figure.prototype.handle_save = function(fig, msg) {
+    var format_dropdown = fig.format_dropdown;
+    var format = format_dropdown.options[format_dropdown.selectedIndex].value;
+    fig.ondownload(fig, format);
+}
+
+
+mpl.figure.prototype.handle_resize = function(fig, msg) {
+    var size = msg['size'];
+    if (size[0] != fig.canvas.width || size[1] != fig.canvas.height) {
+        fig._resize_canvas(size[0], size[1]);
+        fig.send_message("refresh", {});
+    };
+}
+
+mpl.figure.prototype.handle_rubberband = function(fig, msg) {
+    var x0 = msg['x0'] / mpl.ratio;
+    var y0 = (fig.canvas.height - msg['y0']) / mpl.ratio;
+    var x1 = msg['x1'] / mpl.ratio;
+    var y1 = (fig.canvas.height - msg['y1']) / mpl.ratio;
+    x0 = Math.floor(x0) + 0.5;
+    y0 = Math.floor(y0) + 0.5;
+    x1 = Math.floor(x1) + 0.5;
+    y1 = Math.floor(y1) + 0.5;
+    var min_x = Math.min(x0, x1);
+    var min_y = Math.min(y0, y1);
+    var width = Math.abs(x1 - x0);
+    var height = Math.abs(y1 - y0);
+
+    fig.rubberband_context.clearRect(
+        0, 0, fig.canvas.width / mpl.ratio, fig.canvas.height / mpl.ratio);
+
+    fig.rubberband_context.strokeRect(min_x, min_y, width, height);
+}
+
+mpl.figure.prototype.handle_figure_label = function(fig, msg) {
+    // Updates the figure title.
+    fig.header.textContent = msg['label'];
+}
+
+mpl.figure.prototype.handle_cursor = function(fig, msg) {
+    var cursor = msg['cursor'];
+    switch(cursor)
+    {
+    case 0:
+        cursor = 'pointer';
+        break;
+    case 1:
+        cursor = 'default';
+        break;
+    case 2:
+        cursor = 'crosshair';
+        break;
+    case 3:
+        cursor = 'move';
+        break;
+    }
+    fig.rubberband_canvas.style.cursor = cursor;
+}
+
+mpl.figure.prototype.handle_message = function(fig, msg) {
+    fig.message.textContent = msg['message'];
+}
+
+mpl.figure.prototype.handle_draw = function(fig, msg) {
+    // Request the server to send over a new figure.
+    fig.send_draw_message();
+}
+
+mpl.figure.prototype.handle_image_mode = function(fig, msg) {
+    fig.image_mode = msg['mode'];
+}
+
+mpl.figure.prototype.updated_canvas_event = function() {
+    // Called whenever the canvas gets updated.
+    this.send_message("ack", {});
+}
+
+// A function to construct a web socket function for onmessage handling.
+// Called in the figure constructor.
+mpl.figure.prototype._make_on_message_function = function(fig) {
+    return function socket_on_message(evt) {
+        if (evt.data instanceof Blob) {
+            /* FIXME: We get "Resource interpreted as Image but
+             * transferred with MIME type text/plain:" errors on
+             * Chrome.  But how to set the MIME type?  It doesn't seem
+             * to be part of the websocket stream */
+            evt.data.type = "image/png";
+
+            /* Free the memory for the previous frames */
+            if (fig.imageObj.src) {
+                (window.URL || window.webkitURL).revokeObjectURL(
+                    fig.imageObj.src);
+            }
+
+            fig.imageObj.src = (window.URL || window.webkitURL).createObjectURL(
+                evt.data);
+            fig.updated_canvas_event();
+            fig.waiting = false;
+            return;
+        }
+        else if (typeof evt.data === 'string' && evt.data.slice(0, 21) == "data:image/png;base64") {
+            fig.imageObj.src = evt.data;
+            fig.updated_canvas_event();
+            fig.waiting = false;
+            return;
+        }
+
+        var msg = JSON.parse(evt.data);
+        var msg_type = msg['type'];
+
+        // Call the  "handle_{type}" callback, which takes
+        // the figure and JSON message as its only arguments.
+        try {
+            var callback = fig["handle_" + msg_type];
+        } catch (e) {
+            console.log("No handler for the '" + msg_type + "' message type: ", msg);
+            return;
+        }
+
+        if (callback) {
+            try {
+                // console.log("Handling '" + msg_type + "' message: ", msg);
+                callback(fig, msg);
+            } catch (e) {
+                console.log("Exception inside the 'handler_" + msg_type + "' callback:", e, e.stack, msg);
+            }
+        }
+    };
+}
+
+// from http://stackoverflow.com/questions/1114465/getting-mouse-location-in-canvas
+mpl.findpos = function(e) {
+    //this section is from http://www.quirksmode.org/js/events_properties.html
+    var targ;
+    if (!e)
+        e = window.event;
+    if (e.target)
+        targ = e.target;
+    else if (e.srcElement)
+        targ = e.srcElement;
+    if (targ.nodeType == 3) // defeat Safari bug
+        targ = targ.parentNode;
+
+    // jQuery normalizes the pageX and pageY
+    // pageX,Y are the mouse positions relative to the document
+    // offset() returns the position of the element relative to the document
+    var x = e.pageX - $(targ).offset().left;
+    var y = e.pageY - $(targ).offset().top;
+
+    return {"x": x, "y": y};
+};
+
+/*
+ * return a copy of an object with only non-object keys
+ * we need this to avoid circular references
+ * http://stackoverflow.com/a/24161582/3208463
+ */
+function simpleKeys (original) {
+  return Object.keys(original).reduce(function (obj, key) {
+    if (typeof original[key] !== 'object')
+        obj[key] = original[key]
+    return obj;
+  }, {});
+}
+
+mpl.figure.prototype.mouse_event = function(event, name) {
+    var canvas_pos = mpl.findpos(event)
+
+    if (name === 'button_press')
+    {
+        this.canvas.focus();
+        this.canvas_div.focus();
+    }
+
+    var x = canvas_pos.x * mpl.ratio;
+    var y = canvas_pos.y * mpl.ratio;
+
+    this.send_message(name, {x: x, y: y, button: event.button,
+                             step: event.step,
+                             guiEvent: simpleKeys(event)});
+
+    /* This prevents the web browser from automatically changing to
+     * the text insertion cursor when the button is pressed.  We want
+     * to control all of the cursor setting manually through the
+     * 'cursor' event from matplotlib */
+    event.preventDefault();
+    return false;
+}
+
+mpl.figure.prototype._key_event_extra = function(event, name) {
+    // Handle any extra behaviour associated with a key event
+}
+
+mpl.figure.prototype.key_event = function(event, name) {
+
+    // Prevent repeat events
+    if (name == 'key_press')
+    {
+        if (event.which === this._key)
+            return;
+        else
+            this._key = event.which;
+    }
+    if (name == 'key_release')
+        this._key = null;
+
+    var value = '';
+    if (event.ctrlKey && event.which != 17)
+        value += "ctrl+";
+    if (event.altKey && event.which != 18)
+        value += "alt+";
+    if (event.shiftKey && event.which != 16)
+        value += "shift+";
+
+    value += 'k';
+    value += event.which.toString();
+
+    this._key_event_extra(event, name);
+
+    this.send_message(name, {key: value,
+                             guiEvent: simpleKeys(event)});
+    return false;
+}
+
+mpl.figure.prototype.toolbar_button_onclick = function(name) {
+    if (name == 'download') {
+        this.handle_save(this, null);
+    } else {
+        this.send_message("toolbar_button", {name: name});
+    }
+};
+
+mpl.figure.prototype.toolbar_button_onmouseover = function(tooltip) {
+    this.message.textContent = tooltip;
+};
+mpl.toolbar_items = [["Home", "Reset original view", "fa fa-home icon-home", "home"], ["Back", "Back to previous view", "fa fa-arrow-left icon-arrow-left", "back"], ["Forward", "Forward to next view", "fa fa-arrow-right icon-arrow-right", "forward"], ["", "", "", ""], ["Pan", "Pan axes with left mouse, zoom with right", "fa fa-arrows icon-move", "pan"], ["Zoom", "Zoom to rectangle", "fa fa-square-o icon-check-empty", "zoom"], ["", "", "", ""], ["Download", "Download plot", "fa fa-floppy-o icon-save", "download"]];
+
+mpl.extensions = ["eps", "jpeg", "pdf", "png", "ps", "raw", "svg", "tif"];
+
+mpl.default_extension = "png";var comm_websocket_adapter = function(comm) {
+    // Create a "websocket"-like object which calls the given IPython comm
+    // object with the appropriate methods. Currently this is a non binary
+    // socket, so there is still some room for performance tuning.
+    var ws = {};
+
+    ws.close = function() {
+        comm.close()
+    };
+    ws.send = function(m) {
+        //console.log('sending', m);
+        comm.send(m);
+    };
+    // Register the callback with on_msg.
+    comm.on_msg(function(msg) {
+        //console.log('receiving', msg['content']['data'], msg);
+        // Pass the mpl event to the overridden (by mpl) onmessage function.
+        ws.onmessage(msg['content']['data'])
+    });
+    return ws;
+}
+
+mpl.mpl_figure_comm = function(comm, msg) {
+    // This is the function which gets called when the mpl process
+    // starts-up an IPython Comm through the "matplotlib" channel.
+
+    var id = msg.content.data.id;
+    // Get hold of the div created by the display call when the Comm
+    // socket was opened in Python.
+    var element = $("#" + id);
+    var ws_proxy = comm_websocket_adapter(comm)
+
+    function ondownload(figure, format) {
+        window.open(figure.imageObj.src);
+    }
+
+    var fig = new mpl.figure(id, ws_proxy,
+                           ondownload,
+                           element.get(0));
+
+    // Call onopen now - mpl needs it, as it is assuming we've passed it a real
+    // web socket which is closed, not our websocket->open comm proxy.
+    ws_proxy.onopen();
+
+    fig.parent_element = element.get(0);
+    fig.cell_info = mpl.find_output_cell("<div id='" + id + "'></div>");
+    if (!fig.cell_info) {
+        console.error("Failed to find cell for figure", id, fig);
+        return;
+    }
+
+    var output_index = fig.cell_info[2]
+    var cell = fig.cell_info[0];
+
+};
+
+mpl.figure.prototype.handle_close = function(fig, msg) {
+    var width = fig.canvas.width/mpl.ratio
+    fig.root.unbind('remove')
+
+    // Update the output cell to use the data from the current canvas.
+    fig.push_to_output();
+    var dataURL = fig.canvas.toDataURL();
+    // Re-enable the keyboard manager in IPython - without this line, in FF,
+    // the notebook keyboard shortcuts fail.
+    IPython.keyboard_manager.enable()
+    $(fig.parent_element).html('<img src="' + dataURL + '" width="' + width + '">');
+    fig.close_ws(fig, msg);
+}
+
+mpl.figure.prototype.close_ws = function(fig, msg){
+    fig.send_message('closing', msg);
+    // fig.ws.close()
+}
+
+mpl.figure.prototype.push_to_output = function(remove_interactive) {
+    // Turn the data on the canvas into data in the output cell.
+    var width = this.canvas.width/mpl.ratio
+    var dataURL = this.canvas.toDataURL();
+    this.cell_info[1]['text/html'] = '<img src="' + dataURL + '" width="' + width + '">';
+}
+
+mpl.figure.prototype.updated_canvas_event = function() {
+    // Tell IPython that the notebook contents must change.
+    IPython.notebook.set_dirty(true);
+    this.send_message("ack", {});
+    var fig = this;
+    // Wait a second, then push the new image to the DOM so
+    // that it is saved nicely (might be nice to debounce this).
+    setTimeout(function () { fig.push_to_output() }, 1000);
+}
+
+mpl.figure.prototype._init_toolbar = function() {
+    var fig = this;
+
+    var nav_element = $('<div/>');
+    nav_element.attr('style', 'width: 100%');
+    this.root.append(nav_element);
+
+    // Define a callback function for later on.
+    function toolbar_event(event) {
+        return fig.toolbar_button_onclick(event['data']);
+    }
+    function toolbar_mouse_event(event) {
+        return fig.toolbar_button_onmouseover(event['data']);
+    }
+
+    for(var toolbar_ind in mpl.toolbar_items){
+        var name = mpl.toolbar_items[toolbar_ind][0];
+        var tooltip = mpl.toolbar_items[toolbar_ind][1];
+        var image = mpl.toolbar_items[toolbar_ind][2];
+        var method_name = mpl.toolbar_items[toolbar_ind][3];
+
+        if (!name) { continue; };
+
+        var button = $('<button class="btn btn-default" href="#" title="' + name + '"><i class="fa ' + image + ' fa-lg"></i></button>');
+        button.click(method_name, toolbar_event);
+        button.mouseover(tooltip, toolbar_mouse_event);
+        nav_element.append(button);
+    }
+
+    // Add the status bar.
+    var status_bar = $('<span class="mpl-message" style="text-align:right; float: right;"/>');
+    nav_element.append(status_bar);
+    this.message = status_bar[0];
+
+    // Add the close button to the window.
+    var buttongrp = $('<div class="btn-group inline pull-right"></div>');
+    var button = $('<button class="btn btn-mini btn-primary" href="#" title="Stop Interaction"><i class="fa fa-power-off icon-remove icon-large"></i></button>');
+    button.click(function (evt) { fig.handle_close(fig, {}); } );
+    button.mouseover('Stop Interaction', toolbar_mouse_event);
+    buttongrp.append(button);
+    var titlebar = this.root.find($('.ui-dialog-titlebar'));
+    titlebar.prepend(buttongrp);
+}
+
+mpl.figure.prototype._root_extra_style = function(el){
+    var fig = this
+    el.on("remove", function(){
+    fig.close_ws(fig, {});
+    });
+}
+
+mpl.figure.prototype._canvas_extra_style = function(el){
+    // this is important to make the div 'focusable
+    el.attr('tabindex', 0)
+    // reach out to IPython and tell the keyboard manager to turn it's self
+    // off when our div gets focus
+
+    // location in version 3
+    if (IPython.notebook.keyboard_manager) {
+        IPython.notebook.keyboard_manager.register_events(el);
+    }
+    else {
+        // location in version 2
+        IPython.keyboard_manager.register_events(el);
+    }
+
+}
+
+mpl.figure.prototype._key_event_extra = function(event, name) {
+    var manager = IPython.notebook.keyboard_manager;
+    if (!manager)
+        manager = IPython.keyboard_manager;
+
+    // Check for shift+enter
+    if (event.shiftKey && event.which == 13) {
+        this.canvas_div.blur();
+        // select the cell after this one
+        var index = IPython.notebook.find_cell_index(this.cell_info[0]);
+        IPython.notebook.select(index + 1);
+    }
+}
+
+mpl.figure.prototype.handle_save = function(fig, msg) {
+    fig.ondownload(fig, null);
+}
+
+
+mpl.find_output_cell = function(html_output) {
+    // Return the cell and output element which can be found *uniquely* in the notebook.
+    // Note - this is a bit hacky, but it is done because the "notebook_saving.Notebook"
+    // IPython event is triggered only after the cells have been serialised, which for
+    // our purposes (turning an active figure into a static one), is too late.
+    var cells = IPython.notebook.get_cells();
+    var ncells = cells.length;
+    for (var i=0; i<ncells; i++) {
+        var cell = cells[i];
+        if (cell.cell_type === 'code'){
+            for (var j=0; j<cell.output_area.outputs.length; j++) {
+                var data = cell.output_area.outputs[j];
+                if (data.data) {
+                    // IPython >= 3 moved mimebundle to data attribute of output
+                    data = data.data;
+                }
+                if (data['text/html'] == html_output) {
+                    return [cell, data, j];
+                }
+            }
+        }
+    }
+}
+
+// Register the function which deals with the matplotlib target/channel.
+// The kernel may be null if the page has been refreshed.
+if (IPython.notebook.kernel != null) {
+    IPython.notebook.kernel.comm_manager.register_target('matplotlib', mpl.mpl_figure_comm);
+}
+
+</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<img src="data:image/png;base64,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BED46u/vlzlz5kh/f3/Yb8UqfO6lx2deenzm4eBzBwEQAADAMgRAAAAAyxAAAQAALEMABAAAsAwBEAAAwDIEQATS3d0tTz31lEyYMEFGjRol1113nbzxxhty7ty5sN9aWVm8eLGMHz9eKioqpLKyUhoaGsJ+S2Vt/vz5ctttt8lll10mV111lTz44IPS0dER9tuyyoIFCyQWi8nMmTPDfitlLZlMymOPPSajR4+WUaNGyaRJk2TXrl1hvy2EgACIQD7//HOZNm2abN26VQ4dOiSffPKJjBkzRmbPnh32WysbGzZskJEjR8qKFStk79698swzz8iVV14p3377bdhvrWzde++9snLlStmzZ4+0trbKfffdJ+PGjZMzZ86E/das0NjYKBMmTJCbb76ZAFhEp06dkvHjx8u0adOkoaFBurq6ZOvWrXLw4MGw3xpCQACEtrfffluuvfbasN9G2aisrJQZM2Zk/ncqlZKxY8fKggULQnxXdvnuu+8kFotJbW1t2G+l7H3//fcyceJE+eKLL+Tuu+8mABZRVVWV3HXXXWG/DUQEARDaXn/9dbn11lvDfhtl4dy5czJixAjZvHnzkF+fMmWKPPDAAyG9K/t0dnZKLBaTeDwe9lspe1OmTJFZs2aJiBAAi+ymm26SWbNmyeTJk+Wqq66SW265RWpqasJ+WwgJARBaOjs75fLLL+c/IgXS09MjsVhMdu7cOeTXX375ZamsrAzpXdkllUrJ/fffL3feeWfYb6XsrV+/XiZNmiQ//vijiBAAi62iokIqKirktddek+bmZvnoo49k1KhRsmrVqrDfGkJAAISIXLg1EIvFPK/29vYhX5NMJuX666+Xp59+OqR3XX4IgOF77rnnZPz48ZJIJMJ+K2XtyJEjMmbMGGlra8v8GgGwuC655BK54447hvzaiy++KLfffntI7whhIgBCRC6seWpvb/e8snf69vT0yMSJE+WJJ56QVCoV4jsvL9wCDteMGTPkmmuuka6urrDfStnbvHmzxGIxGTFiROaKxWJy0UUXyYgRI2RgYCDst1h2xo0bN+wH9iVLlsjYsWNDekcIEwEQgSWTSZk4caI88sgj/Ee6CCorK+WFF17I/O9UKiVXX301m0CKaHBwUGbMmCFjx46VAwcOhP12rHD69GmJx+NDrttuu00ef/xx1l4WyaOPPjpsE8isWbOGTQVhBwIgAkkmk3LDDTfIPffcI8lkUo4dO5a5UBgbNmyQiooKWbVqlezbt0+mT58uV155pRw/fjzst1a2nn/+ebniiivkq6++GlLTZ8+eDfutWYVbwMXV2NgoF198sVRXV0tnZ6esXbtWLr30UlmzZk3Ybw0hIAAikJUrV7quEUThLFq0SMaNGycjR46UyspK+frrr8N+S2XNraZXrlwZ9luzCgGw+D799FOZNGmSVFRUyI033sgGPovRtQEAACxDAAQAALAMARAAAMAyBEAAAADLEAABAAAsQwAEAACwDAEQAADAMgRAAAAAyxAAAQAALEMABAAAsAwBEAAAwDIEQAAAAMsQAAEAACxDAAQAALAMARAAAMAyBEAAAADLEAABAAAsQwAEAACwDAEQAADAMgRAAAAAyxAAAQAALEMABAAAsAwBEAAAwDIEQAAAAMsQAAEAACxDAAQAALAMARAAAMAyBEAAAADLEAABAAAsQwAEAACwDAEQAADAMgRAAAAAy/x/yMvEsZoF/FIAAAAASUVORK5CYII=" width="640"></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th>epoch</th>
+      <th>train_loss</th>
+      <th>valid_loss</th>
+      <th>topologic_err</th>
+      <th>time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>3.132746</td>
+      <td>1.543080</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>2.297909</td>
+      <td>1.255525</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>1.962810</td>
+      <td>1.066124</td>
+      <td>3.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>1.726164</td>
+      <td>0.864807</td>
+      <td>3.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>1.544718</td>
+      <td>0.755651</td>
+      <td>4.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>1.400420</td>
+      <td>0.708913</td>
+      <td>4.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>1.291406</td>
+      <td>0.676378</td>
+      <td>4.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>1.206022</td>
+      <td>0.669566</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>1.139443</td>
+      <td>0.652338</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>1.085280</td>
+      <td>0.648874</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>1.042900</td>
+      <td>0.656007</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>1.006547</td>
+      <td>0.654699</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>0.976352</td>
+      <td>0.665723</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>0.952572</td>
+      <td>0.664414</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td>0.931337</td>
+      <td>0.663285</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td>0.912602</td>
+      <td>0.653508</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>0.897746</td>
+      <td>0.652874</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>17</td>
+      <td>0.883893</td>
+      <td>0.663898</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>18</td>
+      <td>0.870946</td>
+      <td>0.662970</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>19</td>
+      <td>0.859436</td>
+      <td>0.660242</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>20</td>
+      <td>0.849338</td>
+      <td>0.657511</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>21</td>
+      <td>0.839287</td>
+      <td>0.658129</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>22</td>
+      <td>0.831653</td>
+      <td>0.654719</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>23</td>
+      <td>0.824885</td>
+      <td>0.655494</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td>0.819453</td>
+      <td>0.654649</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>25</td>
+      <td>0.813678</td>
+      <td>0.645157</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>26</td>
+      <td>0.808323</td>
+      <td>0.642751</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>27</td>
+      <td>0.803296</td>
+      <td>0.650585</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>28</td>
+      <td>0.798571</td>
+      <td>0.652887</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>29</td>
+      <td>0.794491</td>
+      <td>0.656067</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>30</td>
+      <td>0.790446</td>
+      <td>0.647425</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>31</td>
+      <td>0.786335</td>
+      <td>0.653972</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>0.782791</td>
+      <td>0.655192</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>33</td>
+      <td>0.779439</td>
+      <td>0.655164</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>34</td>
+      <td>0.777185</td>
+      <td>0.652256</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>35</td>
+      <td>0.774184</td>
+      <td>0.651936</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>36</td>
+      <td>0.771308</td>
+      <td>0.651756</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>37</td>
+      <td>0.768223</td>
+      <td>0.649611</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>38</td>
+      <td>0.765738</td>
+      <td>0.644815</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>39</td>
+      <td>0.763124</td>
+      <td>0.645416</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>40</td>
+      <td>0.760467</td>
+      <td>0.643282</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>41</td>
+      <td>0.757378</td>
+      <td>0.643060</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>42</td>
+      <td>0.754377</td>
+      <td>0.641690</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>43</td>
+      <td>0.751655</td>
+      <td>0.641423</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>44</td>
+      <td>0.748721</td>
+      <td>0.639378</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>45</td>
+      <td>0.746238</td>
+      <td>0.637355</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>46</td>
+      <td>0.742952</td>
+      <td>0.635008</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>47</td>
+      <td>0.739740</td>
+      <td>0.634797</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>48</td>
+      <td>0.736948</td>
+      <td>0.632167</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>49</td>
+      <td>0.733858</td>
+      <td>0.633780</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>50</td>
+      <td>0.730433</td>
+      <td>0.633082</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>51</td>
+      <td>0.727793</td>
+      <td>0.632029</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>52</td>
+      <td>0.724771</td>
+      <td>0.632672</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>53</td>
+      <td>0.722061</td>
+      <td>0.630938</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>54</td>
+      <td>0.718966</td>
+      <td>0.628124</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>55</td>
+      <td>0.716397</td>
+      <td>0.628407</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>56</td>
+      <td>0.713247</td>
+      <td>0.624419</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>57</td>
+      <td>0.709297</td>
+      <td>0.622097</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>58</td>
+      <td>0.706093</td>
+      <td>0.620004</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>59</td>
+      <td>0.702455</td>
+      <td>0.618751</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>60</td>
+      <td>0.698765</td>
+      <td>0.615135</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>61</td>
+      <td>0.695287</td>
+      <td>0.611614</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>62</td>
+      <td>0.691754</td>
+      <td>0.608887</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>63</td>
+      <td>0.688805</td>
+      <td>0.604767</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>64</td>
+      <td>0.685181</td>
+      <td>0.603390</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>65</td>
+      <td>0.681281</td>
+      <td>0.602485</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>66</td>
+      <td>0.677568</td>
+      <td>0.602469</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>67</td>
+      <td>0.674222</td>
+      <td>0.601127</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>68</td>
+      <td>0.670911</td>
+      <td>0.601146</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>69</td>
+      <td>0.667827</td>
+      <td>0.597752</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>70</td>
+      <td>0.664548</td>
+      <td>0.597514</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>71</td>
+      <td>0.661200</td>
+      <td>0.598060</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>72</td>
+      <td>0.657644</td>
+      <td>0.597332</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>73</td>
+      <td>0.653757</td>
+      <td>0.599551</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>74</td>
+      <td>0.650366</td>
+      <td>0.598931</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>75</td>
+      <td>0.646627</td>
+      <td>0.598398</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>76</td>
+      <td>0.642921</td>
+      <td>0.598959</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>77</td>
+      <td>0.639718</td>
+      <td>0.595818</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>78</td>
+      <td>0.635952</td>
+      <td>0.593585</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>79</td>
+      <td>0.632247</td>
+      <td>0.589451</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>80</td>
+      <td>0.628761</td>
+      <td>0.586579</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>81</td>
+      <td>0.625108</td>
+      <td>0.584593</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>82</td>
+      <td>0.621456</td>
+      <td>0.582368</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>83</td>
+      <td>0.617834</td>
+      <td>0.579308</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>84</td>
+      <td>0.614257</td>
+      <td>0.576623</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>85</td>
+      <td>0.610734</td>
+      <td>0.573534</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>86</td>
+      <td>0.607496</td>
+      <td>0.571693</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>87</td>
+      <td>0.604314</td>
+      <td>0.567868</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>88</td>
+      <td>0.600676</td>
+      <td>0.563870</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>89</td>
+      <td>0.597407</td>
+      <td>0.559862</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>90</td>
+      <td>0.593905</td>
+      <td>0.556858</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>91</td>
+      <td>0.590448</td>
+      <td>0.552776</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>92</td>
+      <td>0.586789</td>
+      <td>0.549437</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>93</td>
+      <td>0.583675</td>
+      <td>0.546020</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>94</td>
+      <td>0.580240</td>
+      <td>0.541834</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>95</td>
+      <td>0.576681</td>
+      <td>0.539671</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>96</td>
+      <td>0.573465</td>
+      <td>0.536533</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>97</td>
+      <td>0.569975</td>
+      <td>0.533855</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>98</td>
+      <td>0.566730</td>
+      <td>0.530602</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>99</td>
+      <td>0.563085</td>
+      <td>0.527238</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>100</td>
+      <td>0.559760</td>
+      <td>0.524075</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>101</td>
+      <td>0.556147</td>
+      <td>0.520950</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>102</td>
+      <td>0.552731</td>
+      <td>0.516513</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>103</td>
+      <td>0.549358</td>
+      <td>0.511748</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>104</td>
+      <td>0.545772</td>
+      <td>0.507868</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>105</td>
+      <td>0.541885</td>
+      <td>0.503927</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>106</td>
+      <td>0.538437</td>
+      <td>0.500106</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>107</td>
+      <td>0.534782</td>
+      <td>0.496014</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>108</td>
+      <td>0.531229</td>
+      <td>0.492240</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>109</td>
+      <td>0.527532</td>
+      <td>0.488849</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>110</td>
+      <td>0.524179</td>
+      <td>0.485514</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>111</td>
+      <td>0.520786</td>
+      <td>0.481926</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>112</td>
+      <td>0.516952</td>
+      <td>0.479176</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>113</td>
+      <td>0.513040</td>
+      <td>0.475957</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>114</td>
+      <td>0.509411</td>
+      <td>0.473444</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>115</td>
+      <td>0.505860</td>
+      <td>0.471101</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>116</td>
+      <td>0.502510</td>
+      <td>0.468492</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>117</td>
+      <td>0.499098</td>
+      <td>0.466706</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>118</td>
+      <td>0.495435</td>
+      <td>0.464624</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>119</td>
+      <td>0.491994</td>
+      <td>0.462449</td>
+      <td>7.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>120</td>
+      <td>0.488368</td>
+      <td>0.460710</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>121</td>
+      <td>0.484900</td>
+      <td>0.459001</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>122</td>
+      <td>0.481587</td>
+      <td>0.457109</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>123</td>
+      <td>0.478472</td>
+      <td>0.455663</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>124</td>
+      <td>0.474917</td>
+      <td>0.454258</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>125</td>
+      <td>0.471558</td>
+      <td>0.453317</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>126</td>
+      <td>0.468214</td>
+      <td>0.452331</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>127</td>
+      <td>0.464794</td>
+      <td>0.451317</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>128</td>
+      <td>0.461765</td>
+      <td>0.449646</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>129</td>
+      <td>0.458443</td>
+      <td>0.447966</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>130</td>
+      <td>0.455145</td>
+      <td>0.446276</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>131</td>
+      <td>0.451974</td>
+      <td>0.444436</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>132</td>
+      <td>0.449053</td>
+      <td>0.443884</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>133</td>
+      <td>0.446161</td>
+      <td>0.443360</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>134</td>
+      <td>0.443183</td>
+      <td>0.442823</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>135</td>
+      <td>0.440509</td>
+      <td>0.442310</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>136</td>
+      <td>0.437830</td>
+      <td>0.441747</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>137</td>
+      <td>0.435234</td>
+      <td>0.441242</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>138</td>
+      <td>0.432893</td>
+      <td>0.440705</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>139</td>
+      <td>0.430542</td>
+      <td>0.440275</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>140</td>
+      <td>0.428398</td>
+      <td>0.439768</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>141</td>
+      <td>0.426032</td>
+      <td>0.439265</td>
+      <td>6.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>142</td>
+      <td>0.423780</td>
+      <td>0.438818</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>143</td>
+      <td>0.421556</td>
+      <td>0.438345</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>144</td>
+      <td>0.419562</td>
+      <td>0.437844</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>145</td>
+      <td>0.417800</td>
+      <td>0.437354</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>146</td>
+      <td>0.415864</td>
+      <td>0.436905</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>147</td>
+      <td>0.414018</td>
+      <td>0.436486</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>148</td>
+      <td>0.412627</td>
+      <td>0.436045</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>149</td>
+      <td>0.410970</td>
+      <td>0.435594</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>150</td>
+      <td>0.409499</td>
+      <td>0.435103</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>151</td>
+      <td>0.407938</td>
+      <td>0.434732</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>152</td>
+      <td>0.406566</td>
+      <td>0.434347</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>153</td>
+      <td>0.405032</td>
+      <td>0.433955</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>154</td>
+      <td>0.403784</td>
+      <td>0.433561</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>155</td>
+      <td>0.402323</td>
+      <td>0.433189</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>156</td>
+      <td>0.401068</td>
+      <td>0.432616</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>157</td>
+      <td>0.399957</td>
+      <td>0.431931</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>158</td>
+      <td>0.398750</td>
+      <td>0.431160</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>159</td>
+      <td>0.397599</td>
+      <td>0.430483</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>160</td>
+      <td>0.396512</td>
+      <td>0.429776</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>161</td>
+      <td>0.395255</td>
+      <td>0.429077</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>162</td>
+      <td>0.394342</td>
+      <td>0.428427</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>163</td>
+      <td>0.393434</td>
+      <td>0.427783</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>164</td>
+      <td>0.392283</td>
+      <td>0.427037</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>165</td>
+      <td>0.391534</td>
+      <td>0.426305</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>166</td>
+      <td>0.390554</td>
+      <td>0.425614</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>167</td>
+      <td>0.389512</td>
+      <td>0.424906</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>168</td>
+      <td>0.388814</td>
+      <td>0.424238</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>169</td>
+      <td>0.387960</td>
+      <td>0.423560</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>170</td>
+      <td>0.387015</td>
+      <td>0.422946</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>171</td>
+      <td>0.386281</td>
+      <td>0.422307</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>172</td>
+      <td>0.385249</td>
+      <td>0.421695</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>173</td>
+      <td>0.384446</td>
+      <td>0.421088</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>174</td>
+      <td>0.383609</td>
+      <td>0.420446</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>175</td>
+      <td>0.382982</td>
+      <td>0.419818</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>176</td>
+      <td>0.382353</td>
+      <td>0.419266</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>177</td>
+      <td>0.381608</td>
+      <td>0.418663</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>178</td>
+      <td>0.381077</td>
+      <td>0.418087</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>179</td>
+      <td>0.380398</td>
+      <td>0.417497</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>180</td>
+      <td>0.379744</td>
+      <td>0.416960</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>181</td>
+      <td>0.379259</td>
+      <td>0.416378</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>182</td>
+      <td>0.378752</td>
+      <td>0.415799</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>183</td>
+      <td>0.378241</td>
+      <td>0.415220</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>184</td>
+      <td>0.377657</td>
+      <td>0.414715</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>185</td>
+      <td>0.376978</td>
+      <td>0.414156</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>186</td>
+      <td>0.376671</td>
+      <td>0.413666</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>187</td>
+      <td>0.375908</td>
+      <td>0.413140</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>188</td>
+      <td>0.375337</td>
+      <td>0.412625</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>189</td>
+      <td>0.374776</td>
+      <td>0.412109</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>190</td>
+      <td>0.374350</td>
+      <td>0.411563</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>191</td>
+      <td>0.373789</td>
+      <td>0.411099</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>192</td>
+      <td>0.373424</td>
+      <td>0.410586</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>193</td>
+      <td>0.372980</td>
+      <td>0.410118</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>194</td>
+      <td>0.372637</td>
+      <td>0.409651</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>195</td>
+      <td>0.372029</td>
+      <td>0.409196</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>196</td>
+      <td>0.371509</td>
+      <td>0.408735</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>197</td>
+      <td>0.371079</td>
+      <td>0.408299</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>198</td>
+      <td>0.370646</td>
+      <td>0.407888</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>199</td>
+      <td>0.370237</td>
+      <td>0.407456</td>
+      <td>5.000000</td>
+      <td>00:00</td>
+    </tr>
+  </tbody>
+</table></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>%matplotlib inline
+learn.recorder.plot_losses()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../images/examples_iris_13_0.png" src="../images/examples_iris_13_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Interpretation">
+<h2>Interpretation<a class="headerlink" href="#Interpretation" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>interp = SomInterpretation.from_learner(learn)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>%matplotlib inline
+interp.show_hitmap()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../images/examples_iris_16_0.png" src="../images/examples_iris_16_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>%matplotlib inline
+interp.show_feature_heatmaps(cont_labels=labels, recategorize=False)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='4' class='' max='4', style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4/4 00:00<00:00]
+</div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/usr/local/lib/python3.6/dist-packages/fastsom-0.1-py3.6.egg/fastsom/interp/interp.py:158: UserWarning: Matplotlib is currently using module://ipykernel.pylab.backend_inline, which is a non-GUI backend, so cannot show the figure.
+  fig.show()
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../images/examples_iris_17_2.png" src="../images/examples_iris_17_2.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>%matplotlib inline
+interp.show_weights()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../images/examples_iris_18_0.png" src="../images/examples_iris_18_0.png" />
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          <div class="page-nav">
+            <div class="inner"><ul class="page-nav">
+  <li class="prev">
+    <a href="colors.html"
+       title="previous chapter">← SOM Training on RGB Colors Dataset</a>
+  </li>
+</ul><div class="footer" role="contentinfo">
+      &#169; Copyright 2020, Kirey Group.
+    <br>
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.2 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+</div>
+            </div>
+          </div>
+      </div>
+    </div>
+    
+    
+  </body>
+</html>

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>fastsom.datasets</title>
+    
+      <link rel="stylesheet" href="../static/pygments.css">
+      <link rel="stylesheet" href="../static/theme.css">
+      <link rel="stylesheet" href="../static/sphinx_press_theme.css">
+          <link rel="stylesheet" href="../static/css/notebook_fix.css" type="text/css" />
+      
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../static/documentation_options.js"></script>
+
+      <!-- sphinx script_files -->
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/doctools.js"></script>
+        <script src="../static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+      
+      <script src="../static/theme-vendors.js"></script>
+      <script src="../static/theme.js" defer></script>
+    
+  <link rel="index" title="Index" href="../genindex.html" />
+  <link rel="search" title="Search" href="../search.html" />
+  <link rel="next" title="fastsom.interp" href="../interp/interp.html" />
+  <link rel="prev" title="fastsom.core" href="../core/core.html" /> 
+  </head>
+
+  <body>
+    <div id="app" class="theme-container" :class="pageClasses"><navbar @toggle-sidebar="toggleSidebar">
+  <router-link to="../index.html" class="home-link">
+    
+      <span class="site-name">fastsom</span>
+    
+  </router-link>
+
+  <div class="links">
+    <navlinks class="can-hide">
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+    </navlinks>
+  </div>
+</navbar>
+
+      
+      <div class="sidebar-mask" @click="toggleSidebar(false)">
+      </div>
+        <sidebar @toggle-sidebar="toggleSidebar">
+          
+          <navlinks>
+            
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+            
+          </navlinks><div id="searchbox" class="searchbox" role="search">
+  <div class="caption"><span class="caption-text">Quick search</span>
+    <div class="searchformwrapper">
+      <form class="search" action="../search.html" method="get">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div><div class="sidebar-links" role="navigation" aria-label="main navigation">
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">API</a></span>
+      </p>
+      <ul class="current">
+        
+          <li class="toctree-l1 "><a href="../core/core.html" class="reference internal ">fastsom.core</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 current"><a href="#" class="reference internal current">fastsom.datasets</a>
+
+            
+              <ul>
+                
+                  <li class="toctree-l2"><a href="#databunch-subclasses" class="reference internal">DataBunch subclasses</a></li>
+                
+                  <li class="toctree-l2"><a href="#categorical-features-encoders" class="reference internal">Categorical features encoders</a></li>
+                
+                  <li class="toctree-l2"><a href="#normalizers" class="reference internal">Normalizers</a></li>
+                
+              </ul>
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../interp/interp.html" class="reference internal ">fastsom.interp</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../learn/learn.html" class="reference internal ">fastsom.learn</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../som.html" class="reference internal ">fastsom.som</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">Examples</a></span>
+      </p>
+      <ul class="">
+        
+          <li class="toctree-l1 "><a href="../examples/colors.html" class="reference internal ">SOM Training on RGB Colors Dataset</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../examples/iris.html" class="reference internal ">SOM Training on IRIS Dataset</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+</div>
+        </sidebar>
+
+      <page>
+          <div class="body-header" role="navigation" aria-label="navigation">
+  
+  <ul class="breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+    
+    <li>fastsom.datasets</li>
+  </ul>
+  
+
+  <ul class="page-nav">
+  <li class="prev">
+    <a href="../core/core.html"
+       title="previous chapter">← fastsom.core</a>
+  </li>
+  <li class="next">
+    <a href="../interp/interp.html"
+       title="next chapter">fastsom.interp →</a>
+  </li>
+</ul>
+  
+</div>
+<hr>
+          <div class="content" role="main">
+            
+  <div class="section" id="fastsom-datasets">
+<h1>fastsom.datasets<a class="headerlink" href="#fastsom-datasets" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="databunch-subclasses">
+<h2>DataBunch subclasses<a class="headerlink" href="#databunch-subclasses" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="fastsom.datasets.datasets.UnsupervisedDataBunch">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.datasets.datasets.</code><code class="sig-name descname">UnsupervisedDataBunch</code><span class="sig-paren">(</span><em class="sig-param">train: Union[torch.Tensor, torch.utils.data.dataloader.DataLoader], valid: Union[torch.Tensor, torch.utils.data.dataloader.DataLoader, float, None] = None, bs: int = 64, sampler: Union[str, fastsom.datasets.samplers.SamplerType] = &lt;SamplerType.SEQUENTIAL: 'seq'&gt;, tfms: Optional[List[Callable]] = None, cat_enc: Optional[fastsom.datasets.cat_encoders.CatEncoder] = None, **kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/datasets.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.datasets.UnsupervisedDataBunch" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>DataBunch</cite> subclass without target data.</p>
+<p>All keyword args not listed below will be passed to the parent class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train</strong> (<em>TensorOrDataLoader</em>) – The training data.</p></li>
+<li><p><strong>valid</strong> (<em>Optional</em><em>[</em><em>TensorOrDataLoaderOrSplitPct</em><em>] </em><em>default=None</em>) – The validation data. Can be passed as a PyTorch Tensor / DataLoader or as a percentage of the training set.</p></li>
+<li><p><strong>bs</strong> (<em>int default=64</em>) – The batch size.</p></li>
+<li><p><strong>sampler</strong> (<em>SamplerTypeOrString default=SamplerType.SEQUENTIAL</em>) – The sampler to be used. Can be <cite>seq</cite>, ‘random’ or ‘shuffle’.</p></li>
+<li><p><strong>tfms</strong> (<em>Optional</em><em>[</em><em>List</em><em>[</em><em>Callable</em><em>]</em><em>] </em><em>default=None</em>) – Additional Fastai transforms. These will be forwarded to the DataBunch.</p></li>
+<li><p><strong>cat_enc</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#fastsom.datasets.cat_encoders.CatEncoder" title="fastsom.datasets.cat_encoders.CatEncoder"><em>CatEncoder</em></a><em>] </em><em>default=None</em>) – The categorical encoder to be used, if any.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="fastsom.datasets.datasets.UnsupervisedDataBunch.denormalize">
+<code class="sig-name descname">denormalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/datasets.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.datasets.UnsupervisedDataBunch.denormalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Denormalizes a <cite>Tensor</cite> using the stored normalizer.
+Falls back to simply returning input data if no normalizer is available.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.datasets.datasets.UnsupervisedDataBunch.make_categorical">
+<code class="sig-name descname">make_categorical</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/datasets.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.datasets.UnsupervisedDataBunch.make_categorical" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms a Tensor <cite>t</cite> of encoded categorical variables into their original categorical form.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.datasets.datasets.UnsupervisedDataBunch.normalize">
+<code class="sig-name descname">normalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">normalizer</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'var'</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/datasets.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.datasets.UnsupervisedDataBunch.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses <cite>normalizer</cite> to normalize both train and validation data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>normalizer</strong> (<em>str default='var'</em>) – The normalizer to be used. Available values are ‘var’, ‘minmax’ or ‘minmax-1’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="categorical-features-encoders">
+<h2>Categorical features encoders<a class="headerlink" href="#categorical-features-encoders" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="fastsom.datasets.cat_encoders.CatEncoder">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.datasets.cat_encoders.</code><code class="sig-name descname">CatEncoder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cat_names</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">cont_names</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/cat_encoders.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.cat_encoders.CatEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms categorical features into continuous and back.</p>
+<dl class="py method">
+<dt id="fastsom.datasets.cat_encoders.CatEncoder.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_cat</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/cat_encoders.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.cat_encoders.CatEncoder.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses <cite>x_cat</cite> as a base for this CatEncoder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.datasets.cat_encoders.CatEncoder.make_categorical">
+<code class="sig-name descname">make_categorical</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_cont</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/cat_encoders.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.cat_encoders.CatEncoder.make_categorical" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms <cite>x_cont</cite> back into categorical using this CatEncoder’s state.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.datasets.cat_encoders.CatEncoder.make_continuous">
+<code class="sig-name descname">make_continuous</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_cat</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/cat_encoders.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.cat_encoders.CatEncoder.make_continuous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms <cite>x_cat</cite> using this CatEncoder’s state.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.datasets.cat_encoders.FastTextCatEncoder">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.datasets.cat_encoders.</code><code class="sig-name descname">FastTextCatEncoder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cat_names</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">cont_names</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/cat_encoders.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.cat_encoders.FastTextCatEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses a small <cite>FastText</cite> model to transform categorical features into continuous ones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cat_names</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – The categorical feature names.</p></li>
+<li><p><strong>cont_names</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – The continuous feature names.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="fastsom.datasets.cat_encoders.FastTextCatEncoder.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_cat</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/cat_encoders.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.cat_encoders.FastTextCatEncoder.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains a small <cite>FastText</cite> model on <cite>x_cat</cite>, for later use in encoding/decoding.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x_cat</strong> (<em>np.ndarray</em>) – The numpy matrix of categorical variables. We use Numpy since Tensors don’t support strings.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.datasets.cat_encoders.FastTextCatEncoder.make_categorical">
+<code class="sig-name descname">make_categorical</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_cont</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/cat_encoders.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.cat_encoders.FastTextCatEncoder.make_categorical" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs vector-to-string conversion of <cite>x_cont</cite> using the information stored during <cite>fit</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x_cont</strong> (<em>Tensor</em>) – The Tensor of embeddings.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.datasets.cat_encoders.FastTextCatEncoder.make_continuous">
+<code class="sig-name descname">make_continuous</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_cat</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/cat_encoders.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.cat_encoders.FastTextCatEncoder.make_continuous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs string-to-vector encoding of <cite>x_cat</cite> for each column using the information stored during <cite>fit</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x_cat</strong> (<em>np.ndarray</em>) – The numpy matrix of categorical variables. We use Numpy since Tensors don’t support strings.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.datasets.cat_encoders.OneHotCatEncoder">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.datasets.cat_encoders.</code><code class="sig-name descname">OneHotCatEncoder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cat_names</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">cont_names</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/cat_encoders.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.cat_encoders.OneHotCatEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses One-Hot encoding to transform categorical features into continous ones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cat_names</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – The categorical feature names.</p></li>
+<li><p><strong>cont_names</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – The continuous feature names.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="fastsom.datasets.cat_encoders.OneHotCatEncoder.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_cat</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/cat_encoders.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.cat_encoders.OneHotCatEncoder.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs one-hot encoding of <cite>x_cat</cite> for each column, storing
+information about the number of categories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x_cat</strong> (<em>np.ndarray</em>) – The numpy matrix of categorical variables. We use Numpy since Tensors don’t support strings.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.datasets.cat_encoders.OneHotCatEncoder.make_categorical">
+<code class="sig-name descname">make_categorical</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_cont</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/cat_encoders.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.cat_encoders.OneHotCatEncoder.make_categorical" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs one-hot decoding of <cite>x_cont</cite> using the information stored during <cite>fit</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x_cont</strong> (<em>Tensor</em>) – The Tensor of one-hot encoded values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.datasets.cat_encoders.OneHotCatEncoder.make_continuous">
+<code class="sig-name descname">make_continuous</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_cat</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/cat_encoders.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.cat_encoders.OneHotCatEncoder.make_continuous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs one-hot encoding of <cite>x_cat</cite> for each column using the information stored during <cite>fit</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x_cat</strong> (<em>np.ndarray</em>) – The numpy matrix of categorical variables. We use Numpy since Tensors don’t support strings.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.datasets.cat_encoders.get_cat_encoder">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.datasets.cat_encoders.</code><code class="sig-name descname">get_cat_encoder</code><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/cat_encoders.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.cat_encoders.get_cat_encoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the correct CatEncoder.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="normalizers">
+<h2>Normalizers<a class="headerlink" href="#normalizers" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="fastsom.datasets.normalizers.Normalizer">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.datasets.normalizers.</code><code class="sig-name descname">Normalizer</code><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/normalizers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.normalizers.Normalizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base normalizer class.</p>
+<dl class="py method">
+<dt id="fastsom.datasets.normalizers.Normalizer.denormalize">
+<code class="sig-name descname">denormalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/normalizers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.normalizers.Normalizer.denormalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Denormalizes <cite>data</cite> by using this normalizer’s stats.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.datasets.normalizers.Normalizer.normalize">
+<code class="sig-name descname">normalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">save</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/normalizers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.normalizers.Normalizer.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes <cite>data</cite> by using this normalizer’s criterion.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.datasets.normalizers.Normalizer.normalize_by">
+<code class="sig-name descname">normalize_by</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">source</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">target</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">save</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/normalizers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.normalizers.Normalizer.normalize_by" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes <cite>target</cite> by using <cite>source</cite> stats and this normalizer’s criterion.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.datasets.normalizers.VarianceNormalizer">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.datasets.normalizers.</code><code class="sig-name descname">VarianceNormalizer</code><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/normalizers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.normalizers.VarianceNormalizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizer that uses mean and standard deviation.</p>
+<dl class="py method">
+<dt id="fastsom.datasets.normalizers.VarianceNormalizer.denormalize">
+<code class="sig-name descname">denormalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/normalizers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.normalizers.VarianceNormalizer.denormalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Denormalizes <cite>data</cite> by using stored mean and standard deviation for each feature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.datasets.normalizers.MinMaxScaler">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.datasets.normalizers.</code><code class="sig-name descname">MinMaxScaler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minimum</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">maximum</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/normalizers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.normalizers.MinMaxScaler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rescales data between a minimum and a maximum</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="fastsom.datasets.normalizers.get_normalizer">
+<code class="sig-prename descclassname">fastsom.datasets.normalizers.</code><code class="sig-name descname">get_normalizer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#fastsom.datasets.normalizers.Normalizer" title="fastsom.datasets.normalizers.Normalizer">fastsom.datasets.normalizers.Normalizer</a><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/normalizers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.normalizers.get_normalizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an instance of the requested normalizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – The normalizer name. Available values are <cite>var</cite>, <cite>minmax</cite> and <cite>minmax-1</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          <div class="page-nav">
+            <div class="inner"><ul class="page-nav">
+  <li class="prev">
+    <a href="../core/core.html"
+       title="previous chapter">← fastsom.core</a>
+  </li>
+  <li class="next">
+    <a href="../interp/interp.html"
+       title="next chapter">fastsom.interp →</a>
+  </li>
+</ul><div class="footer" role="contentinfo">
+      &#169; Copyright 2020, Kirey Group.
+    <br>
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.2 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+</div>
+            </div>
+          </div>
+      </page>
+    </div>
+    
+    
+  </body>
+</html>

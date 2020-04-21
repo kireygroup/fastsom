@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>fastsom.core</title>
+    
+      <link rel="stylesheet" href="../static/pygments.css">
+      <link rel="stylesheet" href="../static/theme.css">
+      <link rel="stylesheet" href="../static/sphinx_press_theme.css">
+          <link rel="stylesheet" href="../static/css/notebook_fix.css" type="text/css" />
+      
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../static/documentation_options.js"></script>
+
+      <!-- sphinx script_files -->
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/doctools.js"></script>
+        <script src="../static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+      
+      <script src="../static/theme-vendors.js"></script>
+      <script src="../static/theme.js" defer></script>
+    
+  <link rel="index" title="Index" href="../genindex.html" />
+  <link rel="search" title="Search" href="../search.html" />
+  <link rel="next" title="fastsom.datasets" href="../datasets/datasets.html" />
+  <link rel="prev" title="Fastsom documentation" href="../index.html" /> 
+  </head>
+
+  <body>
+    <div id="app" class="theme-container" :class="pageClasses"><navbar @toggle-sidebar="toggleSidebar">
+  <router-link to="../index.html" class="home-link">
+    
+      <span class="site-name">fastsom</span>
+    
+  </router-link>
+
+  <div class="links">
+    <navlinks class="can-hide">
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+    </navlinks>
+  </div>
+</navbar>
+
+      
+      <div class="sidebar-mask" @click="toggleSidebar(false)">
+      </div>
+        <sidebar @toggle-sidebar="toggleSidebar">
+          
+          <navlinks>
+            
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+            
+          </navlinks><div id="searchbox" class="searchbox" role="search">
+  <div class="caption"><span class="caption-text">Quick search</span>
+    <div class="searchformwrapper">
+      <form class="search" action="../search.html" method="get">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div><div class="sidebar-links" role="navigation" aria-label="main navigation">
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">API</a></span>
+      </p>
+      <ul class="current">
+        
+          <li class="toctree-l1 current"><a href="#" class="reference internal current">fastsom.core</a>
+
+            
+              <ul>
+                
+                  <li class="toctree-l2"><a href="#tensor-utilities" class="reference internal">Tensor utilities</a></li>
+                
+                  <li class="toctree-l2"><a href="#miscellaneous" class="reference internal">Miscellaneous</a></li>
+                
+              </ul>
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../datasets/datasets.html" class="reference internal ">fastsom.datasets</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../interp/interp.html" class="reference internal ">fastsom.interp</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../learn/learn.html" class="reference internal ">fastsom.learn</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../som.html" class="reference internal ">fastsom.som</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">Examples</a></span>
+      </p>
+      <ul class="">
+        
+          <li class="toctree-l1 "><a href="../examples/colors.html" class="reference internal ">SOM Training on RGB Colors Dataset</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../examples/iris.html" class="reference internal ">SOM Training on IRIS Dataset</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+</div>
+        </sidebar>
+
+      <page>
+          <div class="body-header" role="navigation" aria-label="navigation">
+  
+  <ul class="breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+    
+    <li>fastsom.core</li>
+  </ul>
+  
+
+  <ul class="page-nav">
+  <li class="prev">
+    <a href="../index.html"
+       title="previous chapter">← Fastsom documentation</a>
+  </li>
+  <li class="next">
+    <a href="../datasets/datasets.html"
+       title="next chapter">fastsom.datasets →</a>
+  </li>
+</ul>
+  
+</div>
+<hr>
+          <div class="content" role="main">
+            
+  <div class="section" id="fastsom-core">
+<h1>fastsom.core<a class="headerlink" href="#fastsom-core" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="tensor-utilities">
+<h2>Tensor utilities<a class="headerlink" href="#tensor-utilities" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="index-tensor">
+<h3><span class="hidden-section">index_tensor</span><a class="headerlink" href="#index-tensor" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="fastsom.core.tensor.index_tensor">
+<code class="sig-prename descclassname">fastsom.core.tensor.</code><code class="sig-name descname">index_tensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">size</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/core/tensor.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.core.tensor.index_tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an index tensor of size <cite>size</cite>,
+where each element contains its own index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>size</strong> (<em>Tuple</em>) – The size of the matrix indexed by the index tensor.
+Note that the return tensor size will be <cite>(*size, 2)</cite>.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">index_tensor</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">tensor([[[0, 0],</span>
+<span class="go">     [0, 1]],</span>
+<span class="go">     [[1, 0],</span>
+<span class="go">      [1, 1]]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="expanded-op">
+<h3><span class="hidden-section">expanded_op</span><a class="headerlink" href="#expanded-op" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="fastsom.core.tensor.expanded_op">
+<code class="sig-prename descclassname">fastsom.core.tensor.</code><code class="sig-name descname">expanded_op</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">b</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">device(type='cuda')</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/core/tensor.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.core.tensor.expanded_op" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expands tensors <cite>a</cite> and <cite>b</cite> to ensure operation compatibility; then calls <cite>fn(a, b)</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>Tensor</em>) – The first tensor.</p></li>
+<li><p><strong>b</strong> (<em>Tensor</em>) – The second tensor.</p></li>
+<li><p><strong>fn</strong> (<em>Callable</em>) – The function to be applied on expanded <cite>a</cite> and <cite>b</cite>.</p></li>
+<li><p><strong>device</strong> (<em>torch.device default=torch.device</em><em>(</em><em>'cuda'</em><em>)</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">expanded_op</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([5, 12, 2])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="idxs-2d-to-1d">
+<h3><span class="hidden-section">idxs_2d_to_1d</span><a class="headerlink" href="#idxs-2d-to-1d" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="fastsom.core.tensor.idxs_2d_to_1d">
+<code class="sig-prename descclassname">fastsom.core.tensor.</code><code class="sig-name descname">idxs_2d_to_1d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idxs</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">row_size</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; list<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/core/tensor.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.core.tensor.idxs_2d_to_1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms an <cite>np.ndarray</cite> of indices from 2D to 1D by using <cite>row_size</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idxs</strong> (<em>np.ndarray</em>) – The matrix of 2D indices.</p></li>
+<li><p><strong>row_size</strong> (<em>int</em>) – The 2D matrix row size.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">idxs_1d_to_2d</span><span class="p">(</span><span class="n">idxs</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">tensor([ 1,  5,  9, 13])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="idxs-1d-to-2d">
+<h3><span class="hidden-section">idxs_1d_to_2d</span><a class="headerlink" href="#idxs-1d-to-2d" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="fastsom.core.tensor.idxs_1d_to_2d">
+<code class="sig-prename descclassname">fastsom.core.tensor.</code><code class="sig-name descname">idxs_1d_to_2d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idxs</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">col_size</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; list<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/core/tensor.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.core.tensor.idxs_1d_to_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms an <cite>np.ndarray</cite> of indices from 1D to 2D by using <cite>col_size</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idxs</strong> (<em>np.ndarray</em>) – The matrix of 1D indices.</p></li>
+<li><p><strong>col_size</strong> (<em>int</em>) – The 2D matrix col size.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="mi">1</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">9</span><span class="p">,</span> <span class="mi">13</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">idxs_1d_to_2d</span><span class="p">(</span><span class="n">idxs</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">tensor([[0, 1],</span>
+<span class="go">    [1, 1],</span>
+<span class="go">    [2, 1],</span>
+<span class="go">    [3, 1]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="miscellaneous">
+<h2>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ifnone">
+<h3><span class="hidden-section">ifnone</span><a class="headerlink" href="#ifnone" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="fastsom.core.utils.ifnone">
+<code class="sig-prename descclassname">fastsom.core.utils.</code><code class="sig-name descname">ifnone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">o</span><span class="p">:</span> <span class="n">any</span></em>, <em class="sig-param"><span class="n">default</span><span class="p">:</span> <span class="n">any</span></em><span class="sig-paren">)</span> &#x2192; any<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/core/utils.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.core.utils.ifnone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <cite>o</cite> if it is not <cite>None</cite>; returns <cite>default</cite> otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>o</strong> (<em>any</em>) – The value to be checked.</p></li>
+<li><p><strong>default</strong> (<em>any</em>) – The default return value when <cite>o</cite> is <cite>None</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ifnone</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;default-value&#39;</span><span class="p">)</span>
+<span class="go">5</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ifnone</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+<span class="go">42</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="ifindict">
+<h3><span class="hidden-section">ifindict</span><a class="headerlink" href="#ifindict" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="fastsom.core.utils.ifindict">
+<code class="sig-prename descclassname">fastsom.core.utils.</code><code class="sig-name descname">ifindict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span><span class="p">:</span> <span class="n">dict</span></em>, <em class="sig-param"><span class="n">k</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">default</span><span class="p">:</span> <span class="n">any</span></em><span class="sig-paren">)</span> &#x2192; any<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/core/utils.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.core.utils.ifindict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the value of <cite>k</cite> inside <cite>d</cite> if it exists; returns <cite>default</cite> otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d</strong> (<em>dict</em>) – The source dict.</p></li>
+<li><p><strong>k</strong> (<em>str</em>) – The lookup key</p></li>
+<li><p><strong>default</strong> (<em>any</em>) – The default return value when <cite>k</cite> is not in <cite>d</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ifindict</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;default-value&#39;</span><span class="p">)</span>
+<span class="go">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ifindict</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;some_invalid_key&#39;</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+<span class="go">42</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="is-iterable">
+<h3><span class="hidden-section">is_iterable</span><a class="headerlink" href="#is-iterable" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="fastsom.core.utils.is_iterable">
+<code class="sig-prename descclassname">fastsom.core.utils.</code><code class="sig-name descname">is_iterable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">o</span><span class="p">:</span> <span class="n">any</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/core/utils.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.core.utils.is_iterable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if <cite>o</cite> is iterable</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>o</strong> (<em>any</em>) – The value to be checked.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">is_iterable</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)))</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">is_iterable</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">is_iterable</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">is_iterable</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="listify">
+<h3><span class="hidden-section">listify</span><a class="headerlink" href="#listify" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="fastsom.core.utils.listify">
+<code class="sig-prename descclassname">fastsom.core.utils.</code><code class="sig-name descname">listify</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">o</span><span class="p">:</span> <span class="n">any</span></em><span class="sig-paren">)</span> &#x2192; list<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/core/utils.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.core.utils.listify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turns <cite>o</cite> into a list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>o</strong> (<em>any</em>) – The value to be listified.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">listify</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="go">[]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">listify</span><span class="p">(</span><span class="s1">&#39;mystring&#39;</span><span class="p">)</span>
+<span class="go">[&#39;m&#39;, &#39;y&#39;, &#39;s&#39;, &#39;t&#39;, &#39;r&#39;, &#39;i&#39;, &#39;n&#39;, &#39;g&#39;]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">listify</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="go">5</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="setify">
+<h3><span class="hidden-section">setify</span><a class="headerlink" href="#setify" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="fastsom.core.utils.setify">
+<code class="sig-prename descclassname">fastsom.core.utils.</code><code class="sig-name descname">setify</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">o</span><span class="p">:</span> <span class="n">any</span></em><span class="sig-paren">)</span> &#x2192; set<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/core/utils.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.core.utils.setify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turns <cite>o</cite> into a set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>o</strong> (<em>any</em>) – The value to be setified.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">setify</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="go">5</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">setify</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="go">set()</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">setify</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">)</span>
+<span class="go">{&#39;h&#39;, &#39;l&#39;, &#39;d&#39;, &#39;e&#39;, &#39;w&#39;, &#39;r&#39;, &#39; &#39;, &#39;o&#39;}</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">setify</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="go">{1, 2, 3, 4, 5}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="compose">
+<h3><span class="hidden-section">compose</span><a class="headerlink" href="#compose" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="fastsom.core.utils.compose">
+<code class="sig-prename descclassname">fastsom.core.utils.</code><code class="sig-name descname">compose</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="p">:</span> <span class="n">any</span></em>, <em class="sig-param"><span class="n">fns</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>Callable<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">order_key</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'_order'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; any<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/core/utils.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.core.utils.compose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies each function in <cite>fns</cite> to the output of the previous function.</p>
+<p>Function application starts from <cite>x</cite>, and uses <cite>order_key</cite> to sort the <cite>fns</cite> list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>any</em>) – The base function parameter.</p></li>
+<li><p><strong>fns</strong> (<em>Collection</em><em>[</em><em>Callable</em><em>]</em>) – The collection of functions.</p></li>
+<li><p><strong>order_key</strong> (<em>str default='_order'</em>) – The key to be used to sort the functions.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="enum-eq">
+<h3><span class="hidden-section">enum_eq</span><a class="headerlink" href="#enum-eq" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="fastsom.core.utils.enum_eq">
+<code class="sig-prename descclassname">fastsom.core.utils.</code><code class="sig-name descname">enum_eq</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">enum</span></em>, <em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/core/utils.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.core.utils.enum_eq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks equality of <cite>enum</cite> and <cite>value</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enum</strong> (<em>Enum</em>) – The enumerator instance</p></li>
+<li><p><strong>value</strong> (<em>any</em>) – The value or enumerator instance to be compared.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+          <div class="page-nav">
+            <div class="inner"><ul class="page-nav">
+  <li class="prev">
+    <a href="../index.html"
+       title="previous chapter">← Fastsom documentation</a>
+  </li>
+  <li class="next">
+    <a href="../datasets/datasets.html"
+       title="next chapter">fastsom.datasets →</a>
+  </li>
+</ul><div class="footer" role="contentinfo">
+      &#169; Copyright 2020, Kirey Group.
+    <br>
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.2 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+</div>
+            </div>
+          </div>
+      </page>
+    </div>
+    
+    
+  </body>
+</html>
