@@ -4,15 +4,17 @@ This module mimics Fastai dataset utilities for unsupervised data.
 """
 import torch
 import numpy as np
+import pandas as pd
 
 from torch import Tensor
 from torch.utils.data import DataLoader, TensorDataset
 from fastai.basic_data import DataBunch
+from fastai.tabular import TabularDataBunch, FillMissing, Categorify, Normalize, TabularList
 from typing import Union, Optional, List, Callable
 
 from .normalizers import get_normalizer
 from .samplers import SamplerType, get_sampler, SamplerTypeOrString
-from .cat_encoders import CatEncoder
+from .cat_encoders import CatEncoder, CatEncoderTypeOrString
 
 from ..core import ifnone
 
@@ -83,10 +85,43 @@ class UnsupervisedDataBunch(DataBunch):
             # Create data loaders + wrap samplers into batch samplers
             train_dl = DataLoader(train_ds, sampler=train_smp, batch_size=bs)
             valid_dl = DataLoader(valid_ds, sampler=valid_smp, batch_size=bs)
+        
         # Initialize Fastai's DataBunch
-        super().__init__(train_dl, valid_dl, device=torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"), dl_tfms=tfms, **kwargs)
+        super().__init__(
+            train_dl,
+            valid_dl,
+            device=torch.device("cuda")
+            if torch.cuda.is_available()
+            else torch.device("cpu"),
+            dl_tfms=tfms,
+            **kwargs
+        )
 
-    def normalize(self, normalizer: str = 'var') -> None:
+    @classmethod
+    def from_tabular_databunch(cls, data: TabularDataBunch, bs: Optional[int] = None, cat_enc: Union[CatEncoderTypeOrString, CatEncoder] = "onehot"):
+        """
+        Creates a new UnsupervisedDataBunch from a DataFrame.
+
+        Parameters
+        ----------
+        TODO
+        """
+        return data.to_unsupervised_databunch(bs=bs, cat_enc=cat_enc)
+
+    @classmethod
+    def from_df(cls, df: pd.DataFrame, cat_names: List[str], cont_names: List[str], bs: Optional[int] = None, cat_enc: Union[CatEncoderTypeOrString, CatEncoder] = "onehot"):
+        """
+        Creates a new UnsupervisedDataBunch from a DataFrame.
+
+        Parameters
+        ----------
+        TODO
+        """
+        procs = [FillMissing, Categorify, Normalize]
+        learn_tab = TabularList.from_df(df, path='.', cat_names=cat_names, cont_names=cont_names, procs=procs).databunch(bs=bs, num_workers=0)
+        return learn_tab.to_unsupervised_databunch(bs=bs, cat_enc=cat_enc)
+
+    def normalize(self, normalizer: str = "var") -> None:
         """
         Uses `normalizer` to normalize both train and validation data.
 

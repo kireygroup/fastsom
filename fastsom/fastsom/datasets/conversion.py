@@ -30,6 +30,8 @@ def tabular_ds_to_lists(ds: Dataset):
     ds : Dataset
         The TabularDataBunch Dataset containing categorical and continuous elements.
     """
+    if ds is None:
+        return None, None
     x_cat = torch.cat([el[0].data[0].long().unsqueeze(0) for el in ds], dim=0)
     x_cont = torch.cat([el[0].data[1].float().unsqueeze(0) for el in ds], dim=0)
     return x_cat, x_cont
@@ -43,7 +45,7 @@ def dataframe_fill_unknown(df: DataFrame, unknown_cat: str = '<unknown>') -> Dat
     ----------
     df : pandas.DataFrame
         The source DataFrame.
-    `unknown_cat : str default='<unknown>'
+    unknown_cat : str default='<unknown>'
         The string to be used when replacing N/A values.
     """
     for column in df.columns:
@@ -73,19 +75,33 @@ def to_unsupervised_databunch(data: TabularDataBunch, bs: Optional[int] = None, 
     tfm = cat_enc if isinstance(cat_enc, CatEncoder) else get_cat_encoder(cat_enc, data.cat_names, data.cont_names)
     if isinstance(tfm, FastTextCatEncoder):
         # Pass string values to FastTextCatEncoder
-        train_x_cat = dataframe_fill_unknown(data.train_ds.inner_df[data.cat_names]).values
-        valid_x_cat = dataframe_fill_unknown(data.valid_ds.inner_df[data.cat_names]).values
+        train_x_cat = dataframe_fill_unknown(
+            data.train_ds.inner_df[data.cat_names]
+        ).values
         tfm.fit(train_x_cat, cat_names=data.cat_names)
         train_x_cat = tfm.make_continuous(train_x_cat)
-        valid_x_cat = tfm.make_continuous(valid_x_cat)
+        if valid_x_cat is not None:
+            valid_x_cat = dataframe_fill_unknown(
+                data.valid_ds.inner_df[data.cat_names]
+            ).values
+            valid_x_cat = tfm.make_continuous(valid_x_cat)
     else:
         # Pass categories to other transformers
         tfm.fit(train_x_cat, cat_names=data.cat_names)
         train_x_cat = tfm.make_continuous(train_x_cat)
-        valid_x_cat = tfm.make_continuous(valid_x_cat)
+        if valid_x_cat is not None:
+            valid_x_cat = tfm.make_continuous(valid_x_cat)
 
-    train_ds = torch.cat([train_x_cat.float(), train_x_cont], dim=-1) if len(data.train_ds) > 0 else None
-    valid_ds = torch.cat([valid_x_cat.float(), valid_x_cont], dim=-1) if len(data.valid_ds) > 0 else None
+    train_ds = (
+        torch.cat([train_x_cat.float(), train_x_cont], dim=-1)
+        if len(data.train_ds) > 0
+        else None
+    )
+    valid_ds = (
+        torch.cat([valid_x_cat.float(), valid_x_cont], dim=-1)
+        if data.valid_ds is not None and len(data.valid_ds) > 0
+        else None
+    )
 
     bs = ifnone(bs, data.batch_size)
 

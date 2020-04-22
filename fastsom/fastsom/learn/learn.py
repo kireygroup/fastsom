@@ -5,7 +5,7 @@ import torch
 import pandas as pd
 import numpy as np
 
-from typing import Optional, Callable, Collection, List, Type, Dict
+from typing import Optional, Callable, Collection, List, Type, Dict, Tuple
 from functools import partial
 from fastai.basic_train import Learner
 from fastai.train import *
@@ -51,8 +51,10 @@ class SomLearner(Learner):
     ----------
     data : UnsupervisedDataBunch
         Contains train and validations datasets, along with sampling and normalization utils.
-    model : Som
+    model : Som default=None
         The Self-Organizing Map model.
+    size : Tuple[int, int] default=(10, 10)
+        The map size to use if `model` is None.
     visualize : List[str] default=[]
         A list of elements to be visualized while training. Available values are 'weights', 'hyperparams' and 'bmus'.
     init_weights : str default='random'
@@ -74,25 +76,36 @@ class SomLearner(Learner):
     """
 
     def __init__(
-            self,
-            data: UnsupervisedDataBunch,
-            model: Som,
-            init_weights: str = 'random',
-            trainer: Type[SomTrainer] = ExperimentalSomTrainer,
-            trainer_args: Dict = dict(),
-            lr: Collection[float] = (0.09, 0.03),
-            visualize: List[str] = [],
-            metrics: Collection[Callable] = None,
-            callbacks: Collection[Callback] = None,
-            loss_func: Callable = mean_quantization_err,
-            opt_func: Callable = SomOptimizer,
-            **learn_kwargs):
+        self,
+        data: UnsupervisedDataBunch,
+        model: Som = None,
+        size: Tuple[int, int] = (10, 10),
+        init_weights: str = "random",
+        trainer: Type[SomTrainer] = ExperimentalSomTrainer,
+        trainer_args: Dict = dict(),
+        lr: Collection[float] = (0.09, 0.03),
+        visualize: List[str] = [],
+        metrics: Collection[Callable] = None,
+        callbacks: Collection[Callback] = None,
+        loss_func: Callable = mean_quantization_err,
+        opt_func: Callable = SomOptimizer,
+        **learn_kwargs
+    ):
+        train_ds = (
+            data.train_ds.tensors[0]
+            if hasattr(data.train_ds, "tensors")
+            else torch.tensor(data.train_ds, dtype=float)
+        )
 
-        train_ds = data.train_ds.tensors[0] if hasattr(data.train_ds, 'tensors') else torch.tensor(data.train_ds, dtype=float)
+        # Optionally initialize the model
+        if model is None:
+            model = Som((size[0], size[1], data.train_ds.tensors[0].shape[-1]))
+        else:
+            size = model.weights.shape[:-1]
 
         # Initialize the model weights
         initializer = som_initializers[init_weights]
-        model.weights = initializer(train_ds, model.weights.shape)
+        model.weights = initializer(train_ds, size[0] * size[1]).view(*size, -1)
 
         # Add callbacks
         callbacks = ifnone(callbacks, [])
