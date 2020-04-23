@@ -118,6 +118,7 @@ class Som(Module):
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         self.indices = None
         self.after_weight_init()
+        self._recorder = dict()
 
         if self.neigh_diff_fn.__name__ == 'neigh_diff_toroidal':
             self.neigh_diff_fn = partial(self.neigh_diff_fn, map_size=self.size)
@@ -137,15 +138,18 @@ class Som(Module):
 
         # If in training, save outputs for backward step
         if self.training:
-            self._diffs = self.diff(x, self.weights.view(-1, x.shape[-1])).view(x.shape[0], self.size[0], self.size[1], x.shape[-1])
-            self._bmus = bmu_indices
+            self._recorder['diffs'] = self.diff(x, self.weights.view(-1, x.shape[-1])).view(x.shape[0], self.size[0], self.size[1], x.shape[-1])
+            self._recorder['bmus'] = bmu_indices
+            self._recorder['xb'] = x.clone()
 
         return bmu_indices
 
     def backward(self) -> None:
         "Updates weights based on BMUs and indices calculated in the forward"
         # Retrieve the current batch outputs and batch size
-        bmu_indices, elementwise_diffs = self.get_prev_batch_output()
+        bmu_indices = self._recorder['bmus']
+        elementwise_diffs = self._recorder['diffs']
+
         batch_size = bmu_indices.shape[0]
 
         # First, create a tensor of indices of the same size as the weights map

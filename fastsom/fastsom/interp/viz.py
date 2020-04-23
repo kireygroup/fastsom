@@ -166,7 +166,7 @@ class SomBmuVisualizer(Callback):
 
     def on_batch_end(self, **kwargs):
         "Saves BMU hit counts for this batch."
-        bmus = self.model.get_prev_batch_output()[0]
+        bmus = self.model._recorder['bmus']
         unique_bmus, bmu_counts = idxs_2d_to_1d(bmus, self.model.size[0]).unique(dim=0, return_counts=True)
         self.epoch_counts[unique_bmus] += bmu_counts
 

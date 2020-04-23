@@ -10,7 +10,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader, TensorDataset
 from fastai.basic_data import DataBunch
 from fastai.tabular import TabularDataBunch, FillMissing, Categorify, Normalize, TabularList
-from typing import Union, Optional, List, Callable
+from typing import Union, Optional, List, Callable, Tuple
 
 from .normalizers import get_normalizer
 from .samplers import SamplerType, get_sampler, SamplerTypeOrString
@@ -22,36 +22,102 @@ from ..core import ifnone
 __all__ = [
     "UnsupervisedDataBunch",
     "pct_split",
+    "build_dataloaders",
 ]
 
 
 def pct_split(x: Tensor, valid_pct: float = 0.2):
-    """Splits a dataset in `train` and `valid` by using `pct`."""
+    """
+    Returns a tuple of (train, valid) indices that randomly split `x` with `valid_pct`.
+
+    Parameters
+    ----------
+    x : Tensor
+        The tensor to be split.
+    valid_pct : float default=0.2
+        The validation data percentage.
+    """
     sep = int(len(x) * (1.0 - valid_pct))
-    perm = x[torch.randperm(len(x))]
+    perm = torch.randperm(len(x))
     return perm[:sep], perm[sep:]
 
 
-TensorOrDataLoader = Union[torch.Tensor, torch.utils.data.DataLoader]
-TensorOrDataLoaderOrSplitPct = Union[TensorOrDataLoader, float]
+TrainData = Union[
+    Tensor,
+    TensorDataset,
+    Tuple[Tensor, Tensor],
+    torch.utils.data.DataLoader,
+]
+ValidData = Union[TrainData, float]
+
+
+def build_dataloaders(
+        train: TrainData,
+        valid: ValidData,
+        sampler: SamplerTypeOrString,
+        bs: int,
+) -> Tuple[DataLoader, DataLoader, bool]:
+    """
+    Transforms `train` and `valid` into `DataLoader` instances.
+
+    Parameters
+    ----------
+    train: Union[Tensor, TensorDataset, Tuple[Tensor, Tensor], torch.utils.data.DataLoader]
+        The training dataset. If a single `Tensor` is provided, it will be replicated as target.
+    valid: Union[float, Tensor, TensorDataset, Tuple[Tensor, Tensor], torch.utils.data.DataLoader]
+        The validation dataset or split percentage over training data.
+    sampler: SamplerTypeOrString
+        The sampler to be used to build the `DataLoader`.
+    bs: int
+        The batch size.
+    """
+    train_type, valid_type = type(train), type(valid)
+    has_labels = not isinstance(train, Tensor) and ((not isinstance(train, Tuple)) or len(train) > 1)
+    train = (train, train) if not has_labels else train
+    if isinstance(train, Tuple):
+        if isinstance(valid, float):
+            train_idxs, valid_idxs = pct_split(train[0], valid_pct=valid)
+            valid = (train[0][valid_idxs], train[1][valid_idxs])
+            train = (train[0][train_idxs], train[1][train_idxs])
+        elif valid is None:
+            valid = (torch.tensor([]), torch.tensor([]))
+        elif not has_labels:
+            valid = (valid, valid)
+
+        # Build TensorDatasets
+        train = TensorDataset(train[0], train[1])
+        valid = TensorDataset(valid[0], valid[1])
+
+    if isinstance(train, TensorDataset):
+        train_smp = get_sampler(sampler, train, bs)
+        valid_smp = get_sampler(sampler, valid, bs)
+        train = DataLoader(train, sampler=train_smp, batch_size=bs)
+        valid = DataLoader(valid, sampler=valid_smp, batch_size=bs)
+
+    if isinstance(train, DataLoader) and isinstance(valid, DataLoader):
+        return train, valid, has_labels
+
+    raise ValueError(f'Unxpected train / valid data pair of type: {train_type} {valid_type}')
 
 
 class UnsupervisedDataBunch(DataBunch):
     """
-    `DataBunch` subclass without target data.
+    `DataBunch` subclass without mandatory labels.
+    If labels are not provided, they will be stubbed.
 
     All keyword args not listed below will be passed to the parent class.
 
     Parameters
     ----------
-    train : TensorOrDataLoader
-        The training data.
-    valid : Optional[TensorOrDataLoaderOrSplitPct] default=None
-        The validation data. Can be passed as a PyTorch Tensor / DataLoader or as a percentage of the training set.
+    train: Union[Tensor, TensorDataset, Tuple[Tensor, Tensor], torch.utils.data.DataLoader]
+        The training dataset / DataLoader or a Tuple in the form (train, labels). If a single `Tensor` is provided, labels will be stubbed.
+    valid: Union[float, Tensor, TensorDataset, Tuple[Tensor, Tensor], torch.utils.data.DataLoader]
+        The validation dataset / DataLoader or split percentage over training data.
     bs : int default=64
         The batch size.
     sampler : SamplerTypeOrString default=SamplerType.SEQUENTIAL
         The sampler to be used. Can be `seq`, 'random' or 'shuffle'.
+    normalizer : str default='var'
     tfms : Optional[List[Callable]] default=None
         Additional Fastai transforms. These will be forwarded to the DataBunch.
     cat_enc : Optional[CatEncoder] default=None
@@ -59,32 +125,23 @@ class UnsupervisedDataBunch(DataBunch):
     """
 
     def __init__(
-            self, train: TensorOrDataLoader,
-            valid: Optional[TensorOrDataLoaderOrSplitPct] = None,
+            self,
+            train: TrainData,
+            valid: Optional[ValidData] = None,
             bs: int = 64,
             sampler: SamplerTypeOrString = SamplerType.SEQUENTIAL,
             tfms: Optional[List[Callable]] = None,
             cat_enc: Optional[CatEncoder] = None,
+            normalizer: str = 'var',
             **kwargs):
         self.cat_enc = cat_enc
         self.normalizer = None
 
-        if isinstance(train, DataLoader):
-            train_dl, valid_dl = train, valid
-        else:
-            if isinstance(valid, float):
-                if not isinstance(train, Tensor):
-                    raise TypeError("Training data should be passed as `Tensor` when passing valid percentage")
-                train, valid = pct_split(train, valid_pct=valid)
-            # Initialize datasets
-            train_ds = TensorDataset(train, train)
-            valid_ds = TensorDataset(valid, valid)
-            # Initialize data samplers
-            train_smp = get_sampler(sampler, train_ds, bs)
-            valid_smp = get_sampler(sampler, valid_ds, bs)
-            # Create data loaders + wrap samplers into batch samplers
-            train_dl = DataLoader(train_ds, sampler=train_smp, batch_size=bs)
-            valid_dl = DataLoader(valid_ds, sampler=valid_smp, batch_size=bs)
+        # Build DataLoaders for train / validation data by checking given input types
+        train_dl, valid_dl, has_labels = build_dataloaders(train, valid, sampler, bs)
+
+        # Keep track of labels availability
+        self.has_labels = has_labels
 
         # Initialize Fastai's DataBunch
         super().__init__(
@@ -97,19 +154,44 @@ class UnsupervisedDataBunch(DataBunch):
             **kwargs
         )
 
+        # Normalize data
+        if normalizer is not None:
+            self.normalize(normalizer)
+
     @classmethod
-    def from_tabular_databunch(cls, data: TabularDataBunch, bs: Optional[int] = None, cat_enc: Union[CatEncoderTypeOrString, CatEncoder] = "onehot"):
+    def from_tabular_databunch(
+            cls,
+            data: TabularDataBunch,
+            bs: Optional[int] = None,
+            normalizer: Optional[str] = 'var',
+            cat_enc: Union[CatEncoderTypeOrString, CatEncoder] = "onehot"):
         """
         Creates a new UnsupervisedDataBunch from a DataFrame.
 
         Parameters
         ----------
-        TODO
+        data : TabularDataBunch
+            The source TabularDataBunch.
+        bs: Optional[int] default=None
+            The batch size. Defaults to the source databunch batch size if not provided.
+        normalizer: Optional[str] default='var'
+            The optional normalization strategy to be used.
+        cat_enc : Union[CatEncoderTypeOrString, CatEncoder] default='onehot'
+            Categorical encoder.
         """
         return data.to_unsupervised_databunch(bs=bs, cat_enc=cat_enc)
 
     @classmethod
-    def from_df(cls, df: pd.DataFrame, cat_names: List[str], cont_names: List[str], dep_var: str, bs: int = 128, valid_pct: float = 0.2, cat_enc: Union[CatEncoderTypeOrString, CatEncoder] = "onehot"):
+    def from_df(
+            cls,
+            df: pd.DataFrame,
+            cat_names: List[str],
+            cont_names: List[str],
+            dep_var: str,
+            bs: int = 128,
+            valid_pct: float = 0.2,
+            normalizer: Optional[str] = 'var',
+            cat_enc: Union[CatEncoderTypeOrString, CatEncoder] = "onehot"):
         """
         Creates a new UnsupervisedDataBunch from a DataFrame.
 
@@ -127,6 +209,8 @@ class UnsupervisedDataBunch(DataBunch):
             The batch size.
         valid_pct : float default=0.2
             Validation split percentage.
+        normalizer: Optional[str] default='var'
+            The optional normalization strategy to be used.
         cat_enc : Union[CatEncoderTypeOrString, CatEncoder] default='onehot'
             Categorical encoder.
         """
@@ -149,14 +233,14 @@ class UnsupervisedDataBunch(DataBunch):
         save_stats = self.normalizer is None
         self.normalizer = ifnone(self.normalizer, get_normalizer(normalizer))
 
-        train = self.train_ds.tensors[0]
-        norm_train = self.normalizer.normalize(train, save=save_stats)
-        self.train_ds.tensors = [norm_train, norm_train]
+        train_x, train_y = self.train_ds.tensors
+        norm_train_x = self.normalizer.normalize(train_x, save=save_stats)
+        self.train_ds.tensors = (norm_train_x, train_y)
 
-        if self.valid_ds is not None:
-            valid = self.valid_ds.tensors[0]
-            norm_valid = self.normalizer.normalize_by(train, valid)
-            self.valid_ds.tensors = [norm_valid, norm_valid]
+        if self.valid_ds is not None and len(self.valid_ds) > 1:
+            valid_x, valid_y = self.valid_ds.tensors
+            norm_valid_x = self.normalizer.normalize_by(train_x, valid_x)
+            self.valid_ds.tensors = (norm_valid_x, valid_y)
 
     def denormalize(self, data: Tensor) -> Tensor:
         """

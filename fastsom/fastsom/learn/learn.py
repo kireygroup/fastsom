@@ -83,7 +83,7 @@ class SomLearner(Learner):
         init_weights: str = "random",
         trainer: Type[SomTrainer] = ExperimentalSomTrainer,
         trainer_args: Dict = dict(),
-        lr: Collection[float] = [0.6],
+        lr: Collection[float] = [0.6, 0.3, 0.1],
         visualize: List[str] = [],
         metrics: Collection[Callable] = None,
         callbacks: Collection[Callback] = None,
@@ -121,7 +121,8 @@ class SomLearner(Learner):
         metrics = list(map(lambda fn: partial(fn, som=model), metrics)) if metrics is not None else []
 
         super().__init__(
-            data, model,
+            data,
+            model,
             opt_func=opt_func,
             loss_func=loss_fn,
             metrics=metrics,
@@ -158,8 +159,7 @@ class SomLearner(Learner):
             cat = self.data.make_categorical(w[:, :encoded_count])
             # Transform categories back into strings
             if cat_as_str and cat_values is not None:
-                cat = np.array([[cat_values[self.data.cat_enc.cat_names[idx]][el] for el in col]
-                                for idx, col in enumerate(cat.transpose())])
+                cat = np.array([[cat_values[self.data.cat_enc.cat_names[idx]][el] for el in col] for idx, col in enumerate(cat.transpose())])
                 cat = cat.transpose()
             w = np.concatenate([cat, w[:, encoded_count:]], axis=-1)
         else:

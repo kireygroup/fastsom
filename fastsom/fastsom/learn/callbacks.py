@@ -8,7 +8,7 @@ from fastai.callback import Callback
 from typing import Collection, Callable, Dict
 from functools import partial
 
-from ..som import Som, neigh_gauss, neigh_square
+from ..som import Som, neigh_gauss
 from ..core import ifindict
 
 __all__ = [
@@ -18,7 +18,19 @@ __all__ = [
     "LinearDecaySomTrainer",
     "OneCycleEmulatorSomTrainer",
     "SomEarlyStoppingCallback",
+    "lr_split",
 ]
+
+
+def lr_split(lr: Collection[float], lr_phases: Collection[float]) -> Collection[float]:
+    """
+
+    """
+    if len(lr) >= len(lr_phases):
+        return lr[:len(lr_phases)]
+    else:
+        last_lr = lr[-1]
+        return lr + [last_lr * lr_phase_mult for lr_phase_mult in lr_phases[len(lr):]]
 
 
 def update_all_neigh_fn(v, sigma) -> Tensor:
@@ -28,6 +40,10 @@ def update_all_neigh_fn(v, sigma) -> Tensor:
 
 class SomTrainer(Callback):
     """Base class for SOM training strategy callbacks."""
+
+    def __init__(self):
+        self.lr_phases = 1
+
     @classmethod
     def from_model(cls, model: Som, init_method: str, lr: Collection[float], *args, **kwargs):
         """Creates a new instance from model."""
@@ -42,12 +58,14 @@ class TwoPhaseSomTrainer(SomTrainer):
     """
 
     def __init__(self, model: Som, init_method: str, lr: Collection[float], *args, **kwargs) -> None:
-        self.model, self.init_method, self.lr = model, init_method, lr
+        self.model, self.init_method = model, init_method
         self.finetune_epoch_pct = ifindict(kwargs, 'finetune_epoch_pct', 0.4)
         self._finetune_start = None                     # First finetuning epoch
         self._rough_radiuses = None                     # Rough training radiuses
         self._finetune_radiuses = None                  # Finetune training radiuses
         self._backup_neigh_fn = model.neigh_fn
+        lr_phases = [1, 0.2]
+        self.lr = lr_split(lr, lr_phases)
 
     def _parameters(self):
         """Returns parameters for each training phase based on initialization method."""
@@ -123,8 +141,7 @@ class ExperimentalSomTrainer(SomTrainer):
     """
 
     def __init__(self, model: Som, init_method: str, lr: Collection[float], *args, **kwargs) -> None:
-        self.model, self.init_method, self.lr = model, init_method, lr
-        self.min_lr, self.mid_lr, self.max_lr = lr[0], lr[1], lr[2]
+        self.model, self.init_method = model, init_method
         self.max_sigma = np.max(model.size[:-1]) / 2
         self.min_sigma = 1.0
         self.epoch, self.n_epochs = -1, -1
@@ -132,6 +149,8 @@ class ExperimentalSomTrainer(SomTrainer):
         self.sigmas = []
         self.iter = 0
         self.update_on_batch = ifindict(kwargs, 'update_on_batch', False)
+        lr_phases = [1, 0.5, 0.3]
+        self.lr = lr_split(lr, lr_phases)
 
     def on_train_begin(self, **kwargs):
         """Setup per-iteration values based on the number of epochs."""
@@ -142,10 +161,6 @@ class ExperimentalSomTrainer(SomTrainer):
         phase_1_iters = int(round(iterations * 0.16))
         phase_2_iters = int(round(iterations * 0.5))
         phase_3_iters = int(round(iterations * 0.34))
-
-        # alphas_1 = np.linspace(self.min_lr, self.min_lr, num=phase_1_iters)
-        # alphas_2 = np.linspace(self.min_lr, self.mid_lr, num=phase_2_iters)
-        # alphas_3 = np.linspace(self.mid_lr, self.max_lr, num=phase_3_iters)
 
         alphas_1 = [self.lr[0] for _ in range(phase_1_iters)]
         alphas_2 = [self.lr[1] for _ in range(phase_2_iters)]
@@ -203,8 +218,6 @@ class OneCycleEmulatorSomTrainer(SomTrainer):
 
     def __init__(self, model: Som, init_method: str, lr: Collection[float], *args, **kwargs) -> None:
         self.model = model
-        self.max_lr = lr[0]
-        self.min_lr = lr[1]
         self.max_sigma = np.max(model.size[:-1])
         self.min_sigma = 1.0
         self.epoch, self.n_epochs = -1, -1
@@ -212,6 +225,8 @@ class OneCycleEmulatorSomTrainer(SomTrainer):
         self.sigmas = []
         self.iter = 0
         self.update_on_batch = ifindict(kwargs, 'update_on_batch', False)
+        lr_phases = [1, 0.3]
+        self.lr = lr_split(lr, lr_phases)
 
     def on_train_begin(self, **kwargs):
         self.n_epochs = kwargs['n_epochs']
@@ -221,9 +236,12 @@ class OneCycleEmulatorSomTrainer(SomTrainer):
         phase_2_iters = phase_1_iters
         phase_3_iters = iterations - 2 * phase_1_iters
 
-        alphas_1 = np.linspace(self.min_lr, self.max_lr, num=phase_1_iters)
-        alphas_2 = np.linspace(self.max_lr, self.min_lr, num=phase_2_iters)
-        alphas_3 = np.linspace(self.min_lr, self.min_lr / 100, num=phase_3_iters)
+        max_lr = self.lr[0]
+        min_lr = self.lr[1]
+
+        alphas_1 = np.linspace(min_lr, max_lr, num=phase_1_iters)
+        alphas_2 = np.linspace(max_lr, min_lr, num=phase_2_iters)
+        alphas_3 = np.linspace(min_lr, min_lr / 100, num=phase_3_iters)
 
         sigmas_1 = np.linspace(self.max_sigma, self.max_sigma, num=phase_1_iters + phase_2_iters)
         sigmas_3 = np.linspace(self.max_sigma, self.min_sigma, num=phase_3_iters)

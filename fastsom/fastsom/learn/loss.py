@@ -16,6 +16,7 @@ __all__ = [
     "BackwardRedirectTensor",
 ]
 
+
 class SomLoss(Callable):
     "Wraps a loss function, passing it the som module."
 

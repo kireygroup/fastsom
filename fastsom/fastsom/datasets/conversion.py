@@ -34,7 +34,7 @@ def tabular_ds_to_lists(ds: Dataset):
         return None, None, None
     x_cat = torch.cat([el[0].data[0].long().unsqueeze(0) for el in ds], dim=0)
     x_cont = torch.cat([el[0].data[1].float().unsqueeze(0) for el in ds], dim=0)
-    y = torch.cat([torch.tensor(el[1].data).unsqueeze(0) for el in ds], dim=0)
+    y = torch.cat([torch.tensor(el[1].data).view(1, -1) for el in ds], dim=0)
     return x_cat, x_cont, y
 
 
@@ -77,24 +77,26 @@ def to_unsupervised_databunch(data: TabularDataBunch, bs: Optional[int] = None, 
     if isinstance(tfm, FastTextCatEncoder):
         # Pass string values to FastTextCatEncoder
         train_x_cat = dataframe_fill_unknown(data.train_ds.inner_df[data.cat_names]).values
-        tfm.fit(train_x_cat, cat_names=data.cat_names)
+        tfm.fit(train_x_cat.numpy(), cat_names=data.cat_names)
         train_x_cat = tfm.make_continuous(train_x_cat.numpy())
         if valid_x_cat is not None:
             valid_x_cat = dataframe_fill_unknown(data.valid_ds.inner_df[data.cat_names]).values
             valid_x_cat = tfm.make_continuous(valid_x_cat.numpy())
     else:
         # Pass categories to other transformers
-        tfm.fit(train_x_cat, cat_names=data.cat_names)
+        tfm.fit(train_x_cat.numpy(), cat_names=data.cat_names)
         train_x_cat = tfm.make_continuous(train_x_cat.numpy())
         if valid_x_cat is not None:
             valid_x_cat = tfm.make_continuous(valid_x_cat.numpy())
 
-    train_ds = torch.cat([train_x_cat.float(), train_x_cont], dim=-1) if len(data.train_ds) > 1 else torch.tensor([])
-    valid_ds = torch.cat([valid_x_cat.float(), valid_x_cont], dim=-1) if valid_x_cat is not None and len(data.valid_ds) > 1 else torch.tensor([])
+    train_x = torch.cat([train_x_cat.float(), train_x_cont], dim=-1) if len(data.train_ds) > 1 else torch.tensor([])
+    valid_x = torch.cat([valid_x_cat.float(), valid_x_cont], dim=-1) if valid_x_cat is not None and len(data.valid_ds) > 1 else torch.tensor([])
+    train_y = ifnone(train_y, torch.tensor([]))
+    valid_y = ifnone(valid_y, torch.tensor([]))
 
     bs = ifnone(bs, data.batch_size)
 
-    return UnsupervisedDataBunch(train_ds, valid=valid_ds, bs=bs, cat_enc=tfm, **kwargs)
+    return UnsupervisedDataBunch((train_x, train_y), valid=(valid_x, valid_y), bs=bs, cat_enc=tfm, **kwargs)
 
 
 TabularDataBunch.to_unsupervised_databunch = to_unsupervised_databunch

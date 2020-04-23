@@ -42,8 +42,9 @@ def cluster_stats(x: Tensor, som: Som) -> Tuple[float]:
     return counts.float().std().log().cpu().numpy(), np.mean(max_distances), float(empty_clusters_count)
 
 
-def codebook_err(pred_b: Tensor, xb: Tensor, som: Som = None) -> Tensor:
+def codebook_err(pred_b: Tensor, yb: Tensor, som: Som = None) -> Tensor:
     "Counts the number of records not belonging to each cluster that are closer than that cluster's furthest record."
+    xb = som._recorder['xb']
     w = som.weights.view(-1, xb.shape[-1])
     distances = expanded_op(xb, w.to(device=xb.device), pdist)
     row_sz = som.size[0]
@@ -68,19 +69,21 @@ def codebook_err(pred_b: Tensor, xb: Tensor, som: Som = None) -> Tensor:
     return torch.tensor(count / n_classes / batch_size).to(device=xb.device)
 
 
-def mean_quantization_err(pred_b: Tensor, xb: Tensor, som: Som = None) -> Tensor:
+def mean_quantization_err(pred_b: Tensor, yb: Tensor, som: Som = None) -> Tensor:
     "Mean distance of each record from its respective BMU."
+    xb = som._recorder['xb']
     w = som.weights.view(-1, xb.shape[-1]).to(device=xb.device)
     row_sz = som.size[0]
     preds = idxs_2d_to_1d(pred_b, row_sz)
     return pdist(xb, w[preds], p=2).mean()
 
 
-def topologic_err(pred_b: Tensor, xb: Tensor, som: Som = None, thresh: int = 4) -> Tensor:
+def topologic_err(pred_b: Tensor, yb: Tensor, som: Som = None, thresh: int = 4) -> Tensor:
     """
     Min vec distance of each record with every class and checks if the second-to-min value belongs in the first-best neighborhood.
     If not, it gets added as an error.
     """
+    xb = som._recorder['xb']
     # Calculate distance between each element in `xb` and each weight
     distances = expanded_op(xb, som.weights.view(-1, xb.shape[-1]), pdist)
     # Get the indices of the 2 closest element (BMU and 2nd-to-BMU)

@@ -17,8 +17,8 @@ __all__ = [
 
 class SamplerType(Enum):
     "Enum used to pick PyTorch Samplers."
-    RANDOM     = 'random'
-    SHUFFLE    = 'shuffle'
+    RANDOM = 'random'
+    SHUFFLE = 'shuffle'
     SEQUENTIAL = 'seq'
 
 
