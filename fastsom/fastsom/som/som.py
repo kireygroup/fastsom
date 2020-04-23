@@ -140,7 +140,7 @@ class Som(Module):
         if self.training:
             self._recorder['diffs'] = self.diff(x, self.weights.view(-1, x.shape[-1])).view(x.shape[0], self.size[0], self.size[1], x.shape[-1])
             self._recorder['bmus'] = bmu_indices
-            self._recorder['xb'] = x.clone()
+        self._recorder['xb'] = x.clone()
 
         return bmu_indices
 

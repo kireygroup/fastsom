@@ -15,7 +15,7 @@ from fastai.basic_data import DatasetType
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import KBinsDiscretizer
 from fastprogress.fastprogress import progress_bar
-from matplotlib.colors import ListedColormap
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
 from fastsom.core import ifnone, idxs_2d_to_1d
 from fastsom.datasets import get_sampler
@@ -225,22 +225,25 @@ class SomInterpretation():
             # Calculate unique label counts
             unique_labels, label_counts = bmu_labels.unique(return_counts=True)
             data[idx] = unique_labels[label_counts.argmax()]
+            # TODO show percentages + class color
+            # max_label = label_counts.max()
+            # data[idx] = float("{:.2f}".format(max_label.float() / float(len(bmu_labels))))
 
         # Legend labels
         unique_labels = labels.unique()
         class_names = ifnone(class_names, [str(label) for label in unique_labels.numpy()])
 
         # Color map
-        # colors = plt.cm.Pastel2(np.linspace(0, 1, len(unique_labels)))
-        # cmap = LinearSegmentedColormap.from_list('Custom', colors, len(colors))
-        palette = sns.palettes.SEABORN_PALETTES['deep6']
-        cmap = ListedColormap(palette)
+        colors = plt.cm.Pastel2(np.linspace(0, 1, len(unique_labels)))
+        cmap = LinearSegmentedColormap.from_list('Custom', colors, len(colors))
+        # palette = sns.palettes.SEABORN_PALETTES['deep6']
+        # cmap = ListedColormap(palette)
 
         f, ax = plt.subplots(figsize=(11, 9))
         # Plot the heatmap
         ax = sns.heatmap(data.view(map_size), annot=True, cmap=cmap, square=True, linewidths=.5)
 
-        # Manually specify colorbar labelling after it's been generated
+        # # Manually specify colorbar labelling after it's been generated
         colorbar = ax.collections[0].colorbar
         colorbar.set_ticks(unique_labels.numpy())
         colorbar.set_ticklabels(class_names)
