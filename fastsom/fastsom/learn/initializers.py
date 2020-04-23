@@ -17,7 +17,6 @@ __all__ = [
 
 class WeightsInitializer:
     """Weight initializer base class."""
-
     def __call__(self, x: Tensor, k: int, **kwargs) -> Tensor:
         raise NotImplementedError
 

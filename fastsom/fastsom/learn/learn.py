@@ -83,7 +83,7 @@ class SomLearner(Learner):
         init_weights: str = "random",
         trainer: Type[SomTrainer] = ExperimentalSomTrainer,
         trainer_args: Dict = dict(),
-        lr: Collection[float] = (0.09, 0.03),
+        lr: Collection[float] = [0.6],
         visualize: List[str] = [],
         metrics: Collection[Callable] = None,
         callbacks: Collection[Callback] = None,

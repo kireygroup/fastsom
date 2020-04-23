@@ -130,7 +130,6 @@ class ExperimentalSomTrainer(SomTrainer):
         self.epoch, self.n_epochs = -1, -1
         self.alphas = []
         self.sigmas = []
-        self.neigh_fns = []
         self.iter = 0
         self.update_on_batch = ifindict(kwargs, 'update_on_batch', False)
 
@@ -159,17 +158,10 @@ class ExperimentalSomTrainer(SomTrainer):
         self.alphas = np.concatenate([alphas_1, alphas_2, alphas_3], axis=0)
         self.sigmas = np.concatenate([sigmas_1, sigmas_2, sigmas_3], axis=0)
 
-        phase_1_neighs = [neigh_gauss for _ in range(phase_1_iters)]
-        phase_2_neighs = [neigh_square for _ in range(phase_2_iters)]
-        phase_3_neighs = [neigh_square for _ in range(phase_3_iters)]
-
-        self.neigh_fns = phase_1_neighs + phase_2_neighs + phase_3_neighs
-
     def step(self):
         """Advances one step in the training schedule."""
         self.model.alpha = torch.tensor(self.alphas[self.iter])
         self.model.sigma = torch.tensor(self.sigmas[self.iter])
-        # self.model.neigh_fn = self.neigh_fns[self.iter]
         self.iter += 1
 
     def on_batch_begin(self, **kwargs):

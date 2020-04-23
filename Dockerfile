@@ -12,11 +12,11 @@ ARG SSH_USER=root
 ARG SSH_PASS=password
 
 # Install and configure SSH with authentication
-RUN apt-get update \
-    && apt-get install -y openssh-server netcat \
-    && mkdir /var/run/sshd \
-    && echo "${SSH_USER}:${SSH_PASS}" | chpasswd \
-    && sed -i 's/\#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+# RUN apt-get update \
+#     && apt-get install -y openssh-server netcat \
+#     && mkdir /var/run/sshd \
+#     && echo "${SSH_USER}:${SSH_PASS}" | chpasswd \
+#     && sed -i 's/\#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 
 
 # Install Jupyter Notebook

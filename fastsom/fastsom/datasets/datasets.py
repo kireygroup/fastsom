@@ -85,7 +85,7 @@ class UnsupervisedDataBunch(DataBunch):
             # Create data loaders + wrap samplers into batch samplers
             train_dl = DataLoader(train_ds, sampler=train_smp, batch_size=bs)
             valid_dl = DataLoader(valid_ds, sampler=valid_smp, batch_size=bs)
-        
+
         # Initialize Fastai's DataBunch
         super().__init__(
             train_dl,
@@ -109,17 +109,33 @@ class UnsupervisedDataBunch(DataBunch):
         return data.to_unsupervised_databunch(bs=bs, cat_enc=cat_enc)
 
     @classmethod
-    def from_df(cls, df: pd.DataFrame, cat_names: List[str], cont_names: List[str], bs: Optional[int] = None, cat_enc: Union[CatEncoderTypeOrString, CatEncoder] = "onehot"):
+    def from_df(cls, df: pd.DataFrame, cat_names: List[str], cont_names: List[str], dep_var: str, bs: int = 128, valid_pct: float = 0.2, cat_enc: Union[CatEncoderTypeOrString, CatEncoder] = "onehot"):
         """
         Creates a new UnsupervisedDataBunch from a DataFrame.
 
         Parameters
         ----------
-        TODO
+        df : pd.Dataframe
+            The source DataFrame.
+        cat_names : List[str]
+            Categorical feature names.
+        cont_names : List[str]
+            Continuous feature names.
+        dep_var : str
+            The target variable.
+        bs: int default=128
+            The batch size.
+        valid_pct : float default=0.2
+            Validation split percentage.
+        cat_enc : Union[CatEncoderTypeOrString, CatEncoder] default='onehot'
+            Categorical encoder.
         """
         procs = [FillMissing, Categorify, Normalize]
-        learn_tab = TabularList.from_df(df, path='.', cat_names=cat_names, cont_names=cont_names, procs=procs).databunch(bs=bs, num_workers=0)
-        return learn_tab.to_unsupervised_databunch(bs=bs, cat_enc=cat_enc)
+        tabular_data = TabularList.from_df(df, path='.', cat_names=cat_names, cont_names=cont_names, procs=procs) \
+            .split_by_rand_pct(valid_pct) \
+            .label_from_df(cols=dep_var) \
+            .databunch(bs=bs, num_workers=0)
+        return tabular_data.to_unsupervised_databunch(bs=bs, cat_enc=cat_enc)
 
     def normalize(self, normalizer: str = "var") -> None:
         """
