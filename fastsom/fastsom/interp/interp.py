@@ -1,6 +1,6 @@
 """
 This file contains interpretation
-utilities for Self-Organizing Maps
+utilities for Self-Organizing Maps.
 """
 import math
 import torch
@@ -10,12 +10,15 @@ import matplotlib.pyplot as plt
 
 from torch import Tensor
 from torch.utils.data import TensorDataset, BatchSampler
-from typing import Optional, List, Collection, Union
+from typing import Optional, List, Union
+from fastai.basic_data import DatasetType
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import KBinsDiscretizer
 from fastprogress.fastprogress import progress_bar
+from matplotlib.colors import ListedColormap
 
-from fastsom.core import ifnone, listify
-from fastsom.datasets import UnsupervisedDataBunch, get_sampler
+from fastsom.core import ifnone, idxs_2d_to_1d
+from fastsom.datasets import get_sampler
 
 
 __all__ = [
@@ -28,7 +31,7 @@ class SomInterpretation():
     SOM interpretation utility.
 
     Displays various information about a trained Self-Organizing Map, such as
-    topological weight distribution, features distribution and training set 
+    topological weight distribution, features distribution and training set
     distribution over the map.
 
     Parameters
@@ -157,25 +160,88 @@ class SomInterpretation():
             sns.heatmap(w[:, d].reshape(self.learn.model.size[:-1]), ax=ax, annot=True)
         fig.show()
 
-    def show_weights(self, save: bool = False):
+    def show_weights(self, save: bool = False) -> None:
         """
         Shows a colored heatmap of the SOM codebooks.
+        data = idxs_1d_to_2d(data, self.learn.model.size[1])
 
         Parameters
         ----------
         save : bool default=False
             If True, saves the heatmap into a file.
         """
+        image_shape = (self.learn.model.size[0], self.learn.model.size[1], 3)
         if self.w.shape[-1] != 3:
             if self.pca is None:
                 self._init_pca()
             # Calculate the 3-layer PCA of the weights
-            d = self.pca.transform(self.w).reshape(*self.learn.model.size[:-1], 3)
+            d = self.pca.transform(self.w).reshape(*image_shape)
         else:
-            d = self.w.reshape(*self.learn.model.size[:-1], 3)
+            d = self.w
 
         # Rescale values into the RGB space (0, 255)
         def rescale(d): return ((d - d.min(0)) / d.ptp(0) * 255).astype(int)
-        d = rescale(self.w)
+        d = rescale(d)
         # Show weights
-        plt.imshow(d.reshape(self.learn.model.size))
+        plt.imshow(d.reshape(image_shape))
+
+    def show_preds(self, ds_type: DatasetType = DatasetType.Train, class_names: List[str] = None, n_bins: int = 5, save: bool = False, ) -> None:
+        """
+        Displays most frequent label for each map position in `ds_type` dataset.
+        If labels are countinuous, binning on `n_bins` is performed.
+
+        Parameters
+        ----------
+        ds_type : DatasetType default=DatasetType.Train
+            The enum of the dataset to be used.
+        n_bins : int default=5
+            The number of bins to use when labels are continous.
+        save : bool default=False
+            Whether or not the output chart should be saved on a file.
+        """
+        if not self.learn.data.has_labels:
+            raise RuntimeError('Unable to show predictions for a dataset that has no labels. \
+                Please pass labels when creating the `UnsupervisedDataBunch` or use `interp.show_hitmap()`')
+        # Run model predictions
+        preds, labels = self.learn.get_preds(ds_type)
+
+        if 'float' in str(labels.dtype):
+            # Split labels into bins
+            labels = KBinsDiscretizer(n_bins=n_bins, encode='ordinal').fit_transform(labels.numpy())
+            labels = torch.tensor(labels)
+
+        map_size = (self.learn.model.size[0], self.learn.model.size[1])
+
+        # Data placeholder
+        data = torch.zeros(map_size[0] * map_size[1])
+
+        # Transform BMU indices to 1D for easier processing
+        preds_1d = idxs_2d_to_1d(preds, map_size[0])
+        unique_bmus = preds_1d.unique(dim=0)
+
+        for idx, bmu in enumerate(unique_bmus):
+            # Get labels corresponding to this BMU
+            bmu_labels = labels[(preds_1d == bmu).nonzero()]
+            # Calculate unique label counts
+            unique_labels, label_counts = bmu_labels.unique(return_counts=True)
+            data[idx] = unique_labels[label_counts.argmax()]
+
+        # Legend labels
+        unique_labels = labels.unique()
+        class_names = ifnone(class_names, [str(label) for label in unique_labels.numpy()])
+
+        # Color map
+        # colors = plt.cm.Pastel2(np.linspace(0, 1, len(unique_labels)))
+        # cmap = LinearSegmentedColormap.from_list('Custom', colors, len(colors))
+        palette = sns.palettes.SEABORN_PALETTES['deep6']
+        cmap = ListedColormap(palette)
+
+        f, ax = plt.subplots(figsize=(11, 9))
+        # Plot the heatmap
+        ax = sns.heatmap(data.view(map_size), annot=True, cmap=cmap, square=True, linewidths=.5)
+
+        # Manually specify colorbar labelling after it's been generated
+        colorbar = ax.collections[0].colorbar
+        colorbar.set_ticks(unique_labels.numpy())
+        colorbar.set_ticklabels(class_names)
+        plt.show()
