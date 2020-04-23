@@ -5,7 +5,7 @@ import torch
 from torch import Tensor
 from fastai.torch_core import Module
 from functools import partial
-from typing import Tuple, Callable, Optional, List
+from typing import Tuple, Callable
 
 from ..core import index_tensor, expanded_op, ifnone
 
@@ -19,6 +19,7 @@ __all__ = [
     "neigh_diff_toroidal",
     "pnorm",
     "pdist",
+    "pcosim",
     "manhattan_dist",
 ]
 
@@ -26,22 +27,83 @@ __all__ = [
 SomSize2D = Tuple[int, int, int]
 
 
+def pcosim(a: Tensor, b: Tensor, p: int = 2) -> Tensor:
+    """
+    Calculates the cosine similarity of order `p` between `a` and `b`.
+    Assumes tensor shapes are compatible.
+
+    Parameters
+    ----------
+    a : Tensor
+        The first tensor
+    b : Tensor
+        The second tensor
+    p : int default=2
+        The order.
+    """
+    return (a * b).sum(-1) / pnorm(a, p=p) * pnorm(b, p=p)
+
+
 def pnorm(a: Tensor, p: int = 2) -> Tensor:
-    """Calculates the p-norm of `a`."""
+    """
+    Calculates the norm of order `p` of tensor `a`.
+
+    Parameters
+    ----------
+    a : Tensor
+        The input tensor
+    p : int default=2
+        The order.
+    """
     return a.abs().pow(p).sum(-1).pow(1 / p)
 
 
 def pdist(a: Tensor, b: Tensor, p: int = 2) -> Tensor:
-    """Calculates the p-distance between `a` and `b`."""
+    """
+    Calculates the distance of order `p` between `a` and `b`.
+    Assumes tensor shapes are compatible.
+
+    Parameters
+    ----------
+    a : Tensor
+        The first tensor
+    b : Tensor
+        The second tensor
+    p : int default=2
+        The order.
+    """
     return pnorm(a - b, p=p)
 
 
 def manhattan_dist(a: Tensor, b: Tensor) -> Tensor:
-    """Calculates the Manhattan distance of `a` and `b`."""
+    """
+    Calculates the Manhattan distance (order 1 p-distance) between `a` and `b`.
+    Assumes tensor shapes are compatible.
+
+    Parameters
+    ----------
+    a : Tensor
+        The first tensor
+    b : Tensor
+        The second tensor
+    p : int default=2
+        The order.
+    """
     return pdist(a, b, p=1)
 
 
 def neigh_gauss(position_diff: Tensor, sigma: Tensor) -> Tensor:
+    """
+    Gaussian neighborhood scaling function based on center-wise \
+        diff `position_diff` and radius `sigma`.
+
+    Parameters
+    ----------
+    position_diff : Tensor
+        The positional difference around some center.
+    sigma : Tensor
+        The scaling radius.
+    """
     """Calculates the gaussian of `position_diff` with `sigma` scaling."""
     v = pnorm(position_diff, p=2)
     return torch.exp(torch.neg(v.pow(2) / sigma.pow(2)))
@@ -49,28 +111,68 @@ def neigh_gauss(position_diff: Tensor, sigma: Tensor) -> Tensor:
 
 def neigh_rhomb(position_diff: Tensor, sigma: Tensor) -> Tensor:
     """
-    Calculates a rhomb-shaped scaler using `position_diff` and `sigma`.\n
-    Note: Manhattan distance should be used with this neighborhood function.
+    Diamond-shaped neighborhood function based on center-wise diff `position_diff` and radius `sigma`.
+    Note: Manhattan distance should be used with this function.
+
+    Parameters
+    ----------
+    position_diff : Tensor
+        The positional difference around some center.
+    sigma : Tensor
+        The scaling radius.
     """
     v = pnorm(position_diff, p=1)
     return torch.exp(torch.neg(torch.sqrt(v) / sigma))
 
 
 def neigh_square(position_diff: Tensor, sigma: Tensor) -> Tensor:
-    """Calculates a square-shaped scaler using `v` and `sigma`."""
+    """
+    Square-shaped neighborhood scaling function based on center-wise diff `position_diff` and radius `sigma`.
+
+    Parameters
+    ----------
+    position_diff : Tensor
+        The positional difference around some center.
+    sigma : Tensor
+        The scaling radius.
+    """
     v = (position_diff).abs().max(-1)[0]
     # v = pnorm(position_diff, p=2)
     return torch.exp(torch.neg(v.sqrt() / sigma))
 
 
 def neigh_diff_standard(bmus: Tensor, positions: Tensor) -> Tensor:
-    """Calculates the difference between the expanded versions of the batch BMU indices and map indices."""
+    """
+    Positional difference function.
+    Computes index difference between Best Matching Units (`bmus`) and `positions`, where `positions` 
+    are indices of elements inside the SOM grid.
+
+    Parameters
+    ----------
+    bmus : Tensor
+        The list of Best Matching Units (2D indices)
+    positions : Tensor
+        The 2D tensor of grid element indices 
+    """
     return bmus - positions
 
 
-def neigh_diff_toroidal(bmus: Tensor, positions: Tensor, map_size: SomSize2D = None) -> Tensor:
-    """Calculates the toroidal difference between the expanded versions of the batch BMU indices and map indices."""
-    ms = torch.tensor(map_size[:-1])
+def neigh_diff_toroidal(bmus: Tensor, positions: Tensor, map_size: Tuple[int, int] = None) -> Tensor:
+    """
+    Positional difference function.
+    Computes toroidal (wraparound) difference between Best Matching Units (`bmus`) and `positions`, where `positions` 
+    are indices of elements inside the SOM grid.
+
+    Parameters
+    ----------
+    bmus : Tensor
+        The list of Best Matching Units (2D indices)
+    positions : Tensor
+        The 2D tensor of grid element indices
+    map_size : Tuple[int, int] = None
+        The SOM size. Used to pick shortest distance between indices.
+    """
+    ms = torch.tensor(map_size)
     # Calculate diff between x coordinate and y coordinate
     dx = (bmus[..., 0] - positions[..., 0]).abs().unsqueeze(-1)
     dy = (bmus[..., 1] - positions[..., 1]).abs().unsqueeze(-1)
@@ -120,8 +222,9 @@ class Som(Module):
         self.after_weight_init()
         self._recorder = dict()
 
+        # Pass map size to toroidal index diff
         if self.neigh_diff_fn.__name__ == 'neigh_diff_toroidal':
-            self.neigh_diff_fn = partial(self.neigh_diff_fn, map_size=self.size)
+            self.neigh_diff_fn = partial(self.neigh_diff_fn, map_size=self.size[:-1])
 
     def forward(self, x: Tensor) -> Tensor:
         "Calculates distances between elements in `x` and `weights`; computes BMUs and returns them."

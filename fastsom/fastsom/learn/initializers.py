@@ -17,6 +17,7 @@ __all__ = [
 
 class WeightsInitializer:
     """Weight initializer base class."""
+
     def __call__(self, x: Tensor, k: int, **kwargs) -> Tensor:
         raise NotImplementedError
 
@@ -30,6 +31,7 @@ class KMeansInitializer(WeightsInitializer):
     distance : str default='euclidean'
         The type of distance function to be used. Can be `euclidean` or `cosine`.
     """
+
     def __init__(self, distance: str = "euclidean"):
         self.distance = distance
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
@@ -53,8 +55,9 @@ class KMeansInitializer(WeightsInitializer):
 
 class RandomInitializer(WeightsInitializer):
     """
-    Initializes SOM weights randomly.
+    Initializes weights randomly.
     """
+
     def __call__(self, x: Tensor, k: int, **kwargs) -> Tensor:
         """
         Uniform random  weight initialization.

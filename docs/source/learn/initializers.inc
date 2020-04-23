@@ -2,7 +2,7 @@
 .. currentmodule:: fastsom.learn.initializers
 
 
-.. autoclass:: SomInitializer
+.. autoclass:: WeightsInitializer
    :members:
 .. autoclass:: KMeansInitializer
    :members:

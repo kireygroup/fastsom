@@ -164,6 +164,9 @@ class SomBmuVisualizer(Callback):
         self.total_counts = torch.zeros(self.model.size[0] * self.model.size[1])
         self.fig, self.ax = None, None
 
+    def on_train_begin(self, **kwargs):
+        self.fig = plt.figure()
+
     def on_batch_end(self, **kwargs):
         "Saves BMU hit counts for this batch."
         bmus = self.model._recorder['bmus']
@@ -186,8 +189,7 @@ class SomBmuVisualizer(Callback):
     def _update_plot(self, **kwargs):
         "Updates the plot."
         imsize = self.model.size[:-1]
-        if self.fig is None:
-            self.fig = plt.figure()
+        if self.ax is None:
             self.ax = plt.imshow(self.epoch_counts.view(imsize).cpu().numpy())
             self.fig.show()
         else:
