@@ -8,15 +8,19 @@ You can find documentation and examples [here](https://kireygroup.github.io/fast
 
 ## Contents
 
-- [Getting started](#getting-started)
-  - [Install as a dependency](#install-as-a-dependency)
-- [Docker boilerplate](#docker-boilerplate)
-  - [Prerequisites](#prerequisites)
-  - [Building the image](#building-the-image)
-  - [Running the container](#running-the-container)
-  - [Project Structure](#project-structure)
-  - [Developing inside the container](#developing-inside-the-container)
-- [Documentation setup](#documentation-setup)
+- [Fastsom](#fastsom)
+  - [Contents](#contents)
+  - [Getting started](#getting-started)
+    - [Install as a dependency](#install-as-a-dependency)
+  - [Docker boilerplate](#docker-boilerplate)
+    - [Prerequisites](#prerequisites)
+    - [Building the image](#building-the-image)
+    - [Running the container](#running-the-container)
+    - [Developing inside the container](#developing-inside-the-container)
+  - [Documentation setup](#documentation-setup)
+    - [Documenting the code](#documenting-the-code)
+    - [Building the docs](#building-the-docs)
+    - [Deploying the docs on GH Pages](#deploying-the-docs-on-gh-pages)
 
 
 
@@ -24,7 +28,7 @@ You can find documentation and examples [here](https://kireygroup.github.io/fast
 
 ### Install as a dependency
 
-To install Fastsom, you can use `pip` to install the [PyPi package](https://pypi.org/):
+To install Fastsom, you can use `pip` to install the [PyPi package](https://pypi.org/project/fastsom/):
 
 ```bash
 pip install fastsom
@@ -82,14 +86,6 @@ The container will start a new Jupyter Notebook server on port 8888. Jupyter Lab
 
 Note that the `fastsom` folder will be mounted inside the container, so any change you make to the source files or notebooks will be replicated on both host and container.
 
-### Project Structure
-
-```text
-bin/
-fastsom/
-    nbs/
-    fastsom/
-```
 
 ### Developing inside the container
 

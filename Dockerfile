@@ -3,7 +3,6 @@ FROM nvcr.io/nvidia/pytorch:20.02-py3
 RUN apt-get update
 RUN apt-get install build-essential -y
 
-
 # Install unzip
 RUN apt-get install -y unzip
 
@@ -34,7 +33,7 @@ RUN jupyter labextension install jupyterlab-nvdashboard
 
 # Copy over files & install requirements
 RUN mkdir -p /proj
-COPY fastsom/requirements.txt /proj/requirements.txt
+COPY requirements.txt /proj/requirements.txt
 WORKDIR /proj
 RUN pip install -r requirements.txt
 
@@ -47,6 +46,5 @@ RUN chmod +x -R /scripts/
 EXPOSE 8888
 # SSH
 EXPOSE 22
-
 
 CMD ["bash", "/scripts/start.sh"]
