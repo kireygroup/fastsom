@@ -1,20 +1,13 @@
-import os
 from setuptools import setup, find_packages
-from shutil import copyfile
-
-copyfile('setup.py', 'fastsom/setup.py')
-copyfile('README.md', 'fastsom/README.md')
-
-os.chdir('fastsom')
 
 # Retrieve description from README.md
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='fastsom',
-      version='0.1.3',
+      version='0.1.4',
       url='https://github.com/kireygroup/fastsom',
-      download_url='https://github.com/kireygroup/fastsom/archive/v0.1.3.tar.gz',
+      download_url='https://github.com/kireygroup/fastsom/archive/v0.1.4.tar.gz',
       license='MIT',
       author='Riccardo Sayn',
       author_email='riccardo.sayn@kireygroup.com',
@@ -36,6 +29,3 @@ setup(name='fastsom',
           'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7'
       ])
-
-os.remove("setup.py")
-os.remove("README.md")
