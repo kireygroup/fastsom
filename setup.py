@@ -3,7 +3,6 @@ from setuptools import setup, find_packages
 from shutil import copyfile
 
 copyfile('setup.py', 'fastsom/setup.py')
-copyfile('setup.py', 'fastsom/README.md')
 
 os.chdir('fastsom')
 
@@ -18,7 +17,6 @@ setup(name='fastsom',
       packages=find_packages(),
       install_requires=['fastai', 'sklearn', 'kmeans_pytorch', 'seaborn', 'smart-open==1.8.0', 'gensim==3.7.1'],
       keywords=['self-organizing-map', 'fastai', 'pytorch', 'python'],
-      long_description=open('README.md').read(),
       zip_safe=False,
       classifiers=[
           'Development Status :: 3 - Alpha',
@@ -33,4 +31,3 @@ setup(name='fastsom',
       ])
 
 os.remove("setup.py")
-os.remove("README.md")
