@@ -234,7 +234,15 @@
 <dl class="py function">
 <dt id="fastsom.som.som.neigh_gauss">
 <code class="sig-prename descclassname">fastsom.som.som.</code><code class="sig-name descname">neigh_gauss</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">position_diff</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">sigma</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/som.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.som.neigh_gauss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the gaussian of <cite>position_diff</cite> with <cite>sigma</cite> scaling.</p>
+<dd><p>Gaussian neighborhood scaling function based on center-wise         diff <cite>position_diff</cite> and radius <cite>sigma</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position_diff</strong> (<em>Tensor</em>) – The positional difference around some center.</p></li>
+<li><p><strong>sigma</strong> (<em>Tensor</em>) – The scaling radius.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -243,7 +251,15 @@
 <dl class="py function">
 <dt id="fastsom.som.som.neigh_square">
 <code class="sig-prename descclassname">fastsom.som.som.</code><code class="sig-name descname">neigh_square</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">position_diff</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">sigma</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/som.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.som.neigh_square" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates a square-shaped scaler using <cite>v</cite> and <cite>sigma</cite>.</p>
+<dd><p>Square-shaped neighborhood scaling function based on center-wise diff <cite>position_diff</cite> and radius <cite>sigma</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position_diff</strong> (<em>Tensor</em>) – The positional difference around some center.</p></li>
+<li><p><strong>sigma</strong> (<em>Tensor</em>) – The scaling radius.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -252,8 +268,16 @@
 <dl class="py function">
 <dt id="fastsom.som.som.neigh_rhomb">
 <code class="sig-prename descclassname">fastsom.som.som.</code><code class="sig-name descname">neigh_rhomb</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">position_diff</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">sigma</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/som.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.som.neigh_rhomb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates a rhomb-shaped scaler using <cite>position_diff</cite> and <cite>sigma</cite>.</p>
-<p>Note: Manhattan distance should be used with this neighborhood function.</p>
+<dd><p>Diamond-shaped neighborhood function based on center-wise diff <cite>position_diff</cite> and radius <cite>sigma</cite>.
+Note: Manhattan distance should be used with this function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position_diff</strong> (<em>Tensor</em>) – The positional difference around some center.</p></li>
+<li><p><strong>sigma</strong> (<em>Tensor</em>) – The scaling radius.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -265,7 +289,17 @@
 <dl class="py function">
 <dt id="fastsom.som.som.neigh_diff_standard">
 <code class="sig-prename descclassname">fastsom.som.som.</code><code class="sig-name descname">neigh_diff_standard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bmus</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">positions</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/som.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.som.neigh_diff_standard" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the difference between the expanded versions of the batch BMU indices and map indices.</p>
+<dd><p>Positional difference function.
+Computes index difference between Best Matching Units (<cite>bmus</cite>) and <cite>positions</cite>, where <cite>positions</cite>
+are indices of elements inside the SOM grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bmus</strong> (<em>Tensor</em>) – The list of Best Matching Units (2D indices)</p></li>
+<li><p><strong>positions</strong> (<em>Tensor</em>) – The 2D tensor of grid element indices</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -273,8 +307,19 @@
 <h3><span class="hidden-section">neigh_diff_toroidal</span><a class="headerlink" href="#neigh-diff-toroidal" title="Permalink to this headline">¶</a></h3>
 <dl class="py function">
 <dt id="fastsom.som.som.neigh_diff_toroidal">
-<code class="sig-prename descclassname">fastsom.som.som.</code><code class="sig-name descname">neigh_diff_toroidal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bmus</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">positions</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">map_size</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/som.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.som.neigh_diff_toroidal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the toroidal difference between the expanded versions of the batch BMU indices and map indices.</p>
+<code class="sig-prename descclassname">fastsom.som.som.</code><code class="sig-name descname">neigh_diff_toroidal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bmus</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">positions</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">map_size</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/som.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.som.neigh_diff_toroidal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Positional difference function.
+Computes toroidal (wraparound) difference between Best Matching Units (<cite>bmus</cite>) and <cite>positions</cite>, where <cite>positions</cite>
+are indices of elements inside the SOM grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bmus</strong> (<em>Tensor</em>) – The list of Best Matching Units (2D indices)</p></li>
+<li><p><strong>positions</strong> (<em>Tensor</em>) – The 2D tensor of grid element indices</p></li>
+<li><p><strong>map_size</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>] </em><em>= None</em>) – The SOM size. Used to pick shortest distance between indices.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -286,7 +331,15 @@
 <dl class="py function">
 <dt id="fastsom.som.som.pnorm">
 <code class="sig-prename descclassname">fastsom.som.som.</code><code class="sig-name descname">pnorm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">p</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/som.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.som.pnorm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the p-norm of <cite>a</cite>.</p>
+<dd><p>Calculates the norm of order <cite>p</cite> of tensor <cite>a</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>Tensor</em>) – The input tensor</p></li>
+<li><p><strong>p</strong> (<em>int default=2</em>) – The order.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -295,7 +348,36 @@
 <dl class="py function">
 <dt id="fastsom.som.som.pdist">
 <code class="sig-prename descclassname">fastsom.som.som.</code><code class="sig-name descname">pdist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">b</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">p</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/som.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.som.pdist" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the p-distance between <cite>a</cite> and <cite>b</cite>.</p>
+<dd><p>Calculates the distance of order <cite>p</cite> between <cite>a</cite> and <cite>b</cite>.
+Assumes tensor shapes are compatible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>Tensor</em>) – The first tensor</p></li>
+<li><p><strong>b</strong> (<em>Tensor</em>) – The second tensor</p></li>
+<li><p><strong>p</strong> (<em>int default=2</em>) – The order.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="pcosim">
+<h3><span class="hidden-section">pcosim</span><a class="headerlink" href="#pcosim" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="fastsom.som.som.pcosim">
+<code class="sig-prename descclassname">fastsom.som.som.</code><code class="sig-name descname">pcosim</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">b</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">p</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/som.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.som.pcosim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the cosine similarity of order <cite>p</cite> between <cite>a</cite> and <cite>b</cite>.
+Assumes tensor shapes are compatible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>Tensor</em>) – The first tensor</p></li>
+<li><p><strong>b</strong> (<em>Tensor</em>) – The second tensor</p></li>
+<li><p><strong>p</strong> (<em>int default=2</em>) – The order.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

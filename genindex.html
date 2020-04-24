@@ -202,6 +202,7 @@
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  
 </div>
 <h2 id="C">C</h2>
@@ -265,9 +266,13 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="datasets/datasets.html#fastsom.datasets.datasets.UnsupervisedDataBunch.from_df">from_df() (fastsom.datasets.datasets.UnsupervisedDataBunch class method)</a>
+</li>
       <li><a href="interp/interp.html#fastsom.interp.interp.SomInterpretation.from_learner">from_learner() (fastsom.interp.interp.SomInterpretation class method)</a>
 </li>
       <li><a href="learn/learn.html#fastsom.learn.callbacks.SomTrainer.from_model">from_model() (fastsom.learn.callbacks.SomTrainer class method)</a>
+</li>
+      <li><a href="datasets/datasets.html#fastsom.datasets.datasets.UnsupervisedDataBunch.from_tabular_databunch">from_tabular_databunch() (fastsom.datasets.datasets.UnsupervisedDataBunch class method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -385,15 +390,15 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="interp/interp.html#fastsom.interp.viz.SomScatterVisualizer.on_batch_begin">on_batch_begin() (fastsom.interp.viz.SomScatterVisualizer method)</a>
+      <li><a href="interp/interp.html#fastsom.interp.viz.SomTrainingViz.on_batch_begin">on_batch_begin() (fastsom.interp.viz.SomTrainingViz method)</a>
 
       <ul>
         <li><a href="learn/learn.html#fastsom.learn.callbacks.ExperimentalSomTrainer.on_batch_begin">(fastsom.learn.callbacks.ExperimentalSomTrainer method)</a>
 </li>
       </ul></li>
-      <li><a href="interp/interp.html#fastsom.interp.viz.SomBmuVisualizer.on_batch_end">on_batch_end() (fastsom.interp.viz.SomBmuVisualizer method)</a>
+      <li><a href="interp/interp.html#fastsom.interp.viz.SomBmuViz.on_batch_end">on_batch_end() (fastsom.interp.viz.SomBmuViz method)</a>
 </li>
-      <li><a href="interp/interp.html#fastsom.interp.viz.SomScatterVisualizer.on_epoch_begin">on_epoch_begin() (fastsom.interp.viz.SomScatterVisualizer method)</a>
+      <li><a href="interp/interp.html#fastsom.interp.viz.SomTrainingViz.on_epoch_begin">on_epoch_begin() (fastsom.interp.viz.SomTrainingViz method)</a>
 
       <ul>
         <li><a href="learn/learn.html#fastsom.learn.callbacks.ExperimentalSomTrainer.on_epoch_begin">(fastsom.learn.callbacks.ExperimentalSomTrainer method)</a>
@@ -403,18 +408,20 @@
         <li><a href="learn/learn.html#fastsom.learn.callbacks.TwoPhaseSomTrainer.on_epoch_begin">(fastsom.learn.callbacks.TwoPhaseSomTrainer method)</a>
 </li>
       </ul></li>
-      <li><a href="interp/interp.html#fastsom.interp.viz.SomBmuVisualizer.on_epoch_end">on_epoch_end() (fastsom.interp.viz.SomBmuVisualizer method)</a>
+      <li><a href="interp/interp.html#fastsom.interp.viz.SomBmuViz.on_epoch_end">on_epoch_end() (fastsom.interp.viz.SomBmuViz method)</a>
 
       <ul>
-        <li><a href="interp/interp.html#fastsom.interp.viz.SomStatsVisualizer.on_epoch_end">(fastsom.interp.viz.SomStatsVisualizer method)</a>
+        <li><a href="interp/interp.html#fastsom.interp.viz.SomHyperparamsViz.on_epoch_end">(fastsom.interp.viz.SomHyperparamsViz method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="interp/interp.html#fastsom.interp.viz.SomScatterVisualizer.on_train_begin">on_train_begin() (fastsom.interp.viz.SomScatterVisualizer method)</a>
+      <li><a href="interp/interp.html#fastsom.interp.viz.SomBmuViz.on_train_begin">on_train_begin() (fastsom.interp.viz.SomBmuViz method)</a>
 
       <ul>
-        <li><a href="interp/interp.html#fastsom.interp.viz.SomStatsVisualizer.on_train_begin">(fastsom.interp.viz.SomStatsVisualizer method)</a>
+        <li><a href="interp/interp.html#fastsom.interp.viz.SomHyperparamsViz.on_train_begin">(fastsom.interp.viz.SomHyperparamsViz method)</a>
+</li>
+        <li><a href="interp/interp.html#fastsom.interp.viz.SomTrainingViz.on_train_begin">(fastsom.interp.viz.SomTrainingViz method)</a>
 </li>
         <li><a href="learn/learn.html#fastsom.learn.callbacks.ExperimentalSomTrainer.on_train_begin">(fastsom.learn.callbacks.ExperimentalSomTrainer method)</a>
 </li>
@@ -423,10 +430,10 @@
         <li><a href="learn/learn.html#fastsom.learn.callbacks.TwoPhaseSomTrainer.on_train_begin">(fastsom.learn.callbacks.TwoPhaseSomTrainer method)</a>
 </li>
       </ul></li>
-      <li><a href="interp/interp.html#fastsom.interp.viz.SomBmuVisualizer.on_train_end">on_train_end() (fastsom.interp.viz.SomBmuVisualizer method)</a>
+      <li><a href="interp/interp.html#fastsom.interp.viz.SomBmuViz.on_train_end">on_train_end() (fastsom.interp.viz.SomBmuViz method)</a>
 
       <ul>
-        <li><a href="interp/interp.html#fastsom.interp.viz.SomScatterVisualizer.on_train_end">(fastsom.interp.viz.SomScatterVisualizer method)</a>
+        <li><a href="interp/interp.html#fastsom.interp.viz.SomTrainingViz.on_train_end">(fastsom.interp.viz.SomTrainingViz method)</a>
 </li>
       </ul></li>
       <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.OneHotCatEncoder">OneHotCatEncoder (class in fastsom.datasets.cat_encoders)</a>
@@ -437,10 +444,12 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="som.html#fastsom.som.som.pdist">pdist() (in module fastsom.som.som)</a>
+      <li><a href="som.html#fastsom.som.som.pcosim">pcosim() (in module fastsom.som.som)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="som.html#fastsom.som.som.pdist">pdist() (in module fastsom.som.som)</a>
+</li>
       <li><a href="som.html#fastsom.som.som.pnorm">pnorm() (in module fastsom.som.som)</a>
 </li>
   </ul></td>
@@ -463,25 +472,25 @@
 </li>
       <li><a href="interp/interp.html#fastsom.interp.interp.SomInterpretation.show_hitmap">show_hitmap() (fastsom.interp.interp.SomInterpretation method)</a>
 </li>
+      <li><a href="interp/interp.html#fastsom.interp.interp.SomInterpretation.show_preds">show_preds() (fastsom.interp.interp.SomInterpretation method)</a>
+</li>
       <li><a href="interp/interp.html#fastsom.interp.interp.SomInterpretation.show_weights">show_weights() (fastsom.interp.interp.SomInterpretation method)</a>
 </li>
       <li><a href="som.html#fastsom.som.som.Som">Som (class in fastsom.som.som)</a>
 </li>
-      <li><a href="interp/interp.html#fastsom.interp.viz.SomBmuVisualizer">SomBmuVisualizer (class in fastsom.interp.viz)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="learn/learn.html#fastsom.learn.initializers.SomInitializer">SomInitializer (class in fastsom.learn.initializers)</a>
+      <li><a href="interp/interp.html#fastsom.interp.viz.SomBmuViz">SomBmuViz (class in fastsom.interp.viz)</a>
+</li>
+      <li><a href="interp/interp.html#fastsom.interp.viz.SomHyperparamsViz">SomHyperparamsViz (class in fastsom.interp.viz)</a>
 </li>
       <li><a href="interp/interp.html#fastsom.interp.interp.SomInterpretation">SomInterpretation (class in fastsom.interp.interp)</a>
 </li>
       <li><a href="learn/learn.html#fastsom.learn.learn.SomLearner">SomLearner (class in fastsom.learn.learn)</a>
 </li>
-      <li><a href="interp/interp.html#fastsom.interp.viz.SomScatterVisualizer">SomScatterVisualizer (class in fastsom.interp.viz)</a>
-</li>
-      <li><a href="interp/interp.html#fastsom.interp.viz.SomStatsVisualizer">SomStatsVisualizer (class in fastsom.interp.viz)</a>
-</li>
       <li><a href="learn/learn.html#fastsom.learn.callbacks.SomTrainer">SomTrainer (class in fastsom.learn.callbacks)</a>
+</li>
+      <li><a href="interp/interp.html#fastsom.interp.viz.SomTrainingViz">SomTrainingViz (class in fastsom.interp.viz)</a>
 </li>
       <li><a href="learn/learn.html#fastsom.learn.callbacks.ExperimentalSomTrainer.step">step() (fastsom.learn.callbacks.ExperimentalSomTrainer method)</a>
 </li>
@@ -512,6 +521,14 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="datasets/datasets.html#fastsom.datasets.normalizers.VarianceNormalizer">VarianceNormalizer (class in fastsom.datasets.normalizers)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="learn/learn.html#fastsom.learn.initializers.WeightsInitializer">WeightsInitializer (class in fastsom.learn.initializers)</a>
 </li>
   </ul></td>
 </tr></table>

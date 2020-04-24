@@ -206,16 +206,18 @@
 <h2>DataBunch subclasses<a class="headerlink" href="#databunch-subclasses" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="fastsom.datasets.datasets.UnsupervisedDataBunch">
-<em class="property">class </em><code class="sig-prename descclassname">fastsom.datasets.datasets.</code><code class="sig-name descname">UnsupervisedDataBunch</code><span class="sig-paren">(</span><em class="sig-param">train: Union[torch.Tensor, torch.utils.data.dataloader.DataLoader], valid: Union[torch.Tensor, torch.utils.data.dataloader.DataLoader, float, None] = None, bs: int = 64, sampler: Union[str, fastsom.datasets.samplers.SamplerType] = &lt;SamplerType.SEQUENTIAL: 'seq'&gt;, tfms: Optional[List[Callable]] = None, cat_enc: Optional[fastsom.datasets.cat_encoders.CatEncoder] = None, **kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/datasets.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.datasets.UnsupervisedDataBunch" title="Permalink to this definition">¶</a></dt>
-<dd><p><cite>DataBunch</cite> subclass without target data.</p>
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.datasets.datasets.</code><code class="sig-name descname">UnsupervisedDataBunch</code><span class="sig-paren">(</span><em class="sig-param">train: Union[torch.Tensor, torch.utils.data.dataset.TensorDataset, Tuple[torch.Tensor, torch.Tensor], torch.utils.data.dataloader.DataLoader], valid: Union[torch.Tensor, torch.utils.data.dataset.TensorDataset, Tuple[torch.Tensor, torch.Tensor], torch.utils.data.dataloader.DataLoader, float, None] = None, bs: int = 64, sampler: Union[str, fastsom.datasets.samplers.SamplerType] = &lt;SamplerType.SEQUENTIAL: 'seq'&gt;, tfms: Optional[List[Callable]] = None, cat_enc: Optional[fastsom.datasets.cat_encoders.CatEncoder] = None, normalizer: str = 'var', **kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/datasets.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.datasets.UnsupervisedDataBunch" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>DataBunch</cite> subclass without mandatory labels.
+If labels are not provided, they will be stubbed.</p>
 <p>All keyword args not listed below will be passed to the parent class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>train</strong> (<em>TensorOrDataLoader</em>) – The training data.</p></li>
-<li><p><strong>valid</strong> (<em>Optional</em><em>[</em><em>TensorOrDataLoaderOrSplitPct</em><em>] </em><em>default=None</em>) – The validation data. Can be passed as a PyTorch Tensor / DataLoader or as a percentage of the training set.</p></li>
+<li><p><strong>train</strong> (<em>Union</em><em>[</em><em>Tensor</em><em>, </em><em>TensorDataset</em><em>, </em><em>Tuple</em><em>[</em><em>Tensor</em><em>, </em><em>Tensor</em><em>]</em><em>, </em><em>torch.utils.data.DataLoader</em><em>]</em>) – The training dataset / DataLoader or a Tuple in the form (train, labels). If a single <cite>Tensor</cite> is provided, labels will be stubbed.</p></li>
+<li><p><strong>valid</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Tensor</em><em>, </em><em>TensorDataset</em><em>, </em><em>Tuple</em><em>[</em><em>Tensor</em><em>, </em><em>Tensor</em><em>]</em><em>, </em><em>torch.utils.data.DataLoader</em><em>]</em>) – The validation dataset / DataLoader or split percentage over training data.</p></li>
 <li><p><strong>bs</strong> (<em>int default=64</em>) – The batch size.</p></li>
 <li><p><strong>sampler</strong> (<em>SamplerTypeOrString default=SamplerType.SEQUENTIAL</em>) – The sampler to be used. Can be <cite>seq</cite>, ‘random’ or ‘shuffle’.</p></li>
+<li><p><strong>normalizer</strong> (<em>str default='var'</em>) – </p></li>
 <li><p><strong>tfms</strong> (<em>Optional</em><em>[</em><em>List</em><em>[</em><em>Callable</em><em>]</em><em>] </em><em>default=None</em>) – Additional Fastai transforms. These will be forwarded to the DataBunch.</p></li>
 <li><p><strong>cat_enc</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#fastsom.datasets.cat_encoders.CatEncoder" title="fastsom.datasets.cat_encoders.CatEncoder"><em>CatEncoder</em></a><em>] </em><em>default=None</em>) – The categorical encoder to be used, if any.</p></li>
 </ul>
@@ -226,6 +228,42 @@
 <code class="sig-name descname">denormalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/datasets.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.datasets.UnsupervisedDataBunch.denormalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Denormalizes a <cite>Tensor</cite> using the stored normalizer.
 Falls back to simply returning input data if no normalizer is available.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.datasets.datasets.UnsupervisedDataBunch.from_df">
+<em class="property">classmethod </em><code class="sig-name descname">from_df</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">cat_names</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">cont_names</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">dep_var</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">bs</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">128</span></em>, <em class="sig-param"><span class="n">valid_pct</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.2</span></em>, <em class="sig-param"><span class="n">normalizer</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'var'</span></em>, <em class="sig-param"><span class="n">cat_enc</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>fastsom.datasets.cat_encoders.CatEncoderType<span class="p">, </span>str<span class="p">, </span><a class="reference internal" href="#fastsom.datasets.cat_encoders.CatEncoder" title="fastsom.datasets.cat_encoders.CatEncoder">fastsom.datasets.cat_encoders.CatEncoder</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'onehot'</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/datasets.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.datasets.UnsupervisedDataBunch.from_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new UnsupervisedDataBunch from a DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.Dataframe</em>) – The source DataFrame.</p></li>
+<li><p><strong>cat_names</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Categorical feature names.</p></li>
+<li><p><strong>cont_names</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Continuous feature names.</p></li>
+<li><p><strong>dep_var</strong> (<em>str</em>) – The target variable.</p></li>
+<li><p><strong>bs</strong> (<em>int default=128</em>) – The batch size.</p></li>
+<li><p><strong>valid_pct</strong> (<em>float default=0.2</em>) – Validation split percentage.</p></li>
+<li><p><strong>normalizer</strong> (<em>Optional</em><em>[</em><em>str</em><em>] </em><em>default='var'</em>) – The optional normalization strategy to be used.</p></li>
+<li><p><strong>cat_enc</strong> (<em>Union</em><em>[</em><em>CatEncoderTypeOrString</em><em>, </em><a class="reference internal" href="#fastsom.datasets.cat_encoders.CatEncoder" title="fastsom.datasets.cat_encoders.CatEncoder"><em>CatEncoder</em></a><em>] </em><em>default='onehot'</em>) – Categorical encoder.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.datasets.datasets.UnsupervisedDataBunch.from_tabular_databunch">
+<em class="property">classmethod </em><code class="sig-name descname">from_tabular_databunch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">fastai.tabular.data.TabularDataBunch</span></em>, <em class="sig-param"><span class="n">bs</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">normalizer</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'var'</span></em>, <em class="sig-param"><span class="n">cat_enc</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>fastsom.datasets.cat_encoders.CatEncoderType<span class="p">, </span>str<span class="p">, </span><a class="reference internal" href="#fastsom.datasets.cat_encoders.CatEncoder" title="fastsom.datasets.cat_encoders.CatEncoder">fastsom.datasets.cat_encoders.CatEncoder</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'onehot'</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/datasets/datasets.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.datasets.datasets.UnsupervisedDataBunch.from_tabular_databunch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new UnsupervisedDataBunch from a DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>TabularDataBunch</em>) – The source TabularDataBunch.</p></li>
+<li><p><strong>bs</strong> (<em>Optional</em><em>[</em><em>int</em><em>] </em><em>default=None</em>) – The batch size. Defaults to the source databunch batch size if not provided.</p></li>
+<li><p><strong>normalizer</strong> (<em>Optional</em><em>[</em><em>str</em><em>] </em><em>default='var'</em>) – The optional normalization strategy to be used.</p></li>
+<li><p><strong>cat_enc</strong> (<em>Union</em><em>[</em><em>CatEncoderTypeOrString</em><em>, </em><a class="reference internal" href="#fastsom.datasets.cat_encoders.CatEncoder" title="fastsom.datasets.cat_encoders.CatEncoder"><em>CatEncoder</em></a><em>] </em><em>default='onehot'</em>) – Categorical encoder.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

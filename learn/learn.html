@@ -206,15 +206,17 @@
 <h2>Learner<a class="headerlink" href="#learner" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="fastsom.learn.learn.SomLearner">
-<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.learn.</code><code class="sig-name descname">SomLearner</code><span class="sig-paren">(</span><em class="sig-param">data: fastsom.datasets.datasets.UnsupervisedDataBunch</em>, <em class="sig-param">model: fastsom.som.som.Som</em>, <em class="sig-param">init_weights: str = 'random'</em>, <em class="sig-param">trainer: Type[fastsom.learn.callbacks.SomTrainer] = &lt;class 'fastsom.learn.callbacks.ExperimentalSomTrainer'&gt;</em>, <em class="sig-param">trainer_args: Dict = {}</em>, <em class="sig-param">lr: Collection[float] = (0.09</em>, <em class="sig-param">0.03)</em>, <em class="sig-param">visualize: List[str] = []</em>, <em class="sig-param">metrics: Collection[Callable] = None</em>, <em class="sig-param">callbacks: Collection[fastai.callback.Callback] = None</em>, <em class="sig-param">loss_func: Callable = &lt;function mean_quantization_err&gt;</em>, <em class="sig-param">opt_func: Callable = &lt;class 'fastsom.learn.optim.SomOptimizer'&gt;</em>, <em class="sig-param">**learn_kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/learn.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.learn.SomLearner" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.learn.</code><code class="sig-name descname">SomLearner</code><span class="sig-paren">(</span><em class="sig-param">data: fastsom.datasets.datasets.UnsupervisedDataBunch, model: fastsom.som.som.Som = None, size: Tuple[int, int] = (10, 10), init_weights: str = 'random', trainer: Type[fastsom.learn.callbacks.SomTrainer] = &lt;class 'fastsom.learn.callbacks.ExperimentalSomTrainer'&gt;, trainer_args: Dict = {}, lr: Collection[float] = [0.6, 0.3, 0.1], visualize: List[str] = [], visualize_on: str = 'epoch', metrics: Collection[Callable] = None, callbacks: Collection[fastai.callback.Callback] = None, loss_func: Callable = &lt;function mean_quantization_err&gt;, opt_func: Callable = &lt;class 'fastsom.learn.optim.SomOptimizer'&gt;, **learn_kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/learn.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.learn.SomLearner" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learner subclass used to train Self-Organizing Maps.</p>
 <p>All keyword arguments not listed below are forwarded to the <cite>Learner</cite> parent class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<a class="reference internal" href="../datasets/datasets.html#fastsom.datasets.datasets.UnsupervisedDataBunch" title="fastsom.datasets.datasets.UnsupervisedDataBunch"><em>UnsupervisedDataBunch</em></a>) – Contains train and validations datasets, along with sampling and normalization utils.</p></li>
-<li><p><strong>model</strong> (<a class="reference internal" href="../som.html#fastsom.som.som.Som" title="fastsom.som.som.Som"><em>Som</em></a>) – The Self-Organizing Map model.</p></li>
+<li><p><strong>model</strong> (<em>Som default=None</em>) – The Self-Organizing Map model.</p></li>
+<li><p><strong>size</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>] </em><em>default=</em><em>(</em><em>10</em><em>, </em><em>10</em><em>)</em>) – The map size to use if <cite>model</cite> is None.</p></li>
 <li><p><strong>visualize</strong> (<em>List</em><em>[</em><em>str</em><em>] </em><em>default=</em><em>[</em><em>]</em>) – A list of elements to be visualized while training. Available values are ‘weights’, ‘hyperparams’ and ‘bmus’.</p></li>
+<li><p><strong>visualize_on</strong> (<em>str default='epoch'</em>) – Determines when visualizations should be updated (‘batch’ / ‘epoch’).</p></li>
 <li><p><strong>init_weights</strong> (<em>str default='random'</em>) – SOM weight initialization strategy. Defaults to random sampling in the train dataset space.</p></li>
 <li><p><strong>trainer</strong> (<em>Type</em><em>[</em><a class="reference internal" href="#fastsom.learn.callbacks.SomTrainer" title="fastsom.learn.callbacks.SomTrainer"><em>SomTrainer</em></a><em>] </em><em>default=ExperimentalSomTrainer</em>) – The class that should be used to define SOM training behaviour such as hyperparameter scaling.</p></li>
 <li><p><strong>trainer_args</strong> (<em>Dict default=dict</em><em>(</em><em>)</em>) – Keyword arguments to be passed to the trainer upon initialization.</p></li>
@@ -343,21 +345,26 @@ Seems to work well in practice when compared with traditional linear decay.</p>
 <div class="section" id="initialization-methods">
 <h2>Initialization methods<a class="headerlink" href="#initialization-methods" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="fastsom.learn.initializers.SomInitializer">
-<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.initializers.</code><code class="sig-name descname">SomInitializer</code><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/initializers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.initializers.SomInitializer" title="Permalink to this definition">¶</a></dt>
-<dd><p>SOM weight initializer base class.</p>
+<dt id="fastsom.learn.initializers.WeightsInitializer">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.initializers.</code><code class="sig-name descname">WeightsInitializer</code><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/initializers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.initializers.WeightsInitializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weight initializer base class.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt id="fastsom.learn.initializers.KMeansInitializer">
 <em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.initializers.</code><code class="sig-name descname">KMeansInitializer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">distance</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'euclidean'</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/initializers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.initializers.KMeansInitializer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initializes SOM weights using KMeans.</p>
+<dd><p>Initializes weights using K-Means.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>distance</strong> (<em>str default='euclidean'</em>) – The type of distance function to be used. Can be <cite>euclidean</cite> or <cite>cosine</cite>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py class">
 <dt id="fastsom.learn.initializers.RandomInitializer">
 <em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.initializers.</code><code class="sig-name descname">RandomInitializer</code><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/initializers.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.initializers.RandomInitializer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initializes SOM weights randomly.</p>
+<dd><p>Initializes weights randomly.</p>
 </dd></dl>
 
 </div>

@@ -69,3 +69,9 @@ Miscellaneous functions
 
 .. autofunction:: pdist
 
+
+:hidden:`pcosim`
+~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcosim
+
