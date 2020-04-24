@@ -18,7 +18,7 @@ from .optim import SomOptimizer
 
 from ..core import ifnone, setify, index_tensor
 from ..datasets import UnsupervisedDataBunch
-from ..interp import SomScatterVisualizer, SomStatsVisualizer, SomBmuVisualizer, mean_quantization_err
+from ..interp import SomTrainingViz, SomHyperparamsViz, SomBmuViz, mean_quantization_err
 from ..som import Som
 
 
@@ -27,17 +27,18 @@ __all__ = [
 ]
 
 
-def visualization_callbacks(visualize: List[str], model: Som, *viz_args) -> List[Callback]:
-    "Builds a list of visualization callbacks."
+def visualization_callbacks(visualize: List[str], visualize_on: str, learn: Learner) -> List[Callback]:
+    """Builds a list of visualization callbacks."""
     cbs = []
+    visualize_on = ifnone(visualize_on, 'epoch')
     s_visualize = setify(visualize)
 
     if 'weights' in s_visualize:
-        cbs.append(SomScatterVisualizer(model, *viz_args))
+        cbs.append(SomTrainingViz(learn, update_on_batch=(visualize_on == 'batch')))
     if 'hyperparams' in s_visualize:
-        cbs.append(SomStatsVisualizer(model, *viz_args, plot_hyperparams=True, plot_stats=False))
+        cbs.append(SomHyperparamsViz(learn))
     if 'bmus' in s_visualize:
-        cbs.append(SomBmuVisualizer(model))
+        cbs.append(SomBmuViz(learn, update_on_batch=(visualize_on == 'batch')))
     return cbs
 
 
@@ -57,6 +58,8 @@ class SomLearner(Learner):
         The map size to use if `model` is None.
     visualize : List[str] default=[]
         A list of elements to be visualized while training. Available values are 'weights', 'hyperparams' and 'bmus'.
+    visualize_on: str default='epoch'
+        Determines when visualizations should be updated ('batch' / 'epoch').
     init_weights : str default='random'
         SOM weight initialization strategy. Defaults to random sampling in the train dataset space.
     trainer : Type[SomTrainer] default=ExperimentalSomTrainer
@@ -85,6 +88,7 @@ class SomLearner(Learner):
         trainer_args: Dict = dict(),
         lr: Collection[float] = [0.6, 0.3, 0.1],
         visualize: List[str] = [],
+        visualize_on: str = 'epoch',
         metrics: Collection[Callable] = None,
         callbacks: Collection[Callback] = None,
         loss_func: Callable = mean_quantization_err,
@@ -107,11 +111,6 @@ class SomLearner(Learner):
         initializer = som_initializers[init_weights]
         model.weights = initializer(train_ds, size[0] * size[1]).view(*size, -1)
 
-        # Add callbacks
-        callbacks = ifnone(callbacks, [])
-        callbacks += visualization_callbacks(visualize, model, train_ds)
-        callbacks += [trainer.from_model(model, init_weights, lr, **trainer_args)]
-
         # Setup loss function
         loss_func = ifnone(loss_func, mean_quantization_err)
         # Wrap the loss function with SomLoss if needed
@@ -126,9 +125,14 @@ class SomLearner(Learner):
             opt_func=opt_func,
             loss_func=loss_fn,
             metrics=metrics,
-            callbacks=callbacks,
             **learn_kwargs
         )
+
+        # Add callbacks
+        callbacks = ifnone(callbacks, [])
+        callbacks += visualization_callbacks(visualize, visualize_on, self)
+        callbacks += [trainer.from_model(model, init_weights, lr, **trainer_args)]
+        self.callbacks = callbacks
 
     def codebook_to_df(self, cat_values: Optional[Dict[str, Dict[int, str]]] = None, cat_as_str: bool = True) -> pd.DataFrame:
         """

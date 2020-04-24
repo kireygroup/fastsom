@@ -205,7 +205,10 @@ class SomInterpretation():
         # Run model predictions
         preds, labels = self.learn.get_preds(ds_type)
 
-        if 'float' in str(labels.dtype):
+        # Check if labels are continuous
+        continuous_labels = 'float' in str(labels.dtype)
+
+        if continuous_labels and n_bins > 0:
             # Split labels into bins
             labels = KBinsDiscretizer(n_bins=n_bins, encode='ordinal').fit_transform(labels.numpy())
             labels = torch.tensor(labels)
@@ -222,29 +225,35 @@ class SomInterpretation():
         for idx, bmu in enumerate(unique_bmus):
             # Get labels corresponding to this BMU
             bmu_labels = labels[(preds_1d == bmu).nonzero()]
-            # Calculate unique label counts
-            unique_labels, label_counts = bmu_labels.unique(return_counts=True)
-            data[idx] = unique_labels[label_counts.argmax()]
+
+            if continuous_labels and n_bins <= 0:
+                data[idx] = bmu_labels.mean()
+            else:
+                # Calculate unique label counts
+                unique_labels, label_counts = bmu_labels.unique(return_counts=True)
+                data[idx] = unique_labels[label_counts.argmax()]
             # TODO show percentages + class color
             # max_label = label_counts.max()
             # data[idx] = float("{:.2f}".format(max_label.float() / float(len(bmu_labels))))
 
-        # Legend labels
-        unique_labels = labels.unique()
-        class_names = ifnone(class_names, [str(label) for label in unique_labels.numpy()])
-
-        # Color map
-        colors = plt.cm.Pastel2(np.linspace(0, 1, len(unique_labels)))
-        cmap = LinearSegmentedColormap.from_list('Custom', colors, len(colors))
-        # palette = sns.palettes.SEABORN_PALETTES['deep6']
-        # cmap = ListedColormap(palette)
+        if not continuous_labels or n_bins > 0:
+            # Legend labels
+            unique_labels = labels.unique()
+            class_names = ifnone(class_names, [str(label) for label in unique_labels.numpy()])
+            # Color map
+            colors = plt.cm.Pastel2(np.linspace(0, 1, len(unique_labels)))
+            cmap = LinearSegmentedColormap.from_list('Custom', colors, len(colors))
+        else:
+            palette = sns.palettes.SEABORN_PALETTES['deep6']
+            cmap = ListedColormap(palette)
 
         f, ax = plt.subplots(figsize=(11, 9))
         # Plot the heatmap
         ax = sns.heatmap(data.view(map_size), annot=True, cmap=cmap, square=True, linewidths=.5)
 
-        # # Manually specify colorbar labelling after it's been generated
-        colorbar = ax.collections[0].colorbar
-        colorbar.set_ticks(unique_labels.numpy())
-        colorbar.set_ticklabels(class_names)
+        if not continuous_labels or n_bins > 0:
+            # # Manually specify colorbar labelling after it's been generated
+            colorbar = ax.collections[0].colorbar
+            colorbar.set_ticks(unique_labels.numpy())
+            colorbar.set_ticklabels(class_names)
         plt.show()

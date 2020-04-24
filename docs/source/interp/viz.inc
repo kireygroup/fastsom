@@ -1,9 +1,9 @@
 
 .. currentmodule:: fastsom.interp.viz
 
-.. autoclass:: SomScatterVisualizer
+.. autoclass:: SomTrainingViz
    :members:
-.. autoclass:: SomStatsVisualizer
+.. autoclass:: SomHyperparamsViz
    :members:
-.. autoclass:: SomBmuVisualizer
+.. autoclass:: SomBmuViz
    :members:

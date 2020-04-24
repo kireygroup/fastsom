@@ -306,7 +306,7 @@ class Som(Module):
 
     def parameters(self, recurse=True):
         "Returns an iterator over module parameters."
-        return iter([self.lr, self.alpha, self.sigma, self.weights])
+        return iter([self.alpha, self.sigma])
 
     def to_device(self, device: torch.device = None) -> None:
         "Moves params and weights to the appropriate device."
