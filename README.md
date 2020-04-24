@@ -4,8 +4,6 @@ A PyTorch and Fastai based implementation of Self-Organizing Maps.
 
 You can find documentation and examples [here](https://kireygroup.github.io/fastsom/).
 
-
-
 ## Contents
 
 - [Fastsom](#fastsom)
@@ -21,8 +19,6 @@ You can find documentation and examples [here](https://kireygroup.github.io/fast
     - [Documenting the code](#documenting-the-code)
     - [Building the docs](#building-the-docs)
     - [Deploying the docs on GH Pages](#deploying-the-docs-on-gh-pages)
-
-
 
 ## Getting started
 
@@ -49,8 +45,6 @@ git clone git@github.com:kireygroup/fastsom
 cd fastsom
 python setup.py install
 ```
-
-
 
 ## Docker boilerplate
 
@@ -86,7 +80,6 @@ The container will start a new Jupyter Notebook server on port 8888. Jupyter Lab
 
 Note that the `fastsom` folder will be mounted inside the container, so any change you make to the source files or notebooks will be replicated on both host and container.
 
-
 ### Developing inside the container
 
 With Visual Studio Code and PyCharm, it is possible to use the container Python interpreter for development.
@@ -95,13 +88,9 @@ An SSH server has been configured inside the container to allow connection via P
 
 In Visual Studio Code, this can be done via the [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
 
-
-
 ## Documentation setup
 
 Fastsom's documentation is built with [Sphinx](https://www.sphinx-doc.org/) and deployed to Gihtub Pages via the [`gh-pages` branch](https://github.com/kireygroup/fastsom/tree/gh-pages).
-
-
 
 ### Documenting the code
 
@@ -116,8 +105,6 @@ cd docs
 make docs
 ```
 
-
-
 ### Deploying the docs on GH Pages
 
 An additional build step was added to the Makefile to deploy documentation on the `gh-pages` branch automatically:
@@ -126,4 +113,3 @@ An additional build step was added to the Makefile to deploy documentation on th
 cd docs
 make deploy
 ```
-
