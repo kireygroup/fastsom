@@ -3,13 +3,14 @@ from setuptools import setup, find_packages
 from shutil import copyfile
 
 copyfile('setup.py', 'fastsom/setup.py')
+copyfile('setup.py', 'fastsom/README.md')
 
 os.chdir('fastsom')
 
 setup(name='fastsom',
-      version='0.1.1',
+      version='0.1.2',
       url='https://github.com/kireygroup/fastsom',
-      download_url='https://github.com/kireygroup/fastsom/archive/v0.1.1.tar.gz',
+      download_url='https://github.com/kireygroup/fastsom/archive/v0.1.2.tar.gz',
       license='MIT',
       author='Riccardo Sayn',
       author_email='riccardo.sayn@kireygroup.com',
@@ -32,3 +33,4 @@ setup(name='fastsom',
       ])
 
 os.remove("setup.py")
+os.remove("README.md")
