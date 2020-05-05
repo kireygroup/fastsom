@@ -24,7 +24,6 @@ def neigh_gauss(position_diff: torch.Tensor, sigma: torch.Tensor) -> torch.Tenso
     sigma : torch.Tensor
         The scaling radius.
     """
-    """Calculates the gaussian of `position_diff` with `sigma` scaling."""
     v = pnorm(position_diff, p=2)
     return torch.exp(torch.neg(v.pow(2) / sigma.pow(2)))
 

@@ -5,9 +5,9 @@ with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='fastsom',
-      version='0.1.6',
+      version='0.1.7',
       url='https://github.com/kireygroup/fastsom',
-      download_url='https://github.com/kireygroup/fastsom/archive/v0.1.6.tar.gz',
+      download_url='https://github.com/kireygroup/fastsom/archive/v0.1.7.tar.gz',
       license='MIT',
       author='Riccardo Sayn',
       author_email='riccardo.sayn@kireygroup.com',

@@ -6,7 +6,6 @@ __all__ = [
     "pnorm",
     "pdist",
     "manhattan_dist",
-
 ]
 
 
