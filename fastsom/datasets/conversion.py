@@ -4,7 +4,7 @@ Fastai `DataBunch` classes into `UnsupervisedDataBunch`.
 """
 import torch
 from torch.utils.data import Dataset
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 from fastai.tabular import TabularDataBunch
 from pandas import DataFrame
 
@@ -17,11 +17,10 @@ from ..core import ifnone
 __all__ = [
     'tabular_ds_to_lists',
     'to_unsupervised_databunch',
-    'dataframe_fill_unknown',
 ]
 
 
-def tabular_ds_to_lists(ds: Dataset):
+def tabular_ds_to_lists(ds: Dataset) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """
     Converts a Dataset from a `TabularDataBunch` into categorical variables, continuous variables and targets.
 
@@ -73,21 +72,25 @@ def to_unsupervised_databunch(data: TabularDataBunch, bs: Optional[int] = None, 
     train_x_cat, train_x_cont, train_y = tabular_ds_to_lists(data.train_ds)
     valid_x_cat, valid_x_cont, valid_y = tabular_ds_to_lists(data.valid_ds)
 
+    train_x_cat = train_x_cat if len(data.cat_names) > 0 else torch.tensor([])
+    valid_x_cat = valid_x_cat if len(data.cat_names) > 0 else torch.tensor([])
+
     tfm = cat_enc if isinstance(cat_enc, CatEncoder) else get_cat_encoder(cat_enc, data.cat_names, data.cont_names)
-    if isinstance(tfm, FastTextCatEncoder):
-        # Pass string values to FastTextCatEncoder
-        train_x_cat = dataframe_fill_unknown(data.train_ds.inner_df[data.cat_names]).values
-        tfm.fit(train_x_cat.numpy(), cat_names=data.cat_names)
-        train_x_cat = tfm.make_continuous(train_x_cat.numpy())
-        if valid_x_cat is not None:
-            valid_x_cat = dataframe_fill_unknown(data.valid_ds.inner_df[data.cat_names]).values
-            valid_x_cat = tfm.make_continuous(valid_x_cat.numpy())
-    else:
-        # Pass categories to other transformers
-        tfm.fit(train_x_cat.numpy(), cat_names=data.cat_names)
-        train_x_cat = tfm.make_continuous(train_x_cat.numpy())
-        if valid_x_cat is not None:
-            valid_x_cat = tfm.make_continuous(valid_x_cat.numpy())
+    if len(data.cat_names) > 0:
+        if isinstance(tfm, FastTextCatEncoder):
+            # Pass string values to FastTextCatEncoder
+            train_x_cat = dataframe_fill_unknown(data.train_ds.inner_df[data.cat_names]).values
+            tfm.fit(train_x_cat.numpy(), cat_names=data.cat_names)
+            train_x_cat = tfm.make_continuous(train_x_cat.numpy())
+            if valid_x_cat is not None and len(valid_x_cat) > 0:
+                valid_x_cat = dataframe_fill_unknown(data.valid_ds.inner_df[data.cat_names]).values
+                valid_x_cat = tfm.make_continuous(valid_x_cat.numpy())
+        else:
+            # Pass categories to other transformers
+            tfm.fit(train_x_cat.numpy(), cat_names=data.cat_names)
+            train_x_cat = tfm.make_continuous(train_x_cat.numpy())
+            if valid_x_cat is not None:
+                valid_x_cat = tfm.make_continuous(valid_x_cat.numpy())
 
     train_x = torch.cat([train_x_cat.float(), train_x_cont], dim=-1) if len(data.train_ds) > 1 else torch.tensor([])
     valid_x = torch.cat([valid_x_cat.float(), valid_x_cont], dim=-1) if valid_x_cat is not None and len(data.valid_ds) > 1 else torch.tensor([])

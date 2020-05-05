@@ -1,6 +1,7 @@
 """
 This module defines a Fastai `Learner` subclass used to train Self-Organizing Maps.
 """
+from torch import Tensor
 import torch
 import pandas as pd
 import numpy as np
@@ -8,6 +9,7 @@ import numpy as np
 from typing import Optional, Callable, Collection, List, Type, Dict, Tuple
 from functools import partial
 from fastai.basic_train import Learner
+from fastai.basic_data import DataBunch
 from fastai.train import *
 from fastai.callback import Callback
 
@@ -56,83 +58,53 @@ class SomLearner(Learner):
         The Self-Organizing Map model.
     size : Tuple[int, int] default=(10, 10)
         The map size to use if `model` is None.
+    lr : float
+        The learning rate to be used for training.
+    trainer : Type[SomTrainer] default=ExperimentalSomTrainer
+        The class that should be used to define SOM training behaviour such as hyperparameter scaling.
+    callbacks : Collection[Callback] default=None
+        A list of custom Fastai Callbacks.
+    loss_func : Callable default=mean_quantization_err
+        The loss function (actually a metric, since SOMs are unsupervised)
+    metrics : Collection[Callable] default=None
+        A list of metric functions to be evaluated after each iteration.
     visualize : List[str] default=[]
         A list of elements to be visualized while training. Available values are 'weights', 'hyperparams' and 'bmus'.
     visualize_on: str default='epoch'
         Determines when visualizations should be updated ('batch' / 'epoch').
     init_weights : str default='random'
         SOM weight initialization strategy. Defaults to random sampling in the train dataset space.
-    trainer : Type[SomTrainer] default=ExperimentalSomTrainer
-        The class that should be used to define SOM training behaviour such as hyperparameter scaling.
-    trainer_args : Dict default=dict()
-        Keyword arguments to be passed to the trainer upon initialization.
-    lr : Collection[float]
-        A collection of learning rate values. This will be passed to the SomTrainer.
-    metrics : Collection[Callable] default=None
-        A list of metric functions to be evaluated after each iteration.
-    callbacks : Collection[Callback] default=None
-        A list of custom Fastai Callbacks.
-    loss_func : Callable default=mean_quantization_err
-        The loss function (actually a metric, since SOMs are unsupervised)
-    opt_func : Callable (unused)
-        Unused parameter, left out for experimental purpouses.
     """
 
     def __init__(
-        self,
-        data: UnsupervisedDataBunch,
-        model: Som = None,
-        size: Tuple[int, int] = (10, 10),
-        init_weights: str = "random",
-        trainer: Type[SomTrainer] = ExperimentalSomTrainer,
-        trainer_args: Dict = dict(),
-        lr: Collection[float] = [0.6, 0.3, 0.1],
-        visualize: List[str] = [],
-        visualize_on: str = 'epoch',
-        metrics: Collection[Callable] = None,
-        callbacks: Collection[Callback] = None,
-        loss_func: Callable = mean_quantization_err,
-        opt_func: Callable = SomOptimizer,
-        **learn_kwargs
-    ):
-        train_ds = (
-            data.train_ds.tensors[0]
-            if hasattr(data.train_ds, "tensors")
-            else torch.tensor(data.train_ds, dtype=float)
-        )
-
-        # Optionally initialize the model
-        if model is None:
-            model = Som((size[0], size[1], data.train_ds.tensors[0].shape[-1]))
-        else:
-            size = model.weights.shape[:-1]
-
-        # Initialize the model weights
-        initializer = som_initializers[init_weights]
-        model.weights = initializer(train_ds, size[0] * size[1]).view(*size, -1)
-
-        # Setup loss function
-        loss_func = ifnone(loss_func, mean_quantization_err)
-        # Wrap the loss function with SomLoss if needed
-        loss_fn = loss_func if isinstance(loss_func, SomLoss) else SomLoss(loss_func, model)
-
+            self,
+            data: DataBunch,
+            model: Som = None,
+            size: Tuple[int, int] = (10, 10),
+            lr: float = 0.6,
+            trainer: Type[SomTrainer] = ExperimentalSomTrainer,
+            callbacks: List[Callback] = [],
+            loss_func: Callable = mean_quantization_err,
+            metrics: Collection[Callable] = None,
+            visualize: List[str] = [],
+            visualize_on: str = 'epoch',
+            **learn_kwargs
+    ) -> None:
+        n_features = data.train_ds.tensors[0].shape[-1]
+        # Create a new Som using the size, if needed
+        model = model if model is not None else Som((size[0], size[1], n_features))
+        # Pass the LR to the model
+        model.alpha = torch.tensor(lr)
+        # Wrap the loss function
+        loss_func = SomLoss(loss_func, model)
+        # Initialize the trainer with the model
+        callbacks.append(trainer(model))
         # Pass model reference to metrics
         metrics = list(map(lambda fn: partial(fn, som=model), metrics)) if metrics is not None else []
-
-        super().__init__(
-            data,
-            model,
-            opt_func=opt_func,
-            loss_func=loss_fn,
-            metrics=metrics,
-            **learn_kwargs
-        )
-
-        # Add callbacks
-        callbacks = ifnone(callbacks, [])
-        callbacks += visualization_callbacks(visualize, visualize_on, self)
-        callbacks += [trainer.from_model(model, init_weights, lr, **trainer_args)]
-        self.callbacks = callbacks
+        super().__init__(data, model, callbacks=callbacks, loss_func=loss_func, metrics=metrics, **learn_kwargs)
+        # Add visualization callbacks
+        self.callbacks += visualization_callbacks(visualize, visualize_on, self)
+        self.callbacks = list(set(self.callbacks))
 
     def codebook_to_df(self, cat_values: Optional[Dict[str, Dict[int, str]]] = None, cat_as_str: bool = True) -> pd.DataFrame:
         """
@@ -143,8 +115,6 @@ class SomLearner(Learner):
         cat_values: Dict[str, Dict[int, str] default=None
             Nested dict of per-feature value-to-string mappings.
         cat_as_str : bool default=True
-            If true, maps categorical variables into their original values using cat_values.
-
         Examples
         --------
         >>> codebook_to_df(cat_values=dict(feature_a=dict(0='Feature A - Value Zero', 1='Feature A - Value One')))

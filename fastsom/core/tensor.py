@@ -5,18 +5,19 @@ This module contains core tensor operations.
 
 import torch
 import numpy as np
-from torch import Tensor
-from typing import Tuple, Callable
+
+from typing import Callable
+
 
 __all__ = [
     "index_tensor",
-    "expanded_op",
+    "expanded",
     "idxs_2d_to_1d",
     "idxs_1d_to_2d",
 ]
 
 
-def index_tensor(*size) -> Tensor:
+def index_tensor(*size) -> torch.Tensor:
     """
     Returns an index tensor of size `size`,
     where each element contains its own index.
@@ -40,51 +41,43 @@ def index_tensor(*size) -> Tensor:
     return torch.ones(*size).nonzero().view(*size, -1)
 
 
-def expanded_op(a: Tensor, b: Tensor, fn: Callable, device=torch.device("cuda")) -> Tensor:
+def expanded(a: torch.Tensor, b: torch.Tensor, fn: Callable) -> torch.Tensor:
     """
-    Expands tensors `a` and `b` to ensure operation compatibility; then calls `fn(a, b)`.
+    Makes `a` and `b` shapes compatible, then calls `fn(a, b)`. Uses device of tensor a.
 
     Parameters
     ----------
-    a : Tensor
+    a : torch.Tensor
         The first tensor.
-    b : Tensor
+    b : torch.Tensor
         The second tensor.
     fn : Callable
         The function to be applied on expanded `a` and `b`.
-    device : torch.device default=torch.device('cuda')
 
     Examples
     --------
     >>> a = torch.randn(5, 2)
     >>> b = torch.randn(12, 2)
-    >>> c = expanded_op(a, b, lambda a, b: a + b)
+    >>> c = expanded(a, b, lambda a, b: a + b)
     >>> c.shape
     torch.Size([5, 12, 2])
     """
     N, M = a.shape[0], b.shape[0]
 
     # Allocate device space to store results
-    res = torch.zeros(N, M).to(device=device)
+    res = torch.zeros(N, M).to(device=a.device)
 
-    # Reshape A and B to enable distance calculation
-    # # Optionally interleaves repeat method
-    # _a = a.repeat_interleave(M, dim=0) if interleave else a.repeat(M, 1).to(device=device)
-    # _b = b.view(-1, D).repeat(N, 1).to(device=device)
+    _a = a.view(N, 1, -1).to(device=a.device)
+    _b = b.expand(N, -1, -1).to(device=a.device)
 
-    _a = a.view(N, 1, -1).to(device=device)
-    _b = b.expand(N, -1, -1).to(device=device)
-
-    # Invoke the function over the two Tensors
+    # Invoke the function over the two tensors
     res = fn(_a, _b)
 
     # Cleanup device space
-    use_cuda = _a.is_cuda
     del _a
     del _b
-    if use_cuda:
+    if a.is_cuda:
         torch.cuda.empty_cache()
-
     return res
 
 

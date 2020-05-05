@@ -9,10 +9,10 @@ Tensor utilities
 
 .. autofunction:: index_tensor
 
-:hidden:`expanded_op`
+:hidden:`expanded`
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: expanded_op
+.. autofunction:: expanded
 
 :hidden:`idxs_2d_to_1d`
 ~~~~~~~~~~~~~~~~~~~~~~~

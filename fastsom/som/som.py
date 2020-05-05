@@ -1,188 +1,10 @@
-"""
-This module contains the base SOM module.
-"""
 import torch
-from torch import Tensor
-from fastai.torch_core import Module
-from functools import partial
 from typing import Tuple, Callable
+from fastai.torch_core import Module
 
-from ..core import index_tensor, expanded_op, ifnone
-
-
-__all__ = [
-    "Som",
-    "neigh_gauss",
-    "neigh_square",
-    "neigh_rhomb",
-    "neigh_diff_standard",
-    "neigh_diff_toroidal",
-    "pnorm",
-    "pdist",
-    "pcosim",
-    "manhattan_dist",
-]
-
-
-SomSize2D = Tuple[int, int, int]
-
-
-def pcosim(a: Tensor, b: Tensor, p: int = 2) -> Tensor:
-    """
-    Calculates the cosine similarity of order `p` between `a` and `b`.
-    Assumes tensor shapes are compatible.
-
-    Parameters
-    ----------
-    a : Tensor
-        The first tensor
-    b : Tensor
-        The second tensor
-    p : int default=2
-        The order.
-    """
-    return (a * b).sum(-1) / pnorm(a, p=p) * pnorm(b, p=p)
-
-
-def pnorm(a: Tensor, p: int = 2) -> Tensor:
-    """
-    Calculates the norm of order `p` of tensor `a`.
-
-    Parameters
-    ----------
-    a : Tensor
-        The input tensor
-    p : int default=2
-        The order.
-    """
-    return a.abs().pow(p).sum(-1).pow(1 / p)
-
-
-def pdist(a: Tensor, b: Tensor, p: int = 2) -> Tensor:
-    """
-    Calculates the distance of order `p` between `a` and `b`.
-    Assumes tensor shapes are compatible.
-
-    Parameters
-    ----------
-    a : Tensor
-        The first tensor
-    b : Tensor
-        The second tensor
-    p : int default=2
-        The order.
-    """
-    return pnorm(a - b, p=p)
-
-
-def manhattan_dist(a: Tensor, b: Tensor) -> Tensor:
-    """
-    Calculates the Manhattan distance (order 1 p-distance) between `a` and `b`.
-    Assumes tensor shapes are compatible.
-
-    Parameters
-    ----------
-    a : Tensor
-        The first tensor
-    b : Tensor
-        The second tensor
-    p : int default=2
-        The order.
-    """
-    return pdist(a, b, p=1)
-
-
-def neigh_gauss(position_diff: Tensor, sigma: Tensor) -> Tensor:
-    """
-    Gaussian neighborhood scaling function based on center-wise \
-        diff `position_diff` and radius `sigma`.
-
-    Parameters
-    ----------
-    position_diff : Tensor
-        The positional difference around some center.
-    sigma : Tensor
-        The scaling radius.
-    """
-    """Calculates the gaussian of `position_diff` with `sigma` scaling."""
-    v = pnorm(position_diff, p=2)
-    return torch.exp(torch.neg(v.pow(2) / sigma.pow(2)))
-
-
-def neigh_rhomb(position_diff: Tensor, sigma: Tensor) -> Tensor:
-    """
-    Diamond-shaped neighborhood function based on center-wise diff `position_diff` and radius `sigma`.
-    Note: Manhattan distance should be used with this function.
-
-    Parameters
-    ----------
-    position_diff : Tensor
-        The positional difference around some center.
-    sigma : Tensor
-        The scaling radius.
-    """
-    v = pnorm(position_diff, p=1)
-    return torch.exp(torch.neg(torch.sqrt(v) / sigma))
-
-
-def neigh_square(position_diff: Tensor, sigma: Tensor) -> Tensor:
-    """
-    Square-shaped neighborhood scaling function based on center-wise diff `position_diff` and radius `sigma`.
-
-    Parameters
-    ----------
-    position_diff : Tensor
-        The positional difference around some center.
-    sigma : Tensor
-        The scaling radius.
-    """
-    v = (position_diff).abs().max(-1)[0]
-    # v = pnorm(position_diff, p=2)
-    return torch.exp(torch.neg(v.sqrt() / sigma))
-
-
-def neigh_diff_standard(bmus: Tensor, positions: Tensor) -> Tensor:
-    """
-    Positional difference function.
-    Computes index difference between Best Matching Units (`bmus`) and `positions`, where `positions` 
-    are indices of elements inside the SOM grid.
-
-    Parameters
-    ----------
-    bmus : Tensor
-        The list of Best Matching Units (2D indices)
-    positions : Tensor
-        The 2D tensor of grid element indices 
-    """
-    return bmus - positions
-
-
-def neigh_diff_toroidal(bmus: Tensor, positions: Tensor, map_size: Tuple[int, int] = None) -> Tensor:
-    """
-    Positional difference function.
-    Computes toroidal (wraparound) difference between Best Matching Units (`bmus`) and `positions`, where `positions` 
-    are indices of elements inside the SOM grid.
-
-    Parameters
-    ----------
-    bmus : Tensor
-        The list of Best Matching Units (2D indices)
-    positions : Tensor
-        The 2D tensor of grid element indices
-    map_size : Tuple[int, int] = None
-        The SOM size. Used to pick shortest distance between indices.
-    """
-    ms = torch.tensor(map_size)
-    # Calculate diff between x coordinate and y coordinate
-    dx = (bmus[..., 0] - positions[..., 0]).abs().unsqueeze(-1)
-    dy = (bmus[..., 1] - positions[..., 1]).abs().unsqueeze(-1)
-
-    # Calculate single coordinate toroidal diffs using map size
-    dx = torch.cat([dx, ms[0] - dx], dim=-1).min(dim=-1, keepdim=True)[0]
-    dy = torch.cat([dy, ms[1] - dy], dim=-1).min(dim=-1, keepdim=True)[0]
-
-    # Aggregate back again
-    return torch.cat([dx, dy], dim=-1)
+from .neighborhood import neigh_gauss, neigh_diff_standard
+from .distance import pdist
+from ..core import expanded, ifnone, index_tensor
 
 
 class Som(Module):
@@ -191,10 +13,8 @@ class Som(Module):
 
     Parameters
     ----------
-    size: SomSize2D
+    size: Tuple[int, int, int],
         The 2D map size: (rows, cols, n_features)
-    alpha : float default=0.3
-        The initial alpha hyperparameter. This is usually overwritten by a `SomTrainer`.
     dist_fn: Callable = pdist
         The distance function used to compute records-to-codebook distances.
     neigh_fn: Callable = neigh_gauss
@@ -204,120 +24,119 @@ class Som(Module):
     """
 
     def __init__(
-        self,
-        size: SomSize2D,
-        alpha=0.3,
-        dist_fn: Callable = pdist,
-        neigh_fn: Callable = neigh_gauss,
-        neigh_diff_fn: Callable = neigh_diff_standard,
+            self,
+            size: Tuple[int, int, int],
+            dist_fn: Callable = pdist,
+            neigh_fn: Callable = neigh_gauss,
+            neigh_diff_fn: Callable = neigh_diff_standard,
     ) -> None:
+        super().__init__()
         self.size = size
-        self.lr = torch.tensor([1.0])
-        self.alpha = torch.tensor([alpha])
-        self.sigma = torch.tensor([max(size[:-1]) / 2.0])
-        self.weights = torch.randn(size)
-        self.dist_fn, self.neigh_fn, self.neigh_diff_fn = dist_fn, neigh_fn, neigh_diff_fn
-        self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-        self.indices = None
-        self.after_weight_init()
+        self.alpha = torch.tensor(0.3)
+        self.sigma = torch.tensor(max(size[:-1]) / 2.0)
+        self.weights = torch.randn(self.size)
+        self.map_indices = index_tensor(self.size[:-1]).view(-1, 2)
+        # customizable functions
+        self.dist_fn = dist_fn
+        self.neigh_fn = neigh_fn
+        self.neigh_diff_fn = neigh_diff_fn
         self._recorder = dict()
 
-        # Pass map size to toroidal index diff
-        if self.neigh_diff_fn.__name__ == 'neigh_diff_toroidal':
-            self.neigh_diff_fn = partial(self.neigh_diff_fn, map_size=self.size[:-1])
+    def forward(self, xb: torch.Tensor) -> torch.Tensor:
+        """
+        SOM forward pass.
 
-    def forward(self, x: Tensor) -> Tensor:
-        "Calculates distances between elements in `x` and `weights`; computes BMUs and returns them."
-        if x.device != self.device:
-            x = self._to_device(x)
-        if self.weights.device != self.device:
-            self.weights = self._to_device(self.weights)
+        Does the following:
+         1. Calculate distance between `xb` and `weights`;
+         2. Find BMU for each element in `xb`
+         3. Return BMUs indices
 
-        # Evaluate distances between each item in `x` and each neuron of the map
-        distances = self.distance(x, self.weights.view(-1, x.shape[-1]))
+        Parameters
+        ----------
+        xb : torch.Tensor
+            The batch data
+        """
+        self.to_device(device=xb.device)
+        n_features = xb.shape[-1]
+        distances = self.distance(xb, self.weights.view(-1, n_features))
+        bmus = self.find_bmus(distances)
+        # save batch data
+        self._recorder['xb'] = xb.clone()
+        self._recorder['bmus'] = bmus
 
-        # Retrieve the tensor of BMUs for each element in batch
-        bmu_indices = self.find_bmus(distances)
+        return bmus
 
-        # If in training, save outputs for backward step
-        if self.training:
-            self._recorder['diffs'] = self.diff(x, self.weights.view(-1, x.shape[-1])).view(x.shape[0], self.size[0], self.size[1], x.shape[-1])
-            self._recorder['bmus'] = bmu_indices
-        self._recorder['xb'] = x.clone()
+    def distance(self, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+        """
+        Calculates distance between `a` and `b` using this module's `dist_fn`.
 
-        return bmu_indices
+        Parameters
+        ----------
+        a : torch.Tensor
+            The first tensor
+        b : torch.Tensor
+            The second tensor
+        """
+        return expanded(a, b, self.dist_fn)
 
     def backward(self) -> None:
-        "Updates weights based on BMUs and indices calculated in the forward"
-        # Retrieve the current batch outputs and batch size
-        bmu_indices = self._recorder['bmus']
-        elementwise_diffs = self._recorder['diffs']
-
-        batch_size = bmu_indices.shape[0]
-
-        # First, create a tensor of indices of the same size as the weights map
-        if self.indices is None:
-            self.indices = self._to_device(index_tensor(self.size[:-1]).view(-1, 2))
-
-        # Then calculate neighborhood scaling for each bmu (one per batch)
-        neigh_multipliers = self.neighborhood(bmu_indices, self.indices, self.sigma)
-
-        delta = neigh_multipliers * self.alpha * elementwise_diffs
-
-        # Update weights (divide by batch size to avoid exploding weights)
-        self.weights += (delta.sum(dim=0) / batch_size)
-
-    def find_bmus(self, distances: Tensor) -> Tensor:
         """
-        Finds the BMUs for a batch of distances.\n
-        Input:\n
-        `distances`:  [B, rows*cols]\n
-        \n
-        Output:\n
-        `bmus`:       [B, 2]
+        SOM backward pass.
+
+        Does the following:
+
+         1. Calculate index-distances of codebook elements and bmus
+         2. Calculate neighbourhood scaling on index distances
+         3. Update weights
         """
-        # Calculate the argmin of the tensor
-        min_idx = distances.argmin(-1)
-        # Stack the argmin 2D indices
-        bmus = torch.stack([min_idx / self.size[1], min_idx % self.size[1]], dim=1)
-        return self._to_device(bmus)
+        # get last batch data
+        xb, bmus = self._recorder['xb'], self._recorder['bmus']
+        batch_size = xb.shape[0]
+        n_features = xb.shape[-1]
+        elementwise_diffs = expanded(xb, self.weights.view(-1, n_features), lambda a, b: a - b).view(batch_size, self.size[0], self.size[1], n_features)
+        neighbourhood_mults = self.neighborhood(bmus, self.sigma)
+        self.weights += (self.alpha * neighbourhood_mults * elementwise_diffs / batch_size).sum(0)
 
-    def distance(self, a: Tensor, b: Tensor) -> Tensor:
-        "Calculates the distance between `a` and `b`, expanding their sizes."
-        return expanded_op(a, b, self.dist_fn, device=self.device)
+    def find_bmus(self, distances: torch.Tensor) -> torch.Tensor:
+        """
+        Find BMU for each batch in `distances`.
 
-    def diff(self, a: Tensor, b: Tensor) -> Tensor:
-        "Calculates the difference between `a` and `b`, expanding their sizes."
-        return expanded_op(a, b, lambda a, b: a - b, device=self.device)
+        Parameters
+        ----------
+        distances : torch.Tensor
+            The data-to-codebook distances.
+        """
+        min_idxs = distances.argmin(-1)
+        # Distances are flattened, so we need to transform 1d indices into 2d map locations
+        return torch.stack([min_idxs / self.size[1], min_idxs % self.size[1]], dim=1)
 
-    def neighborhood(self, bmus: Tensor, indices: Tensor, sigma: Tensor) -> Tensor:
-        "Calculates neighborhood multipliers using `neigh_fn`."
+    def neighborhood(self, bmus: torch.Tensor, sigma: torch.Tensor) -> torch.Tensor:
+        """
+        Calculates neighborhood multipliers for each BMU in `bmus` using this module's `neigh_diff_fn` and `neigh_fn`.
+
+        Parameters
+        ----------
+        bmus : torch.Tensor
+            The batch BMU indices
+        sigma : torch.Tensor
+            The neighborhoor radius
+        """
         out_shape = (bmus.shape[0], self.size[0], self.size[1], 1)
-        return expanded_op(bmus.float(), indices.float(), lambda a, b: self.neigh_fn(self.neigh_diff_fn(a, b), sigma), device=self.device).view(out_shape)
-
-    def get_prev_batch_output(self):
-        "Retrieves the output of the previous batch in training"
-        if self._diffs is not None and self._bmus is not None:
-            return self._bmus, self._diffs
-        raise RuntimeError(f'`{self.__class__.__name__}.get_prev_batch_output` should only be called during training')
-
-    def after_weight_init(self):
-        self.to_device()
-
-    def parameters(self, recurse=True):
-        "Returns an iterator over module parameters."
-        return iter([self.alpha, self.sigma])
+        index_diff = expanded(bmus, self.map_indices, self.neigh_diff_fn)
+        return self.neigh_fn(index_diff, sigma).view(out_shape)
 
     def to_device(self, device: torch.device = None) -> None:
-        "Moves params and weights to the appropriate device."
+        """Moves params and weights to the appropriate device."""
         self.weights = self._to_device(self.weights, device=device)
         self.alpha = self._to_device(self.alpha, device=device)
         self.sigma = self._to_device(self.sigma, device=device)
-        self.lr = self._to_device(self.lr, device=device)
+        self.map_indices = self._to_device(self.map_indices, device=device)
 
-    def _to_device(self, a: Tensor, device: torch.device = None) -> Tensor:
-        "Moves a tensor to the appropriate device"
-        return a.to(device=ifnone(device, self.device))
+    def _to_device(self, a: torch.Tensor, device: torch.device = None) -> torch.Tensor:
+        """Moves a tensor to the appropriate device"""
+        if a.device != device:
+            a = a.to(device=device)
+        return a
 
     def __repr__(self):
         return f'{self.__class__.__name__}(\n\

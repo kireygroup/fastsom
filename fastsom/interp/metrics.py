@@ -9,7 +9,7 @@ from typing import Tuple
 
 from fastsom.som import Som, pdist
 
-from ..core import expanded_op, idxs_2d_to_1d, idxs_1d_to_2d
+from ..core import expanded, idxs_2d_to_1d, idxs_1d_to_2d
 
 __all__ = [
     "cluster_stats",
@@ -46,7 +46,7 @@ def codebook_err(pred_b: Tensor, yb: Tensor, som: Som = None) -> Tensor:
     "Counts the number of records not belonging to each cluster that are closer than that cluster's furthest record."
     xb = som._recorder['xb']
     w = som.weights.view(-1, xb.shape[-1])
-    distances = expanded_op(xb, w.to(device=xb.device), pdist)
+    distances = expanded(xb, w.to(device=xb.device), pdist)
     row_sz = som.size[0]
     preds = idxs_2d_to_1d(pred_b, row_sz)
     n_classes = som.size[0] * som.size[1]
@@ -85,7 +85,7 @@ def topologic_err(pred_b: Tensor, yb: Tensor, som: Som = None, thresh: int = 4) 
     """
     xb = som._recorder['xb']
     # Calculate distance between each element in `xb` and each weight
-    distances = expanded_op(xb, som.weights.view(-1, xb.shape[-1]), pdist)
+    distances = expanded(xb, som.weights.view(-1, xb.shape[-1]), pdist)
     # Get the indices of the 2 closest element (BMU and 2nd-to-BMU)
     _, closest_2_indices = distances.topk(2, largest=False, sorted=True, dim=-1)
     col_sz = som.size[1]

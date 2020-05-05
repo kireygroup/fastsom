@@ -10,7 +10,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader, TensorDataset
 from fastai.basic_data import DataBunch
 from fastai.tabular import TabularDataBunch, FillMissing, Categorify, Normalize, TabularList
-from typing import Union, Optional, List, Callable, Tuple
+from typing import Union, Optional, List, Callable, Tuple, Collection
 
 from .normalizers import get_normalizer
 from .samplers import SamplerType, get_sampler, SamplerTypeOrString
@@ -187,7 +187,7 @@ class UnsupervisedDataBunch(DataBunch):
             df: pd.DataFrame,
             cat_names: List[str],
             cont_names: List[str],
-            dep_var: str,
+            dep_vars: Optional[str] = None,
             bs: int = 128,
             valid_pct: float = 0.2,
             normalizer: Optional[str] = 'var',
@@ -203,8 +203,8 @@ class UnsupervisedDataBunch(DataBunch):
             Categorical feature names.
         cont_names : List[str]
             Continuous feature names.
-        dep_var : str
-            The target variable.
+        dep_vars : Union[str, List[str]]
+            The target variable(s).
         bs: int default=128
             The batch size.
         valid_pct : float default=0.2
@@ -214,11 +214,14 @@ class UnsupervisedDataBunch(DataBunch):
         cat_enc : Union[CatEncoderTypeOrString, CatEncoder] default='onehot'
             Categorical encoder.
         """
-        procs = [FillMissing, Categorify, Normalize]
-        tabular_data = TabularList.from_df(df, path='.', cat_names=cat_names, cont_names=cont_names, procs=procs) \
-            .split_by_rand_pct(valid_pct) \
-            .label_from_df(cols=dep_var) \
-            .databunch(bs=bs, num_workers=0)
+        procs = [FillMissing, Categorify]
+        dep_vars = dep_vars if dep_vars is None or isinstance(dep_vars, Collection) else [dep_vars]
+        tabular_data = TabularList.from_df(df, path='.', cat_names=cat_names, cont_names=cont_names, procs=procs).split_by_rand_pct(valid_pct)
+        if dep_vars is not None:
+            tabular_data = tabular_data.label_from_df(cols=dep_vars)
+        else:
+            tabular_data = tabular_data.label_empty()
+        tabular_data = tabular_data.databunch(bs=bs, num_workers=0)
         return tabular_data.to_unsupervised_databunch(bs=bs, cat_enc=cat_enc)
 
     def normalize(self, normalizer: str = "var") -> None:
@@ -254,20 +257,3 @@ class UnsupervisedDataBunch(DataBunch):
     def make_categorical(self, t: Tensor) -> np.ndarray:
         """Transforms a Tensor `t` of encoded categorical variables into their original categorical form."""
         return self.cat_enc.make_categorical(t)
-
-
-def batch_slice(bs: int, maximum: int) -> slice:
-    """Generator function. Generates contiguous slices of size `bs`."""
-    curr = 0
-    while True:
-        yield slice(curr, curr+bs)
-        # Restart from 0 if max has been reached; advance to next batch otherwise
-        curr = 0 if curr+bs > maximum or curr+bs*2 > maximum else curr + bs
-
-
-def random_batch_slice(bs: int, maximum: int) -> Tensor:
-    """Generator function. Generate uniform random long tensors that can be used to index another tensor."""
-    base = torch.zeros(bs)
-    while True:
-        # Fill `base` with uniform data
-        yield base.uniform_(0, maximum).long()

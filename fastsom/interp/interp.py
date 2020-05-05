@@ -170,6 +170,7 @@ class SomInterpretation():
         save : bool default=False
             If True, saves the heatmap into a file.
         """
+
         image_shape = (self.learn.model.size[0], self.learn.model.size[1], 3)
         if self.w.shape[-1] != 3:
             if self.pca is None:
@@ -183,6 +184,7 @@ class SomInterpretation():
         def rescale(d): return ((d - d.min(0)) / d.ptp(0) * 255).astype(int)
         d = rescale(d)
         # Show weights
+        plt.figure(figsize=(10, 10))
         plt.imshow(d.reshape(image_shape))
 
     def show_preds(self, ds_type: DatasetType = DatasetType.Train, class_names: List[str] = None, n_bins: int = 5, save: bool = False, ) -> None:
