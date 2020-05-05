@@ -1,739 +1,444 @@
 <!DOCTYPE html>
-<html>
+<html >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>fastsom.interp</title>
+    
+      <link rel="stylesheet" href="../static/pygments.css">
+      <link rel="stylesheet" href="../static/theme.css">
+      <link rel="stylesheet" href="../static/sphinx_press_theme.css">
+          <link rel="stylesheet" href="../static/css/notebook_fix.css" type="text/css" />
+      
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../static/documentation_options.js"></script>
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>fastsom.interp</title>
+      <!-- sphinx script_files -->
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/doctools.js"></script>
+        <script src="../static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
 
-  <link rel="stylesheet" href="../static/pygments.css">
-  <link rel="stylesheet" href="../static/theme.css">
-  <link rel="stylesheet" href="../static/sphinx_press_theme.css">
-  <link rel="stylesheet" href="../static/css/notebook_fix.css" type="text/css" />
-
-  <script type="text/javascript" id="documentation_options" data-url_root="../"
-    src="../static/documentation_options.js"></script>
-
-  <!-- sphinx script_files -->
-  <script src="../static/jquery.js"></script>
-  <script src="../static/underscore.js"></script>
-  <script src="../static/doctools.js"></script>
-  <script src="../static/language_data.js"></script>
-  <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA="
-    src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-
-
-  <script src="../static/theme-vendors.js"></script>
-  <script src="../static/theme.js" defer></script>
-
+      
+      <script src="../static/theme-vendors.js"></script>
+      <script src="../static/theme.js" defer></script>
+    
   <link rel="index" title="Index" href="../genindex.html" />
   <link rel="search" title="Search" href="../search.html" />
   <link rel="next" title="fastsom.learn" href="../learn/learn.html" />
-  <link rel="prev" title="fastsom.datasets" href="../datasets/datasets.html" />
-</head>
+  <link rel="prev" title="fastsom.datasets" href="../datasets/datasets.html" /> 
+  </head>
 
-<body>
-  <div id="app" class="theme-container" :class="pageClasses">
-    <navbar @toggle-sidebar="toggleSidebar">
-      <router-link to="../index.html" class="home-link">
+  <body>
+    <div id="app" class="theme-container" :class="pageClasses"><navbar @toggle-sidebar="toggleSidebar">
+  <router-link to="../index.html" class="home-link">
+    
+      <span class="site-name">fastsom</span>
+    
+  </router-link>
 
-        <span class="site-name">fastsom</span>
+  <div class="links">
+    <navlinks class="can-hide">
 
-      </router-link>
-
-      <div class="links">
-        <navlinks class="can-hide">
-
-
-          <div class="nav-item">
-            <a href="../index.html#fastsom-documentation" class="nav-link  router-link-active">
-              API
-            </a>
-          </div>
-
-          <div class="nav-item">
-            <a href="../index.html#fastsom-documentation" class="nav-link ">
-              Examples
-            </a>
-          </div>
-
-
-
-
-        </navlinks>
-      </div>
-    </navbar>
-
-
-    <div class="sidebar-mask" @click="toggleSidebar(false)">
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         API
+      </a>
     </div>
-    <sidebar @toggle-sidebar="toggleSidebar">
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         Examples
+      </a>
+    </div>
+  
 
-      <navlinks>
 
 
-
-        <div class="nav-item">
-          <a href="../index.html#fastsom-documentation" class="nav-link  router-link-active">
-            API
-          </a>
-        </div>
-
-        <div class="nav-item">
-          <a href="../index.html#fastsom-documentation" class="nav-link ">
-            Examples
-          </a>
-        </div>
-
-
-
-
-
-      </navlinks>
-      <div id="searchbox" class="searchbox" role="search">
-        <div class="caption"><span class="caption-text">Quick search</span>
-          <div class="searchformwrapper">
-            <form class="search" action="../search.html" method="get">
-              <input type="text" name="q" />
-              <input type="submit" value="Search" />
-              <input type="hidden" name="check_keywords" value="yes" />
-              <input type="hidden" name="area" value="default" />
-            </form>
-          </div>
-        </div>
-      </div>
-      <div class="sidebar-links" role="navigation" aria-label="main navigation">
-
-        <div class="sidebar-group">
-          <p class="caption">
-            <span class="caption-text"><a href="../index.html#fastsom-documentation">API</a></span>
-          </p>
-          <ul class="current">
-
-            <li class="toctree-l1 "><a href="../core/core.html" class="reference internal ">fastsom.core</a>
-
-
-            </li>
-
-
-            <li class="toctree-l1 "><a href="../datasets/datasets.html" class="reference internal ">fastsom.datasets</a>
-
-
-            </li>
-
-
-            <li class="toctree-l1 current"><a href="#" class="reference internal current">fastsom.interp</a>
-
-
-              <ul>
-
-                <li class="toctree-l2"><a href="#som-training-interpretation" class="reference internal">SOM Training
-                    interpretation</a></li>
-
-                <li class="toctree-l2"><a href="#som-metrics" class="reference internal">SOM Metrics</a></li>
-
-                <li class="toctree-l2"><a href="#som-training-visualization" class="reference internal">SOM Training
-                    Visualization</a></li>
-
-              </ul>
-
-            </li>
-
-
-            <li class="toctree-l1 "><a href="../learn/learn.html" class="reference internal ">fastsom.learn</a>
-
-
-            </li>
-
-
-            <li class="toctree-l1 "><a href="../som.html" class="reference internal ">fastsom.som</a>
-
-
-            </li>
-
-
-          </ul>
-        </div>
-
-        <div class="sidebar-group">
-          <p class="caption">
-            <span class="caption-text"><a href="../index.html#fastsom-documentation">Examples</a></span>
-          </p>
-          <ul class="">
-
-            <li class="toctree-l1 "><a href="../examples/colors.html" class="reference internal ">SOM Training on RGB
-                Colors Dataset</a>
-
-
-            </li>
-
-
-            <li class="toctree-l1 "><a href="../examples/iris.html" class="reference internal ">SOM Training on IRIS
-                Dataset</a>
-
-
-            </li>
-
-
-          </ul>
-        </div>
-
-      </div>
-    </sidebar>
-
-    <page>
-      <div class="body-header" role="navigation" aria-label="navigation">
-
-        <ul class="breadcrumbs">
-          <li><a href="../index.html">Docs</a> &raquo;</li>
-
-          <li>fastsom.interp</li>
-        </ul>
-
-
-        <ul class="page-nav">
-          <li class="prev">
-            <a href="../datasets/datasets.html" title="previous chapter">← fastsom.datasets</a>
-          </li>
-          <li class="next">
-            <a href="../learn/learn.html" title="next chapter">fastsom.learn →</a>
-          </li>
-        </ul>
-
-      </div>
-      <hr>
-      <div class="content" role="main">
-
-        <div class="section" id="fastsom-interp">
-          <h1>fastsom.interp<a class="headerlink" href="#fastsom-interp" title="Permalink to this headline">¶</a></h1>
-          <div class="section" id="som-training-interpretation">
-            <h2>SOM Training interpretation<a class="headerlink" href="#som-training-interpretation"
-                title="Permalink to this headline">¶</a></h2>
-            <dl class="py class">
-              <dt id="fastsom.interp.interp.SomInterpretation">
-                <em class="property">class </em><code
-                  class="sig-prename descclassname">fastsom.interp.interp.</code><code
-                  class="sig-name descname">SomInterpretation</code><span class="sig-paren">(</span><em
-                  class="sig-param"><span class="n">learn</span></em><span class="sig-paren">)</span><a
-                  class="reference external"
-                  href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/interp.py"><span
-                    class="viewcode-link">[source]</span></a><a class="headerlink"
-                  href="#fastsom.interp.interp.SomInterpretation" title="Permalink to this definition">¶</a></dt>
-              <dd>
-                <p>SOM interpretation utility.</p>
-                <p>Displays various information about a trained Self-Organizing Map, such as
-                  topological weight distribution, features distribution and training set
-                  distribution over the map.</p>
-                <dl class="field-list simple">
-                  <dt class="field-odd">Parameters</dt>
-                  <dd class="field-odd">
-                    <p><strong>learn</strong> (<a class="reference internal"
-                        href="../learn/learn.html#fastsom.learn.learn.SomLearner"
-                        title="fastsom.learn.learn.SomLearner"><em>SomLearner</em></a>) – The learner to be used for
-                      interpretation.</p>
-                  </dd>
-                </dl>
-                <dl class="py method">
-                  <dt id="fastsom.interp.interp.SomInterpretation.from_learner">
-                    <em class="property">classmethod </em><code class="sig-name descname">from_learner</code><span
-                      class="sig-paren">(</span><em class="sig-param"><span class="n">learn</span></em><span
-                      class="sig-paren">)</span><a class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/interp.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.interp.SomInterpretation.from_learner"
-                      title="Permalink to this definition">¶</a></dt>
-                  <dd>
-                    <p>Creates a new instance of <cite>SomInterpretation</cite> from a <cite>SomLearner</cite>.</p>
-                    <dl class="field-list simple">
-                      <dt class="field-odd">Parameters</dt>
-                      <dd class="field-odd">
-                        <p><strong>learn</strong> (<a class="reference internal"
-                            href="../learn/learn.html#fastsom.learn.learn.SomLearner"
-                            title="fastsom.learn.learn.SomLearner"><em>SomLearner</em></a>) – The learner to be used for
-                          interpretation.</p>
-                      </dd>
-                    </dl>
-                  </dd>
-                </dl>
-
-                <dl class="py method">
-                  <dt id="fastsom.interp.interp.SomInterpretation.show_feature_heatmaps">
-                    <code class="sig-name descname">show_feature_heatmaps</code><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="n">dim</span><span class="p">:</span> <span class="n">Union[int,
-                        List[int], None]</span> <span class="o">=</span> <span class="default_value">None</span></em>,
-                    <em class="sig-param"><span class="n">cat_labels</span><span class="p">:</span> <span
-                        class="n">Optional<span class="p">[</span>List<span class="p">[</span>str<span
-                          class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span
-                        class="default_value">None</span></em>, <em class="sig-param"><span
-                        class="n">cont_labels</span><span class="p">:</span> <span class="n">Optional<span
-                          class="p">[</span>List<span class="p">[</span>str<span class="p">]</span><span
-                          class="p">]</span></span> <span class="o">=</span> <span
-                        class="default_value">None</span></em>, <em class="sig-param"><span
-                        class="n">recategorize</span><span class="p">:</span> <span class="n">bool</span> <span
-                        class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span
-                        class="n">save</span><span class="p">:</span> <span class="n">bool</span> <span
-                        class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span>
-                    &#x2192; None<a class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/interp.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.interp.SomInterpretation.show_feature_heatmaps"
-                      title="Permalink to this definition">¶</a></dt>
-                  <dd>
-                    <p>Shows a heatmap for each feature displaying its value distribution over the codebook.</p>
-                    <dl class="field-list simple">
-                      <dt class="field-odd">Parameters</dt>
-                      <dd class="field-odd">
-                        <ul class="simple">
-                          <li>
-                            <p><strong>dim</strong>
-                              (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>int</em><em>,
-                              </em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em><em>]
-                              </em><em>default=None</em>) – Indices of features to be shown; defaults to all features.
-                            </p>
-                          </li>
-                          <li>
-                            <p><strong>cat_labels</strong>
-                              (<em>Optional</em><em>[</em><em>List</em><em>[</em><em>str</em><em>]</em><em>]
-                              </em><em>default=None</em>) – Categorical feature labels.</p>
-                          </li>
-                          <li>
-                            <p><strong>cont_labels</strong>
-                              (<em>Optional</em><em>[</em><em>List</em><em>[</em><em>str</em><em>]</em><em>]
-                              </em><em>default=None</em>) – Continuous feature labels.</p>
-                          </li>
-                          <li>
-                            <p><strong>recategorize</strong> (<em>bool default=True</em>) – If True, converts back
-                              categorical features that were previously made continuous.</p>
-                          </li>
-                          <li>
-                            <p><strong>save</strong> (<em>bool default=False</em>) – If True, saves the charts into a
-                              file.</p>
-                          </li>
-                        </ul>
-                      </dd>
-                    </dl>
-                  </dd>
-                </dl>
-
-                <dl class="py method">
-                  <dt id="fastsom.interp.interp.SomInterpretation.show_hitmap">
-                    <code class="sig-name descname">show_hitmap</code><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="n">data</span><span class="p">:</span> <span
-                        class="n">torch.Tensor</span> <span class="o">=</span> <span
-                        class="default_value">None</span></em>, <em class="sig-param"><span class="n">bs</span><span
-                        class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span
-                        class="default_value">64</span></em>, <em class="sig-param"><span class="n">save</span><span
-                        class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span
-                        class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; None<a
-                      class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/interp.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.interp.SomInterpretation.show_hitmap"
-                      title="Permalink to this definition">¶</a></dt>
-                  <dd>
-                    <p>Shows a hitmap with counts for each codebook unit over the dataset.</p>
-                    <dl class="field-list simple">
-                      <dt class="field-odd">Parameters</dt>
-                      <dd class="field-odd">
-                        <ul class="simple">
-                          <li>
-                            <p><strong>data</strong> (<em>Tensor default=None</em>) – The dataset to be used for
-                              prediction; defaults to the training set if None.</p>
-                          </li>
-                          <li>
-                            <p><strong>bs</strong> (<em>int default=64</em>) – The batch size to be used to run model
-                              predictions.</p>
-                          </li>
-                          <li>
-                            <p><strong>save</strong> (<em>bool default=False</em>) – If True, saves the hitmap into a
-                              file.</p>
-                          </li>
-                        </ul>
-                      </dd>
-                    </dl>
-                  </dd>
-                </dl>
-
-                <dl class="py method">
-                  <dt id="fastsom.interp.interp.SomInterpretation.show_preds">
-                    <code class="sig-name descname">show_preds</code><span class="sig-paren">(</span><em
-                      class="sig-param">ds_type: fastai.basic_data.DatasetType = &lt;DatasetType.Train: 1&gt;</em>, <em
-                      class="sig-param">class_names: List[str] = None</em>, <em class="sig-param">n_bins: int = 5</em>,
-                    <em class="sig-param">save: bool = False</em><span class="sig-paren">)</span> &#x2192; None<a
-                      class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/interp.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.interp.SomInterpretation.show_preds"
-                      title="Permalink to this definition">¶</a></dt>
-                  <dd>
-                    <p>Displays most frequent label for each map position in <cite>ds_type</cite> dataset.
-                      If labels are countinuous, binning on <cite>n_bins</cite> is performed.</p>
-                    <dl class="field-list simple">
-                      <dt class="field-odd">Parameters</dt>
-                      <dd class="field-odd">
-                        <ul class="simple">
-                          <li>
-                            <p><strong>ds_type</strong> (<em>DatasetType default=DatasetType.Train</em>) – The enum of
-                              the dataset to be used.</p>
-                          </li>
-                          <li>
-                            <p><strong>n_bins</strong> (<em>int default=5</em>) – The number of bins to use when labels
-                              are continous.</p>
-                          </li>
-                          <li>
-                            <p><strong>save</strong> (<em>bool default=False</em>) – Whether or not the output chart
-                              should be saved on a file.</p>
-                          </li>
-                        </ul>
-                      </dd>
-                    </dl>
-                  </dd>
-                </dl>
-
-                <dl class="py method">
-                  <dt id="fastsom.interp.interp.SomInterpretation.show_weights">
-                    <code class="sig-name descname">show_weights</code><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="n">save</span><span class="p">:</span> <span class="n">bool</span>
-                      <span class="o">=</span> <span class="default_value">False</span></em><span
-                      class="sig-paren">)</span> &#x2192; None<a class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/interp.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.interp.SomInterpretation.show_weights"
-                      title="Permalink to this definition">¶</a></dt>
-                  <dd>
-                    <p>Shows a colored heatmap of the SOM codebooks.</p>
-                    <dl class="field-list simple">
-                      <dt class="field-odd">Parameters</dt>
-                      <dd class="field-odd">
-                        <p><strong>save</strong> (<em>bool default=False</em>) – If True, saves the heatmap into a file.
-                        </p>
-                      </dd>
-                    </dl>
-                  </dd>
-                </dl>
-
-              </dd>
-            </dl>
-
-          </div>
-          <div class="section" id="som-metrics">
-            <h2>SOM Metrics<a class="headerlink" href="#som-metrics" title="Permalink to this headline">¶</a></h2>
-            <dl class="py function">
-              <dt id="fastsom.interp.metrics.cluster_stats">
-                <code class="sig-prename descclassname">fastsom.interp.metrics.</code><code
-                  class="sig-name descname">cluster_stats</code><span class="sig-paren">(</span><em
-                  class="sig-param"><span class="n">x</span><span class="p">:</span> <span
-                    class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">som</span><span
-                    class="p">:</span> <span class="n"><a class="reference internal"
-                      href="../som.html#fastsom.som.som.Som"
-                      title="fastsom.som.som.Som">fastsom.som.som.Som</a></span></em><span class="sig-paren">)</span>
-                &#x2192; Tuple<span class="p">[</span>float<span class="p">]</span><a class="reference external"
-                  href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/metrics.py"><span
-                    class="viewcode-link">[source]</span></a><a class="headerlink"
-                  href="#fastsom.interp.metrics.cluster_stats" title="Permalink to this definition">¶</a></dt>
-              <dd>
-                <p>Calculates cluster statistics for a Self-Organizing Map.</p>
-              </dd>
-            </dl>
-
-            <dl class="py function">
-              <dt id="fastsom.interp.metrics.codebook_err">
-                <code class="sig-prename descclassname">fastsom.interp.metrics.</code><code
-                  class="sig-name descname">codebook_err</code><span class="sig-paren">(</span><em
-                  class="sig-param"><span class="n">pred_b</span><span class="p">:</span> <span
-                    class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">yb</span><span
-                    class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span
-                    class="n">som</span><span class="p">:</span> <span class="n"><a class="reference internal"
-                      href="../som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span>
-                  <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span>
-                &#x2192; torch.Tensor<a class="reference external"
-                  href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/metrics.py"><span
-                    class="viewcode-link">[source]</span></a><a class="headerlink"
-                  href="#fastsom.interp.metrics.codebook_err" title="Permalink to this definition">¶</a></dt>
-              <dd>
-                <p>Counts the number of records not belonging to each cluster that are closer than that cluster’s
-                  furthest record.</p>
-              </dd>
-            </dl>
-
-            <dl class="py function">
-              <dt id="fastsom.interp.metrics.mean_quantization_err">
-                <code class="sig-prename descclassname">fastsom.interp.metrics.</code><code
-                  class="sig-name descname">mean_quantization_err</code><span class="sig-paren">(</span><em
-                  class="sig-param"><span class="n">pred_b</span><span class="p">:</span> <span
-                    class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">yb</span><span
-                    class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span
-                    class="n">som</span><span class="p">:</span> <span class="n"><a class="reference internal"
-                      href="../som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span>
-                  <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span>
-                &#x2192; torch.Tensor<a class="reference external"
-                  href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/metrics.py"><span
-                    class="viewcode-link">[source]</span></a><a class="headerlink"
-                  href="#fastsom.interp.metrics.mean_quantization_err" title="Permalink to this definition">¶</a></dt>
-              <dd>
-                <p>Mean distance of each record from its respective BMU.</p>
-              </dd>
-            </dl>
-
-            <dl class="py function">
-              <dt id="fastsom.interp.metrics.topologic_err">
-                <code class="sig-prename descclassname">fastsom.interp.metrics.</code><code
-                  class="sig-name descname">topologic_err</code><span class="sig-paren">(</span><em
-                  class="sig-param"><span class="n">pred_b</span><span class="p">:</span> <span
-                    class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">yb</span><span
-                    class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span
-                    class="n">som</span><span class="p">:</span> <span class="n"><a class="reference internal"
-                      href="../som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span>
-                  <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span
-                    class="n">thresh</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span>
-                  <span class="default_value">4</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a
-                  class="reference external"
-                  href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/metrics.py"><span
-                    class="viewcode-link">[source]</span></a><a class="headerlink"
-                  href="#fastsom.interp.metrics.topologic_err" title="Permalink to this definition">¶</a></dt>
-              <dd>
-                <p>Min vec distance of each record with every class and checks if the second-to-min value belongs in the
-                  first-best neighborhood.
-                  If not, it gets added as an error.</p>
-              </dd>
-            </dl>
-
-          </div>
-          <div class="section" id="som-training-visualization">
-            <h2>SOM Training Visualization<a class="headerlink" href="#som-training-visualization"
-                title="Permalink to this headline">¶</a></h2>
-            <dl class="py class">
-              <dt id="fastsom.interp.viz.SomTrainingViz">
-                <em class="property">class </em><code class="sig-prename descclassname">fastsom.interp.viz.</code><code
-                  class="sig-name descname">SomTrainingViz</code><span class="sig-paren">(</span><em
-                  class="sig-param"><span class="n">learn</span><span class="p">:</span> <span
-                    class="n">fastai.basic_train.Learner</span></em>, <em class="sig-param"><span
-                    class="n">update_on_batch</span><span class="p">:</span> <span class="n">bool</span> <span
-                    class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a
-                  class="reference external"
-                  href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span
-                    class="viewcode-link">[source]</span></a><a class="headerlink"
-                  href="#fastsom.interp.viz.SomTrainingViz" title="Permalink to this definition">¶</a></dt>
-              <dd>
-                <p><cite>Callback</cite> used to visualize an approximation of the Som weight update.</p>
-                <dl class="field-list simple">
-                  <dt class="field-odd">Parameters</dt>
-                  <dd class="field-odd">
-                    <p><strong>learn</strong> (<em>Learner</em>) – The <cite>Learner</cite> instance.</p>
-                  </dd>
-                </dl>
-                <dl class="py method">
-                  <dt id="fastsom.interp.viz.SomTrainingViz.on_batch_begin">
-                    <code class="sig-name descname">on_batch_begin</code><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span
-                      class="sig-paren">)</span><a class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.viz.SomTrainingViz.on_batch_begin"
-                      title="Permalink to this definition">¶</a></dt>
-                  <dd>
-                    <p>Updates the plot if needed.</p>
-                  </dd>
-                </dl>
-
-                <dl class="py method">
-                  <dt id="fastsom.interp.viz.SomTrainingViz.on_epoch_begin">
-                    <code class="sig-name descname">on_epoch_begin</code><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span
-                      class="sig-paren">)</span><a class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.viz.SomTrainingViz.on_epoch_begin"
-                      title="Permalink to this definition">¶</a></dt>
-                  <dd>
-                    <p>Updates the plot if needed.</p>
-                  </dd>
-                </dl>
-
-                <dl class="py method">
-                  <dt id="fastsom.interp.viz.SomTrainingViz.on_train_begin">
-                    <code class="sig-name descname">on_train_begin</code><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span
-                      class="sig-paren">)</span><a class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.viz.SomTrainingViz.on_train_begin"
-                      title="Permalink to this definition">¶</a></dt>
-                  <dd>
-                    <p>Initializes the PCA on the dataset and creates the plot.</p>
-                  </dd>
-                </dl>
-
-                <dl class="py method">
-                  <dt id="fastsom.interp.viz.SomTrainingViz.on_train_end">
-                    <code class="sig-name descname">on_train_end</code><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span
-                      class="sig-paren">)</span><a class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.viz.SomTrainingViz.on_train_end" title="Permalink to this definition">¶</a>
-                  </dt>
-                  <dd>
-                    <p>Cleanup after training.</p>
-                  </dd>
-                </dl>
-
-              </dd>
-            </dl>
-
-            <dl class="py class">
-              <dt id="fastsom.interp.viz.SomHyperparamsViz">
-                <em class="property">class </em><code class="sig-prename descclassname">fastsom.interp.viz.</code><code
-                  class="sig-name descname">SomHyperparamsViz</code><span class="sig-paren">(</span><em
-                  class="sig-param"><span class="n">learn</span><span class="p">:</span> <span
-                    class="n">fastai.basic_train.Learner</span></em><span class="sig-paren">)</span><a
-                  class="reference external"
-                  href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span
-                    class="viewcode-link">[source]</span></a><a class="headerlink"
-                  href="#fastsom.interp.viz.SomHyperparamsViz" title="Permalink to this definition">¶</a></dt>
-              <dd>
-                <p>Displays a lineplot for each SOM hyperparameter.</p>
-                <dl class="field-list simple">
-                  <dt class="field-odd">Parameters</dt>
-                  <dd class="field-odd">
-                    <p><strong>learn</strong> (<em>Learner</em>) – The <cite>Learner</cite> instance.</p>
-                  </dd>
-                </dl>
-                <dl class="py method">
-                  <dt id="fastsom.interp.viz.SomHyperparamsViz.on_epoch_end">
-                    <code class="sig-name descname">on_epoch_end</code><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span
-                      class="sig-paren">)</span><a class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.viz.SomHyperparamsViz.on_epoch_end"
-                      title="Permalink to this definition">¶</a></dt>
-                  <dd>
-                    <p>Updates hyperparameters and plots.</p>
-                  </dd>
-                </dl>
-
-                <dl class="py method">
-                  <dt id="fastsom.interp.viz.SomHyperparamsViz.on_train_begin">
-                    <code class="sig-name descname">on_train_begin</code><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span
-                      class="sig-paren">)</span><a class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.viz.SomHyperparamsViz.on_train_begin"
-                      title="Permalink to this definition">¶</a></dt>
-                  <dd>
-                    <p>Initializes the plots.</p>
-                  </dd>
-                </dl>
-
-              </dd>
-            </dl>
-
-            <dl class="py class">
-              <dt id="fastsom.interp.viz.SomBmuViz">
-                <em class="property">class </em><code class="sig-prename descclassname">fastsom.interp.viz.</code><code
-                  class="sig-name descname">SomBmuViz</code><span class="sig-paren">(</span><em class="sig-param"><span
-                    class="n">learn</span><span class="p">:</span> <span
-                    class="n">fastai.basic_train.Learner</span></em>, <em class="sig-param"><span
-                    class="n">update_on_batch</span><span class="p">:</span> <span class="n">bool</span> <span
-                    class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a
-                  class="reference external"
-                  href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span
-                    class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomBmuViz"
-                  title="Permalink to this definition">¶</a></dt>
-              <dd>
-                <p>Visualization callback for SOM training.
-                  Stores BMU locations for each batch and displays them on epoch end.</p>
-                <dl class="field-list simple">
-                  <dt class="field-odd">Parameters</dt>
-                  <dd class="field-odd">
-                    <p><strong>learn</strong> (<em>Learner</em>) – The <cite>Learner</cite> instance.</p>
-                  </dd>
-                </dl>
-                <dl class="py method">
-                  <dt id="fastsom.interp.viz.SomBmuViz.on_batch_end">
-                    <code class="sig-name descname">on_batch_end</code><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span
-                      class="sig-paren">)</span><a class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.viz.SomBmuViz.on_batch_end" title="Permalink to this definition">¶</a></dt>
-                  <dd>
-                    <p>Saves BMU hit counts for this batch.</p>
-                  </dd>
-                </dl>
-
-                <dl class="py method">
-                  <dt id="fastsom.interp.viz.SomBmuViz.on_epoch_end">
-                    <code class="sig-name descname">on_epoch_end</code><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span
-                      class="sig-paren">)</span><a class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.viz.SomBmuViz.on_epoch_end" title="Permalink to this definition">¶</a></dt>
-                  <dd>
-                    <p>Updates total BMU counter and resets epoch counter.</p>
-                  </dd>
-                </dl>
-
-                <dl class="py method">
-                  <dt id="fastsom.interp.viz.SomBmuViz.on_train_begin">
-                    <code class="sig-name descname">on_train_begin</code><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span
-                      class="sig-paren">)</span><a class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.viz.SomBmuViz.on_train_begin" title="Permalink to this definition">¶</a>
-                  </dt>
-                  <dd>
-                    <p>To initialize constants in the callback.</p>
-                  </dd>
-                </dl>
-
-                <dl class="py method">
-                  <dt id="fastsom.interp.viz.SomBmuViz.on_train_end">
-                    <code class="sig-name descname">on_train_end</code><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span
-                      class="sig-paren">)</span><a class="reference external"
-                      href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span
-                        class="viewcode-link">[source]</span></a><a class="headerlink"
-                      href="#fastsom.interp.viz.SomBmuViz.on_train_end" title="Permalink to this definition">¶</a></dt>
-                  <dd>
-                    <p>Cleanup after training.</p>
-                  </dd>
-                </dl>
-
-              </dd>
-            </dl>
-
-          </div>
-        </div>
-
-
-      </div>
-      <div class="page-nav">
-        <div class="inner">
-          <ul class="page-nav">
-            <li class="prev">
-              <a href="../datasets/datasets.html" title="previous chapter">← fastsom.datasets</a>
-            </li>
-            <li class="next">
-              <a href="../learn/learn.html" title="next chapter">fastsom.learn →</a>
-            </li>
-          </ul>
-          <div class="footer" role="contentinfo">
-            &#169; Copyright 2020, Kirey Group.
-            <br>
-            Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.2 with <a
-              href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
-          </div>
-        </div>
-      </div>
-    </page>
+    </navlinks>
   </div>
+</navbar>
+
+      
+      <div class="sidebar-mask" @click="toggleSidebar(false)">
+      </div>
+        <sidebar @toggle-sidebar="toggleSidebar">
+          
+          <navlinks>
+            
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         Examples
+      </a>
+    </div>
+  
 
 
-</body>
 
+            
+          </navlinks><div id="searchbox" class="searchbox" role="search">
+  <div class="caption"><span class="caption-text">Quick search</span>
+    <div class="searchformwrapper">
+      <form class="search" action="../search.html" method="get">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div><div class="sidebar-links" role="navigation" aria-label="main navigation">
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">API</a></span>
+      </p>
+      <ul class="current">
+        
+          <li class="toctree-l1 "><a href="../core/core.html" class="reference internal ">fastsom.core</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../datasets/datasets.html" class="reference internal ">fastsom.datasets</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 current"><a href="#" class="reference internal current">fastsom.interp</a>
+
+            
+              <ul>
+                
+                  <li class="toctree-l2"><a href="#som-training-interpretation" class="reference internal">SOM Training interpretation</a></li>
+                
+                  <li class="toctree-l2"><a href="#som-metrics" class="reference internal">SOM Metrics</a></li>
+                
+                  <li class="toctree-l2"><a href="#som-training-visualization" class="reference internal">SOM Training Visualization</a></li>
+                
+              </ul>
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../learn/learn.html" class="reference internal ">fastsom.learn</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../som/som.html" class="reference internal ">fastsom.som</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">Examples</a></span>
+      </p>
+      <ul class="">
+        
+          <li class="toctree-l1 "><a href="../examples/colors.html" class="reference internal ">SOM Training on RGB Colors Dataset</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../examples/iris.html" class="reference internal ">SOM Training on IRIS Dataset</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+</div>
+        </sidebar>
+
+      <page>
+          <div class="body-header" role="navigation" aria-label="navigation">
+  
+  <ul class="breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+    
+    <li>fastsom.interp</li>
+  </ul>
+  
+
+  <ul class="page-nav">
+  <li class="prev">
+    <a href="../datasets/datasets.html"
+       title="previous chapter">← fastsom.datasets</a>
+  </li>
+  <li class="next">
+    <a href="../learn/learn.html"
+       title="next chapter">fastsom.learn →</a>
+  </li>
+</ul>
+  
+</div>
+<hr>
+          <div class="content" role="main">
+            
+  <div class="section" id="fastsom-interp">
+<h1>fastsom.interp<a class="headerlink" href="#fastsom-interp" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="som-training-interpretation">
+<h2>SOM Training interpretation<a class="headerlink" href="#som-training-interpretation" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="fastsom.interp.interp.SomInterpretation">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.interp.interp.</code><code class="sig-name descname">SomInterpretation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">learn</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/interp.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.interp.SomInterpretation" title="Permalink to this definition">¶</a></dt>
+<dd><p>SOM interpretation utility.</p>
+<p>Displays various information about a trained Self-Organizing Map, such as
+topological weight distribution, features distribution and training set
+distribution over the map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>learn</strong> (<a class="reference internal" href="../learn/learn.html#fastsom.learn.learn.SomLearner" title="fastsom.learn.learn.SomLearner"><em>SomLearner</em></a>) – The learner to be used for interpretation.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="fastsom.interp.interp.SomInterpretation.from_learner">
+<em class="property">classmethod </em><code class="sig-name descname">from_learner</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">learn</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/interp.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.interp.SomInterpretation.from_learner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new instance of <cite>SomInterpretation</cite> from a <cite>SomLearner</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>learn</strong> (<a class="reference internal" href="../learn/learn.html#fastsom.learn.learn.SomLearner" title="fastsom.learn.learn.SomLearner"><em>SomLearner</em></a>) – The learner to be used for interpretation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.interp.interp.SomInterpretation.show_feature_heatmaps">
+<code class="sig-name descname">show_feature_heatmaps</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dim</span><span class="p">:</span> <span class="n">Union[int, List[int], None]</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cat_labels</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cont_labels</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">recategorize</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">save</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/interp.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.interp.SomInterpretation.show_feature_heatmaps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows a heatmap for each feature displaying its value distribution over the codebook.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>int</em><em>, </em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em><em>] </em><em>default=None</em>) – Indices of features to be shown; defaults to all features.</p></li>
+<li><p><strong>cat_labels</strong> (<em>Optional</em><em>[</em><em>List</em><em>[</em><em>str</em><em>]</em><em>] </em><em>default=None</em>) – Categorical feature labels.</p></li>
+<li><p><strong>cont_labels</strong> (<em>Optional</em><em>[</em><em>List</em><em>[</em><em>str</em><em>]</em><em>] </em><em>default=None</em>) – Continuous feature labels.</p></li>
+<li><p><strong>recategorize</strong> (<em>bool default=True</em>) – If True, converts back categorical features that were previously made continuous.</p></li>
+<li><p><strong>save</strong> (<em>bool default=False</em>) – If True, saves the charts into a file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.interp.interp.SomInterpretation.show_hitmap">
+<code class="sig-name descname">show_hitmap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">torch.Tensor</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">bs</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">64</span></em>, <em class="sig-param"><span class="n">save</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/interp.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.interp.SomInterpretation.show_hitmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows a hitmap with counts for each codebook unit over the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>Tensor default=None</em>) – The dataset to be used for prediction; defaults to the training set if None.</p></li>
+<li><p><strong>bs</strong> (<em>int default=64</em>) – The batch size to be used to run model predictions.</p></li>
+<li><p><strong>save</strong> (<em>bool default=False</em>) – If True, saves the hitmap into a file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.interp.interp.SomInterpretation.show_preds">
+<code class="sig-name descname">show_preds</code><span class="sig-paren">(</span><em class="sig-param">ds_type: fastai.basic_data.DatasetType = &lt;DatasetType.Train: 1&gt;</em>, <em class="sig-param">class_names: List[str] = None</em>, <em class="sig-param">n_bins: int = 5</em>, <em class="sig-param">save: bool = False</em><span class="sig-paren">)</span> &#x2192; None<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/interp.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.interp.SomInterpretation.show_preds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays most frequent label for each map position in <cite>ds_type</cite> dataset.
+If labels are countinuous, binning on <cite>n_bins</cite> is performed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds_type</strong> (<em>DatasetType default=DatasetType.Train</em>) – The enum of the dataset to be used.</p></li>
+<li><p><strong>n_bins</strong> (<em>int default=5</em>) – The number of bins to use when labels are continous.</p></li>
+<li><p><strong>save</strong> (<em>bool default=False</em>) – Whether or not the output chart should be saved on a file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.interp.interp.SomInterpretation.show_weights">
+<code class="sig-name descname">show_weights</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">save</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/interp.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.interp.SomInterpretation.show_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows a colored heatmap of the SOM codebooks.
+data = idxs_1d_to_2d(data, self.learn.model.size[1])</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>save</strong> (<em>bool default=False</em>) – If True, saves the heatmap into a file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="som-metrics">
+<h2>SOM Metrics<a class="headerlink" href="#som-metrics" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="fastsom.interp.metrics.cluster_stats">
+<code class="sig-prename descclassname">fastsom.interp.metrics.</code><code class="sig-name descname">cluster_stats</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">som</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../som/som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>float<span class="p">]</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/metrics.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.metrics.cluster_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates cluster statistics for a Self-Organizing Map.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="fastsom.interp.metrics.codebook_err">
+<code class="sig-prename descclassname">fastsom.interp.metrics.</code><code class="sig-name descname">codebook_err</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pred_b</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">yb</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">som</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../som/som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/metrics.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.metrics.codebook_err" title="Permalink to this definition">¶</a></dt>
+<dd><p>Counts the number of records not belonging to each cluster that are closer than that cluster’s furthest record.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="fastsom.interp.metrics.mean_quantization_err">
+<code class="sig-prename descclassname">fastsom.interp.metrics.</code><code class="sig-name descname">mean_quantization_err</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pred_b</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">yb</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">som</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../som/som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/metrics.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.metrics.mean_quantization_err" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean distance of each record from its respective BMU.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="fastsom.interp.metrics.topologic_err">
+<code class="sig-prename descclassname">fastsom.interp.metrics.</code><code class="sig-name descname">topologic_err</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pred_b</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">yb</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">som</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../som/som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">thresh</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">4</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/metrics.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.metrics.topologic_err" title="Permalink to this definition">¶</a></dt>
+<dd><p>Min vec distance of each record with every class and checks if the second-to-min value belongs in the first-best neighborhood.
+If not, it gets added as an error.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="som-training-visualization">
+<h2>SOM Training Visualization<a class="headerlink" href="#som-training-visualization" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="fastsom.interp.viz.SomTrainingViz">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.interp.viz.</code><code class="sig-name descname">SomTrainingViz</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">learn</span><span class="p">:</span> <span class="n">fastai.basic_train.Learner</span></em>, <em class="sig-param"><span class="n">update_on_batch</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomTrainingViz" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>Callback</cite> used to visualize an approximation of the Som weight update.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>learn</strong> (<em>Learner</em>) – The <cite>Learner</cite> instance.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="fastsom.interp.viz.SomTrainingViz.on_batch_begin">
+<code class="sig-name descname">on_batch_begin</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomTrainingViz.on_batch_begin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the plot if needed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.interp.viz.SomTrainingViz.on_epoch_begin">
+<code class="sig-name descname">on_epoch_begin</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomTrainingViz.on_epoch_begin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the plot if needed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.interp.viz.SomTrainingViz.on_train_begin">
+<code class="sig-name descname">on_train_begin</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomTrainingViz.on_train_begin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes the PCA on the dataset and creates the plot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.interp.viz.SomTrainingViz.on_train_end">
+<code class="sig-name descname">on_train_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomTrainingViz.on_train_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cleanup after training.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.interp.viz.SomHyperparamsViz">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.interp.viz.</code><code class="sig-name descname">SomHyperparamsViz</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">learn</span><span class="p">:</span> <span class="n">fastai.basic_train.Learner</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomHyperparamsViz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays a lineplot for each SOM hyperparameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>learn</strong> (<em>Learner</em>) – The <cite>Learner</cite> instance.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="fastsom.interp.viz.SomHyperparamsViz.on_epoch_end">
+<code class="sig-name descname">on_epoch_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomHyperparamsViz.on_epoch_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates hyperparameters and plots.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.interp.viz.SomHyperparamsViz.on_train_begin">
+<code class="sig-name descname">on_train_begin</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomHyperparamsViz.on_train_begin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes the plots.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.interp.viz.SomBmuViz">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.interp.viz.</code><code class="sig-name descname">SomBmuViz</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">learn</span><span class="p">:</span> <span class="n">fastai.basic_train.Learner</span></em>, <em class="sig-param"><span class="n">update_on_batch</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomBmuViz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualization callback for SOM training.
+Stores BMU locations for each batch and displays them on epoch end.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>learn</strong> (<em>Learner</em>) – The <cite>Learner</cite> instance.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="fastsom.interp.viz.SomBmuViz.on_batch_end">
+<code class="sig-name descname">on_batch_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomBmuViz.on_batch_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves BMU hit counts for this batch.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.interp.viz.SomBmuViz.on_epoch_end">
+<code class="sig-name descname">on_epoch_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomBmuViz.on_epoch_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates total BMU counter and resets epoch counter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.interp.viz.SomBmuViz.on_train_begin">
+<code class="sig-name descname">on_train_begin</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomBmuViz.on_train_begin" title="Permalink to this definition">¶</a></dt>
+<dd><p>To initialize constants in the callback.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.interp.viz.SomBmuViz.on_train_end">
+<code class="sig-name descname">on_train_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/interp/viz.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.interp.viz.SomBmuViz.on_train_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cleanup after training.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          <div class="page-nav">
+            <div class="inner"><ul class="page-nav">
+  <li class="prev">
+    <a href="../datasets/datasets.html"
+       title="previous chapter">← fastsom.datasets</a>
+  </li>
+  <li class="next">
+    <a href="../learn/learn.html"
+       title="next chapter">fastsom.learn →</a>
+  </li>
+</ul><div class="footer" role="contentinfo">
+      &#169; Copyright 2020, Kirey Group.
+    <br>
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.2 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+</div>
+            </div>
+          </div>
+      </page>
+    </div>
+    
+    
+  </body>
 </html>

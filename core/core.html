@@ -140,7 +140,7 @@
           </li>
 
         
-          <li class="toctree-l1 "><a href="../som.html" class="reference internal ">fastsom.som</a>
+          <li class="toctree-l1 "><a href="../som/som.html" class="reference internal ">fastsom.som</a>
 
             
           </li>
@@ -226,26 +226,25 @@ Note that the return tensor size will be <cite>(*size, 2)</cite>.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="expanded-op">
-<h3><span class="hidden-section">expanded_op</span><a class="headerlink" href="#expanded-op" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="expanded">
+<h3><span class="hidden-section">expanded</span><a class="headerlink" href="#expanded" title="Permalink to this headline">¶</a></h3>
 <dl class="py function">
-<dt id="fastsom.core.tensor.expanded_op">
-<code class="sig-prename descclassname">fastsom.core.tensor.</code><code class="sig-name descname">expanded_op</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">b</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">device(type='cuda')</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/core/tensor.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.core.tensor.expanded_op" title="Permalink to this definition">¶</a></dt>
-<dd><p>Expands tensors <cite>a</cite> and <cite>b</cite> to ensure operation compatibility; then calls <cite>fn(a, b)</cite>.</p>
+<dt id="fastsom.core.tensor.expanded">
+<code class="sig-prename descclassname">fastsom.core.tensor.</code><code class="sig-name descname">expanded</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">b</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/core/tensor.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.core.tensor.expanded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes <cite>a</cite> and <cite>b</cite> shapes compatible, then calls <cite>fn(a, b)</cite>. Uses device of tensor a.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>a</strong> (<em>Tensor</em>) – The first tensor.</p></li>
-<li><p><strong>b</strong> (<em>Tensor</em>) – The second tensor.</p></li>
+<li><p><strong>a</strong> (<em>torch.Tensor</em>) – The first tensor.</p></li>
+<li><p><strong>b</strong> (<em>torch.Tensor</em>) – The second tensor.</p></li>
 <li><p><strong>fn</strong> (<em>Callable</em>) – The function to be applied on expanded <cite>a</cite> and <cite>b</cite>.</p></li>
-<li><p><strong>device</strong> (<em>torch.device default=torch.device</em><em>(</em><em>'cuda'</em><em>)</em>) – </p></li>
 </ul>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">expanded_op</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">expanded</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">shape</span>
 <span class="go">torch.Size([5, 12, 2])</span>
 </pre></div>

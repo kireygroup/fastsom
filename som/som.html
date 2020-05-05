@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>fastsom.som</title>
+    
+      <link rel="stylesheet" href="../static/pygments.css">
+      <link rel="stylesheet" href="../static/theme.css">
+      <link rel="stylesheet" href="../static/sphinx_press_theme.css">
+          <link rel="stylesheet" href="../static/css/notebook_fix.css" type="text/css" />
+      
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../static/documentation_options.js"></script>
+
+      <!-- sphinx script_files -->
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/doctools.js"></script>
+        <script src="../static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+      
+      <script src="../static/theme-vendors.js"></script>
+      <script src="../static/theme.js" defer></script>
+    
+  <link rel="index" title="Index" href="../genindex.html" />
+  <link rel="search" title="Search" href="../search.html" />
+  <link rel="next" title="SOM Training on RGB Colors Dataset" href="../examples/colors.html" />
+  <link rel="prev" title="fastsom.learn" href="../learn/learn.html" /> 
+  </head>
+
+  <body>
+    <div id="app" class="theme-container" :class="pageClasses"><navbar @toggle-sidebar="toggleSidebar">
+  <router-link to="../index.html" class="home-link">
+    
+      <span class="site-name">fastsom</span>
+    
+  </router-link>
+
+  <div class="links">
+    <navlinks class="can-hide">
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+    </navlinks>
+  </div>
+</navbar>
+
+      
+      <div class="sidebar-mask" @click="toggleSidebar(false)">
+      </div>
+        <sidebar @toggle-sidebar="toggleSidebar">
+          
+          <navlinks>
+            
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+            
+          </navlinks><div id="searchbox" class="searchbox" role="search">
+  <div class="caption"><span class="caption-text">Quick search</span>
+    <div class="searchformwrapper">
+      <form class="search" action="../search.html" method="get">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div><div class="sidebar-links" role="navigation" aria-label="main navigation">
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">API</a></span>
+      </p>
+      <ul class="current">
+        
+          <li class="toctree-l1 "><a href="../core/core.html" class="reference internal ">fastsom.core</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../datasets/datasets.html" class="reference internal ">fastsom.datasets</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../interp/interp.html" class="reference internal ">fastsom.interp</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../learn/learn.html" class="reference internal ">fastsom.learn</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 current"><a href="#" class="reference internal current">fastsom.som</a>
+
+            
+              <ul>
+                
+                  <li class="toctree-l2"><a href="#som-module" class="reference internal">SOM Module</a></li>
+                
+                  <li class="toctree-l2"><a href="#som-model" class="reference internal">SOM Model</a></li>
+                
+                  <li class="toctree-l2"><a href="#neighborhood-functions" class="reference internal">Neighborhood functions</a></li>
+                
+                  <li class="toctree-l2"><a href="#distance-functions" class="reference internal">Distance functions</a></li>
+                
+              </ul>
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">Examples</a></span>
+      </p>
+      <ul class="">
+        
+          <li class="toctree-l1 "><a href="../examples/colors.html" class="reference internal ">SOM Training on RGB Colors Dataset</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../examples/iris.html" class="reference internal ">SOM Training on IRIS Dataset</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+</div>
+        </sidebar>
+
+      <page>
+          <div class="body-header" role="navigation" aria-label="navigation">
+  
+  <ul class="breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+    
+    <li>fastsom.som</li>
+  </ul>
+  
+
+  <ul class="page-nav">
+  <li class="prev">
+    <a href="../learn/learn.html"
+       title="previous chapter">← fastsom.learn</a>
+  </li>
+  <li class="next">
+    <a href="../examples/colors.html"
+       title="next chapter">SOM Training on RGB Colors Dataset →</a>
+  </li>
+</ul>
+  
+</div>
+<hr>
+          <div class="content" role="main">
+            
+  <div class="section" id="fastsom-som">
+<h1>fastsom.som<a class="headerlink" href="#fastsom-som" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="som-module">
+<h2>SOM Module<a class="headerlink" href="#som-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="som-model">
+<h2>SOM Model<a class="headerlink" href="#som-model" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="som">
+<h3><span class="hidden-section">Som</span><a class="headerlink" href="#som" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="fastsom.som.som.Som">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.som.som.</code><code class="sig-name descname">Som</code><span class="sig-paren">(</span><em class="sig-param">size: Tuple[int, int, int], dist_fn: Callable = &lt;function pdist&gt;, neigh_fn: Callable = &lt;function neigh_gauss&gt;, neigh_diff_fn: Callable = &lt;function neigh_diff_standard&gt;</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/som.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.som.Som" title="Permalink to this definition">¶</a></dt>
+<dd><p>Self-Organizing Map module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em><em>,</em>) – The 2D map size: (rows, cols, n_features)</p></li>
+<li><p><strong>dist_fn</strong> (<em>Callable = pdist</em>) – The distance function used to compute records-to-codebook distances.</p></li>
+<li><p><strong>neigh_fn</strong> (<em>Callable = neigh_gauss</em>) – The neighbourhood scaling function.</p></li>
+<li><p><strong>neigh_diff_fn</strong> (<em>Callable = neigh_diff_standard</em>) – The neighbourhood difference function. Can be standard or toroidal.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="neighborhood-functions">
+<h2>Neighborhood functions<a class="headerlink" href="#neighborhood-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="fastsom.som.neighborhood.neigh_gauss">
+<code class="sig-prename descclassname">fastsom.som.neighborhood.</code><code class="sig-name descname">neigh_gauss</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">position_diff</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">sigma</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/neighborhood.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.neighborhood.neigh_gauss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gaussian neighborhood scaling function based on center-wise         diff <cite>position_diff</cite> and radius <cite>sigma</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position_diff</strong> (<em>torch.Tensor</em>) – The positional difference around some center.</p></li>
+<li><p><strong>sigma</strong> (<em>torch.Tensor</em>) – The scaling radius.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="fastsom.som.neighborhood.neigh_square">
+<code class="sig-prename descclassname">fastsom.som.neighborhood.</code><code class="sig-name descname">neigh_square</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">position_diff</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">sigma</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/neighborhood.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.neighborhood.neigh_square" title="Permalink to this definition">¶</a></dt>
+<dd><p>Square-shaped neighborhood scaling function based on center-wise diff <cite>position_diff</cite> and radius <cite>sigma</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position_diff</strong> (<em>torch.Tensor</em>) – The positional difference around some center.</p></li>
+<li><p><strong>sigma</strong> (<em>torch.Tensor</em>) – The scaling radius.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="fastsom.som.neighborhood.neigh_rhomb">
+<code class="sig-prename descclassname">fastsom.som.neighborhood.</code><code class="sig-name descname">neigh_rhomb</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">position_diff</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">sigma</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/neighborhood.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.neighborhood.neigh_rhomb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Diamond-shaped neighborhood function based on center-wise diff <cite>position_diff</cite> and radius <cite>sigma</cite>.
+Note: Manhattan distance should be used with this function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position_diff</strong> (<em>torch.Tensor</em>) – The positional difference around some center.</p></li>
+<li><p><strong>sigma</strong> (<em>torch.Tensor</em>) – The scaling radius.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="fastsom.som.neighborhood.neigh_diff_standard">
+<code class="sig-prename descclassname">fastsom.som.neighborhood.</code><code class="sig-name descname">neigh_diff_standard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bmus</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">positions</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/neighborhood.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.neighborhood.neigh_diff_standard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Positional difference function.
+Computes index difference between Best Matching Units (<cite>bmus</cite>) and <cite>positions</cite>, where <cite>positions</cite>
+are indices of elements inside the SOM grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bmus</strong> (<em>torch.Tensor</em>) – The list of Best Matching Units (2D indices)</p></li>
+<li><p><strong>positions</strong> (<em>torch.Tensor</em>) – The 2D tensor of grid element indices</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="fastsom.som.neighborhood.neigh_diff_toroidal">
+<code class="sig-prename descclassname">fastsom.som.neighborhood.</code><code class="sig-name descname">neigh_diff_toroidal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bmus</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">positions</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">map_size</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/neighborhood.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.neighborhood.neigh_diff_toroidal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Positional difference function.
+Computes toroidal (wraparound) difference between Best Matching Units (<cite>bmus</cite>) and <cite>positions</cite>, where <cite>positions</cite>
+are indices of elements inside the SOM grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bmus</strong> (<em>torch.Tensor</em>) – The list of Best Matching Units (2D indices)</p></li>
+<li><p><strong>positions</strong> (<em>torch.Tensor</em>) – The 2D tensor of grid element indices</p></li>
+<li><p><strong>map_size</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>] </em><em>= None</em>) – The SOM size. Used to pick shortest distance between indices.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="distance-functions">
+<h2>Distance functions<a class="headerlink" href="#distance-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="fastsom.som.distance.pnorm">
+<code class="sig-prename descclassname">fastsom.som.distance.</code><code class="sig-name descname">pnorm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">p</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/distance.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.distance.pnorm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the norm of order <cite>p</cite> of tensor <cite>a</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>torch.Tensor</em>) – The input tensor</p></li>
+<li><p><strong>p</strong> (<em>int default=2</em>) – The order.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="fastsom.som.distance.pdist">
+<code class="sig-prename descclassname">fastsom.som.distance.</code><code class="sig-name descname">pdist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">b</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">p</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/distance.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.distance.pdist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the distance of order <cite>p</cite> between <cite>a</cite> and <cite>b</cite>.
+Assumes tensor shapes are compatible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>torch.Tensor</em>) – The first tensor</p></li>
+<li><p><strong>b</strong> (<em>torch.Tensor</em>) – The second tensor</p></li>
+<li><p><strong>p</strong> (<em>int default=2</em>) – The order.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="fastsom.som.distance.pcosim">
+<code class="sig-prename descclassname">fastsom.som.distance.</code><code class="sig-name descname">pcosim</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">b</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">p</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/distance.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.distance.pcosim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the cosine similarity of order <cite>p</cite> between <cite>a</cite> and <cite>b</cite>.
+Assumes tensor shapes are compatible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>torch.Tensor</em>) – The first tensor</p></li>
+<li><p><strong>b</strong> (<em>torch.Tensor</em>) – The second tensor</p></li>
+<li><p><strong>p</strong> (<em>int default=2</em>) – The order.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          <div class="page-nav">
+            <div class="inner"><ul class="page-nav">
+  <li class="prev">
+    <a href="../learn/learn.html"
+       title="previous chapter">← fastsom.learn</a>
+  </li>
+  <li class="next">
+    <a href="../examples/colors.html"
+       title="next chapter">SOM Training on RGB Colors Dataset →</a>
+  </li>
+</ul><div class="footer" role="contentinfo">
+      &#169; Copyright 2020, Kirey Group.
+    <br>
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.2 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+</div>
+            </div>
+          </div>
+      </page>
+    </div>
+    
+    
+  </body>
+</html>
