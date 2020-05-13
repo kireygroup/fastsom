@@ -37,8 +37,8 @@ class LinearDecaySomTrainer(SomTrainer):
 
     def __init__(self, model: Som):
         self.model = model
-        self.alpha = self.model.alpha.cpu().numpy()
-        self.sigma = self.model.sigma.cpu().numpy()
+        self.alpha = self.model.alpha
+        self.sigma = self.model.sigma
         self.n_epochs = None
 
     def on_train_begin(self, **kwargs):

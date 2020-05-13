@@ -1,18 +1,22 @@
 import torch
+import torch.nn.functional as F
+
+from functools import reduce
+from typing import Callable, Union, Tuple, List
 
 
 __all__ = [
-    "pcosim",
     "pnorm",
     "pdist",
+    "pcosdist",
     "manhattan_dist",
+    "grouped_distance",
 ]
 
 
-def pcosim(a: torch.Tensor, b: torch.Tensor, p: int = 2) -> torch.Tensor:
+def pcosdist(a: torch.Tensor, b: torch.Tensor, p: int = 2) -> torch.Tensor:
     """
-    Calculates the cosine similarity of order `p` between `a` and `b`.
-    Assumes tensor shapes are compatible.
+    Calculates cosine distance of order `p` between `a` and `b`.
 
     Parameters
     ----------
@@ -23,7 +27,7 @@ def pcosim(a: torch.Tensor, b: torch.Tensor, p: int = 2) -> torch.Tensor:
     p : int default=2
         The order.
     """
-    return (a * b).sum(-1) / pnorm(a, p=p) * pnorm(b, p=p)
+    return -F.cosine_similarity(a, b, dim=-1)
 
 
 def pnorm(a: torch.Tensor, p: int = 2) -> torch.Tensor:
@@ -72,3 +76,27 @@ def manhattan_dist(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         The order.
     """
     return pdist(a, b, p=1)
+
+
+def grouped_distance(a: torch.Tensor, b: torch.Tensor, dist_fn: Callable, n_groups: Union[int, List[Tuple[int, int]]]) -> torch.Tensor:
+    """
+    Divides both `a` and `b` into smaller groups, then calls `dist_fn` on each pair of groups.
+    Useful when computing distances over groups of embeddings, for example.
+
+    Parameters
+    ----------
+    a : torch.Tensor
+        The first Tensor
+    b : torch.Tensor
+        The second Tensor
+    dist_fn : Callable
+        The actual distance function
+    groups : int
+        The number of groups of equal size to be used.
+    """
+    # Split each tensor into `n_groups` chunks in the feature dimension
+    zipped_chunks = zip(torch.chunk(a, n_groups, dim=-1), torch.chunk(b, n_groups, dim=-1))
+    # Calculate distance for each pair, then concatenate back together
+    dists = [dist_fn(a_group, b_group) for a_group, b_group in zipped_chunks]
+    # Average over groups
+    return reduce(lambda a, b: a+b, dists) / n_groups

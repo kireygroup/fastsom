@@ -9,7 +9,7 @@ import pandas as pd
 from torch import Tensor
 from torch.utils.data import DataLoader, TensorDataset
 from fastai.basic_data import DataBunch
-from fastai.tabular import TabularDataBunch, FillMissing, Categorify, Normalize, TabularList
+from fastai.tabular import TabularDataBunch, FillMissing, Categorify, TabularList
 from typing import Union, Optional, List, Callable, Tuple, Collection
 
 from .normalizers import get_normalizer
@@ -37,7 +37,7 @@ def pct_split(x: Tensor, valid_pct: float = 0.2):
     valid_pct : float default=0.2
         The validation data percentage.
     """
-    sep = int(len(x) * (1.0 - valid_pct))
+    sep = int(len(x) * (1.0 - min(1.0, valid_pct)))
     perm = torch.randperm(len(x))
     return perm[:sep], perm[sep:]
 
@@ -75,12 +75,12 @@ def build_dataloaders(
     has_labels = not isinstance(train, Tensor) and ((not isinstance(train, Tuple)) or len(train) > 1)
     train = (train, train) if not has_labels else train
     if isinstance(train, Tuple):
-        if isinstance(valid, float):
+        if valid is None or valid == 0.0:
+            valid = (torch.tensor([]), torch.tensor([]))
+        elif isinstance(valid, float):
             train_idxs, valid_idxs = pct_split(train[0], valid_pct=valid)
             valid = (train[0][valid_idxs], train[1][valid_idxs])
             train = (train[0][train_idxs], train[1][train_idxs])
-        elif valid is None:
-            valid = (torch.tensor([]), torch.tensor([]))
         elif not has_labels:
             valid = (valid, valid)
 

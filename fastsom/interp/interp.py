@@ -68,27 +68,19 @@ class SomInterpretation():
         self.pca = PCA(n_components=3)
         self.pca.fit(self.w)
 
-    def show_hitmap(self, data: Tensor = None, bs: int = 64, save: bool = False) -> None:
+    def show_hitmap(self, save: bool = False) -> None:
         """
         Shows a hitmap with counts for each codebook unit over the dataset.
 
         Parameters
         ----------
-        data : Tensor default=None
-            The dataset to be used for prediction; defaults to the training set if None.
-        bs : int default=64
-            The batch size to be used to run model predictions.
         save : bool default=False
             If True, saves the hitmap into a file.
         """
         _, ax = plt.subplots(figsize=(10, 10))
-        d = data if data is not None else self._get_train()
-        bs = min(bs, len(d))
-        sampler = BatchSampler(get_sampler('seq', TensorDataset(d, d), bs), batch_size=bs, drop_last=True)
         preds = torch.zeros(0, 2).cpu().long()
-
-        for xb_slice in iter(sampler):
-            preds = torch.cat([preds, self.learn.model(d[xb_slice]).cpu()], dim=0)
+        for xb in progress_bar(self.learn.data.train_dl):
+            preds = torch.cat([preds, self.learn.model(xb[0]).cpu()], dim=0)
 
         out, counts = preds.unique(return_counts=True, dim=0)
         z = torch.zeros(self.learn.model.size[:-1]).long()
@@ -98,12 +90,14 @@ class SomInterpretation():
         sns.heatmap(z.cpu().numpy(), linewidth=0.5, annot=True, ax=ax, fmt='d')
         plt.show()
 
-    def show_feature_heatmaps(self,
-                              dim: Optional[Union[int, List[int]]] = None,
-                              cat_labels: Optional[List[str]] = None,
-                              cont_labels: Optional[List[str]] = None,
-                              recategorize: bool = True,
-                              save: bool = False) -> None:
+    def show_feature_heatmaps(
+        self,
+        dim: Optional[Union[int, List[int]]] = None,
+        cat_labels: Optional[List[str]] = None,
+        cont_labels: Optional[List[str]] = None,
+        recategorize: bool = True,
+        save: bool = False
+    ) -> None:
         """
         Shows a heatmap for each feature displaying its value distribution over the codebook.
 
