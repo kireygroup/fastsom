@@ -61,7 +61,8 @@ class SomInterpretation():
         return cls(learn)
 
     def _get_train(self):
-        return self.data.train_ds.tensors[0].cpu()
+        x, _ = self.data._get_xy(self.data.train_ds)
+        return x.cpu()
 
     def _init_pca(self):
         "Initializes and fits the PCA instance."

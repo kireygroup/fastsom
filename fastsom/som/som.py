@@ -126,7 +126,7 @@ class Som(Module):
         return self.neigh_fn(index_diff, sigma).view(out_shape)
 
     def parameters(self):
-        return iter([self.weights, self.map_indices, self.dist_fn])
+        return iter([self.weights, self.map_indices])
 
     def to_device(self, device: torch.device = None) -> None:
         """Moves params and weights to the appropriate device."""

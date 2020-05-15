@@ -1,7 +1,6 @@
 """
 This module defines a Fastai `Learner` subclass used to train Self-Organizing Maps.
 """
-from torch import Tensor
 import torch
 import pandas as pd
 import numpy as np
@@ -14,12 +13,10 @@ from fastai.train import *
 from fastai.callback import Callback
 
 from .callbacks import SomTrainer, ExperimentalSomTrainer
-from .initializers import som_initializers
 from .loss import SomLoss
 from .optim import SomOptimizer
 
 from ..core import ifnone, setify, index_tensor
-from ..datasets import UnsupervisedDataBunch
 from ..interp import SomTrainingViz, SomHyperparamsViz, SomBmuViz, mean_quantization_err
 from ..som import Som
 
@@ -90,7 +87,8 @@ class SomLearner(Learner):
             visualize_on: str = 'epoch',
             **learn_kwargs
     ) -> None:
-        n_features = data.train_ds.tensors[0].shape[-1]
+        x, y = data._get_xy(data.train_ds)
+        n_features = x.shape[-1]
         # Create a new Som using the size, if needed
         model = model if model is not None else Som((size[0], size[1], n_features))
         # Pass the LR to the model
@@ -101,6 +99,8 @@ class SomLearner(Learner):
         callbacks.append(trainer(model))
         # Pass model reference to metrics
         metrics = list(map(lambda fn: partial(fn, som=model), metrics)) if metrics is not None else []
+        if 'opt_func' not in learn_kwargs:
+            learn_kwargs['opt_func'] = opt_func=SomOptimizer
         super().__init__(data, model, callbacks=callbacks, loss_func=loss_func, metrics=metrics, **learn_kwargs)
         # Add visualization callbacks
         self.callbacks += visualization_callbacks(visualize, visualize_on, self)

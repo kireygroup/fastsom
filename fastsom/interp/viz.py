@@ -37,7 +37,7 @@ class SomTrainingViz(Callback):
         self.dim = 2
         self.learn = learn
         self.model = learn.model
-        self.data = learn.data.train_ds.tensors[0].clone().cpu().numpy()
+        self.data = learn.data._get_xy(learn.data.train_ds)[0].clone().cpu().numpy()
         self.input_el_size = self.data.shape[-1]
         self.data_color, self.weights_color = '#539dcc', '#e58368'
         self.pca, self.f, self.ax, self.scatter = None, None, None, None

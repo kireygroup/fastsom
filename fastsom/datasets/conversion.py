@@ -96,10 +96,19 @@ def to_unsupervised_databunch(data: TabularDataBunch, bs: Optional[int] = None, 
     valid_x = torch.cat([valid_x_cat.float(), valid_x_cont], dim=-1) if valid_x_cat is not None and len(data.valid_ds) > 1 else torch.tensor([])
     train_y = ifnone(train_y, torch.tensor([]))
     valid_y = ifnone(valid_y, torch.tensor([]))
-
+    train_idx = slice(0, train_x.shape[0])
+    valid_idx = slice(train_x.shape[0], train_x.shape[0] + valid_x.shape[0])
+    x = torch.cat([train_x, valid_x], dim=0)
+    y = torch.cat([train_y, valid_y], dim=0)
     bs = ifnone(bs, data.batch_size)
-
-    return UnsupervisedDataBunch((train_x, train_y), valid=(valid_x, valid_y), bs=bs, cat_enc=tfm, **kwargs)
+    data = TensorList.from_tensor(x)
+    if valid_x.shape[0] > 0:
+        data = data.split_by_list(train_idx, valid_idx)
+    else:
+        data = data.split_none()
+    data = data.label_from_list(y).databunch()
+    data.cat_enc = tfm
+    return data
 
 
 TabularDataBunch.to_unsupervised_databunch = to_unsupervised_databunch

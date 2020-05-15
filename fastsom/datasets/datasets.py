@@ -6,11 +6,13 @@ import torch
 import numpy as np
 import pandas as pd
 
-from torch import Tensor
+from torch import Tensor, FloatTensor
 from torch.utils.data import DataLoader, TensorDataset
-from fastai.basic_data import DataBunch
+from fastai.basic_data import DataBunch, DatasetType
+from fastai.data_block import ItemList
 from fastai.tabular import TabularDataBunch, FillMissing, Categorify, TabularList
-from typing import Union, Optional, List, Callable, Tuple, Collection
+from typing import Union, Optional, List, Tuple, Collection, Callable
+from functools import partial
 
 from .normalizers import get_normalizer
 from .samplers import SamplerType, get_sampler, SamplerTypeOrString
@@ -20,6 +22,7 @@ from ..core import ifnone
 
 
 __all__ = [
+    "TensorList",
     "UnsupervisedDataBunch",
     "pct_split",
     "build_dataloaders",
@@ -47,6 +50,7 @@ TrainData = Union[
     TensorDataset,
     Tuple[Tensor, Tensor],
     torch.utils.data.DataLoader,
+    ItemList,
 ]
 ValidData = Union[TrainData, float]
 
@@ -88,7 +92,7 @@ def build_dataloaders(
         train = TensorDataset(train[0], train[1])
         valid = TensorDataset(valid[0], valid[1])
 
-    if isinstance(train, TensorDataset):
+    if isinstance(train, TensorDataset) or isinstance(train, ItemList):
         train_smp = get_sampler(sampler, train, bs)
         valid_smp = get_sampler(sampler, valid, bs)
         train = DataLoader(train, sampler=train_smp, batch_size=bs)
@@ -98,6 +102,52 @@ def build_dataloaders(
         return train, valid, has_labels
 
     raise ValueError(f'Unxpected train / valid data pair of type: {train_type} {valid_type}')
+
+
+class TensorList(ItemList):
+    """`ItemList` subclass for tensor data."""
+    @classmethod
+    def from_tensor(cls, x: torch.Tensor) -> None:
+        return cls(x)
+
+    @property
+    def data(self) -> torch.Tensor:
+        if isinstance(self.items, np.ndarray):
+            # for some reason, serialized data gets loaded as np.ndarray of type object
+            return torch.tensor(self.items.astype(float))
+        if isinstance(self.items, torch.Tensor):
+            return self.items
+        else:
+            return torch.tensor(self.items)
+
+    @data.setter
+    def data(self, value: torch.Tensor):
+        self.items = value
+
+
+def normalize(x: FloatTensor, mean: FloatTensor, std: FloatTensor) -> FloatTensor:
+    """Normalize `x` with `mean` and `std`."""
+    return (x - mean) / std
+
+
+def denormalize(x:FloatTensor, mean:FloatTensor,std:FloatTensor, do_x:bool=True)->FloatTensor:
+    """Denormalize `x` with `mean` and `std`."""
+    return x.cpu().float() * std + mean if do_x else x.cpu()
+
+
+def _normalize_batch(b:Tuple[Tensor,Tensor], mean:FloatTensor, std:FloatTensor, do_x:bool=True, do_y:bool=False) -> Tuple[Tensor, Tensor]:
+    "`b` = `x`,`y` - normalize `x` array of imgs and `do_y` optionally `y`."
+    x,y = b
+    mean,std = mean.to(x.device),std.to(x.device)
+    if do_x: x = normalize(x,mean,std)
+    if do_y and len(y.shape) == 4: y = normalize(y,mean,std)
+    return x,y
+
+
+def normalize_funcs(mean: FloatTensor, std: FloatTensor, do_x: bool=True, do_y: bool=False) -> Tuple[Callable, Callable]:
+    "Create normalize/denormalize func using `mean` and `std`, can specify `do_y` and `device`."
+    return (partial(_normalize_batch, mean=mean, std=std, do_x=do_x, do_y=do_y),
+            partial(denormalize,      mean=mean, std=std, do_x=do_x))
 
 
 class UnsupervisedDataBunch(DataBunch):
@@ -117,9 +167,6 @@ class UnsupervisedDataBunch(DataBunch):
         The batch size.
     sampler : SamplerTypeOrString default=SamplerType.SEQUENTIAL
         The sampler to be used. Can be `seq`, 'random' or 'shuffle'.
-    normalizer : str default='var'
-    tfms : Optional[List[Callable]] default=None
-        Additional Fastai transforms. These will be forwarded to the DataBunch.
     cat_enc : Optional[CatEncoder] default=None
         The categorical encoder to be used, if any.
     """
@@ -130,33 +177,31 @@ class UnsupervisedDataBunch(DataBunch):
             valid: Optional[ValidData] = None,
             bs: int = 64,
             sampler: SamplerTypeOrString = SamplerType.SEQUENTIAL,
-            tfms: Optional[List[Callable]] = None,
             cat_enc: Optional[CatEncoder] = None,
-            normalizer: str = 'var',
+            norm: bool = True,
             **kwargs):
         self.cat_enc = cat_enc
-        self.normalizer = None
-
         # Build DataLoaders for train / validation data by checking given input types
         train_dl, valid_dl, has_labels = build_dataloaders(train, valid, sampler, bs)
 
         # Keep track of labels availability
         self.has_labels = has_labels
-
+        
         # Initialize Fastai's DataBunch
         super().__init__(
             train_dl,
             valid_dl,
-            device=torch.device("cuda")
-            if torch.cuda.is_available()
-            else torch.device("cpu"),
-            dl_tfms=tfms,
             **kwargs
         )
 
-        # Normalize data
-        if normalizer is not None:
-            self.normalize(normalizer)
+    def normalize(self, stats: Collection[Tensor]=None, do_x: bool=True, do_y: bool=False) -> None:
+        """Add normalize transform using `stats` (defaults to `DataBunch.batch_stats`)"""
+        if getattr(self, 'norm', False): raise Exception('Can not call normalize twice')
+        x = self._get_xy(self.train_ds)[0]
+        self.stats = x.mean(0), x.std(0)
+        self.norm, self.denorm = normalize_funcs(*self.stats, do_x=do_x, do_y=do_y)
+        self.add_tfm(self.norm)
+        return self
 
     @classmethod
     def from_tabular_databunch(
@@ -174,8 +219,6 @@ class UnsupervisedDataBunch(DataBunch):
             The source TabularDataBunch.
         bs: Optional[int] default=None
             The batch size. Defaults to the source databunch batch size if not provided.
-        normalizer: Optional[str] default='var'
-            The optional normalization strategy to be used.
         cat_enc : Union[CatEncoderTypeOrString, CatEncoder] default='onehot'
             Categorical encoder.
         """
@@ -190,7 +233,6 @@ class UnsupervisedDataBunch(DataBunch):
             dep_vars: Optional[str] = None,
             bs: int = 128,
             valid_pct: float = 0.2,
-            normalizer: Optional[str] = 'var',
             cat_enc: Union[CatEncoderTypeOrString, CatEncoder] = "onehot"):
         """
         Creates a new UnsupervisedDataBunch from a DataFrame.
@@ -224,36 +266,32 @@ class UnsupervisedDataBunch(DataBunch):
         tabular_data = tabular_data.databunch(bs=bs, num_workers=0)
         return tabular_data.to_unsupervised_databunch(bs=bs, cat_enc=cat_enc)
 
-    def normalize(self, normalizer: str = "var") -> None:
-        """
-        Uses `normalizer` to normalize both train and validation data.
-
-        Parameters
-        ----------
-        normalizer : str default='var'
-            The normalizer to be used. Available values are 'var', 'minmax' or 'minmax-1'.
-        """
-        save_stats = self.normalizer is None
-        self.normalizer = ifnone(self.normalizer, get_normalizer(normalizer))
-
-        train_x, train_y = self.train_ds.tensors
-        norm_train_x = self.normalizer.normalize(train_x, save=save_stats)
-        self.train_ds.tensors = (norm_train_x, train_y)
-
-        if self.valid_ds is not None and len(self.valid_ds) > 1:
-            valid_x, valid_y = self.valid_ds.tensors
-            norm_valid_x = self.normalizer.normalize_by(train_x, valid_x)
-            self.valid_ds.tensors = (norm_valid_x, valid_y)
-
-    def denormalize(self, data: Tensor) -> Tensor:
-        """
-        Denormalizes a `Tensor` using the stored normalizer.
-        Falls back to simply returning input data if no normalizer is available.
-        """
-        if self.normalizer is None:
-            return data
-        return self.normalizer.denormalize(data)
-
     def make_categorical(self, t: Tensor) -> np.ndarray:
         """Transforms a Tensor `t` of encoded categorical variables into their original categorical form."""
         return self.cat_enc.make_categorical(t)
+
+    def ds(self, ds_type: DatasetType = DatasetType.Train) -> TensorList:
+        """Returns x/y tensors for `ds_type`."""
+        if ds_type == DatasetType.Train:
+            return self.train_ds
+        if ds_type == DatasetType.Train:
+            return self.valid_ds
+        if ds_type == DatasetType.Test:
+            return self.test_ds
+
+    def _get_xy(self, ds: Union[TensorDataset, TensorList]) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Returns x/y tensors from a dataset."""
+        if isinstance(ds, TensorDataset):
+            return ds.tensors
+        else:
+            return ds.x.data, ds.y
+
+    def _set_xy(self, ds: Union[TensorDataset, TensorList], x: torch.Tensor, y: torch.Tensor):
+        if isinstance(ds, TensorDataset):
+            ds.tensors = (x, y)
+        else:
+            ds.x.data = x
+            ds.y = y
+
+
+TensorList._bunch = UnsupervisedDataBunch
