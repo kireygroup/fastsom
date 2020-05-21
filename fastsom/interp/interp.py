@@ -8,8 +8,6 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from torch import Tensor
-from torch.utils.data import TensorDataset, BatchSampler
 from typing import Optional, List, Union
 from fastai.basic_data import DatasetType
 from sklearn.decomposition import PCA
@@ -18,7 +16,7 @@ from fastprogress.fastprogress import progress_bar
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
 from fastsom.core import ifnone, idxs_2d_to_1d
-from fastsom.datasets import get_sampler
+from fastsom.datasets import get_xy
 
 
 __all__ = [
@@ -61,7 +59,7 @@ class SomInterpretation():
         return cls(learn)
 
     def _get_train(self):
-        x, _ = self.data._get_xy(self.data.train_ds)
+        x, _ = get_xy(self.data)
         return x.cpu()
 
     def _init_pca(self):

@@ -130,23 +130,23 @@ def normalize(x: FloatTensor, mean: FloatTensor, std: FloatTensor) -> FloatTenso
     return (x - mean) / std
 
 
-def denormalize(x:FloatTensor, mean:FloatTensor,std:FloatTensor, do_x:bool=True)->FloatTensor:
+def denormalize(x: FloatTensor, mean: FloatTensor, std: FloatTensor, do_x: bool = True) -> FloatTensor:
     """Denormalize `x` with `mean` and `std`."""
     return x.cpu().float() * std + mean if do_x else x.cpu()
 
 
-def _normalize_batch(b:Tuple[Tensor,Tensor], mean:FloatTensor, std:FloatTensor, do_x:bool=True, do_y:bool=False) -> Tuple[Tensor, Tensor]:
+def _normalize_batch(b: Tuple[Tensor, Tensor], mean: FloatTensor, std: FloatTensor, do_x: bool = True, do_y: bool = False) -> Tuple[Tensor, Tensor]:
     "`b` = `x`,`y` - normalize `x` array of imgs and `do_y` optionally `y`."
-    x,y = b
-    mean,std = mean.to(x.device),std.to(x.device)
-    if do_x: x = normalize(x,mean,std)
-    if do_y and len(y.shape) == 4: y = normalize(y,mean,std)
-    return x,y
+    x, y = b
+    mean, std = mean.to(x.device), std.to(x.device)
+    if do_x:
+        x = normalize(x, mean, std)
+    return x, y
 
 
-def normalize_funcs(mean: FloatTensor, std: FloatTensor, do_x: bool=True, do_y: bool=False) -> Tuple[Callable, Callable]:
+def normalize_funcs(mean: FloatTensor, std: FloatTensor, do_x: bool = True, do_y: bool = False) -> Tuple[Callable, Callable]:
     "Create normalize/denormalize func using `mean` and `std`, can specify `do_y` and `device`."
-    return (partial(_normalize_batch, mean=mean, std=std, do_x=do_x, do_y=do_y),
+    return (partial(_normalize_batch, mean=mean, std=std, do_x=do_x, do_y=False),
             partial(denormalize,      mean=mean, std=std, do_x=do_x))
 
 
@@ -194,10 +194,11 @@ class UnsupervisedDataBunch(DataBunch):
             **kwargs
         )
 
-    def normalize(self, stats: Collection[Tensor]=None, do_x: bool=True, do_y: bool=False) -> None:
+    def normalize(self, stats: Collection[Tensor] = None, do_x: bool = True, do_y: bool = False) -> None:
         """Add normalize transform using `stats` (defaults to `DataBunch.batch_stats`)"""
-        if getattr(self, 'norm', False): raise Exception('Can not call normalize twice')
-        x = self._get_xy(self.train_ds)[0]
+        if getattr(self, 'norm', False):
+            raise Exception('Can not call normalize twice')
+        x, _ = self._get_xy(self.train_ds)[0]
         self.stats = x.mean(0), x.std(0)
         self.norm, self.denorm = normalize_funcs(*self.stats, do_x=do_x, do_y=do_y)
         self.add_tfm(self.norm)

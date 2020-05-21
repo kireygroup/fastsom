@@ -13,6 +13,7 @@ from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 
 from ..core import idxs_2d_to_1d
+from ..datasets import get_xy
 
 
 __all__ = [
@@ -37,27 +38,28 @@ class SomTrainingViz(Callback):
         self.dim = 2
         self.learn = learn
         self.model = learn.model
-        self.data = learn.data._get_xy(learn.data.train_ds)[0].clone().cpu().numpy()
-        self.input_el_size = self.data.shape[-1]
+        self.input_el_size = None
         self.data_color, self.weights_color = '#539dcc', '#e58368'
         self.pca, self.f, self.ax, self.scatter = None, None, None, None
         self.update_on_batch = update_on_batch
 
     def on_train_begin(self, **kwargs):
         "Initializes the PCA on the dataset and creates the plot."
+        # Retrieve data
+        data, _ = get_xy(self.learn.data)
+        self.input_el_size = data.shape[-1]
         # Init + fit the PCA
         self.pca = PCA(n_components=self.dim)
-        self.pca.fit(self.data)
+        d = self.pca.fit_transform(data)
         # Make the chart interactive
         plt.ion()
         self.f = plt.figure()
         self.ax = self.f.add_subplot(111, projection='3d' if self.dim == 3 else None)
+        # Calculate PCA of the weights
         w = self.pca.transform(self.model.weights.view(-1, self.input_el_size).cpu().numpy())
-
         # Plot weights
         self.scatter = self.ax.scatter(*tuple([el[i] for el in w] for i in range(self.dim)), c=self.weights_color, zorder=100)
         # Plot data
-        d = self.pca.transform(self.data)
         self.ax.scatter(*tuple([el[i] for el in d] for i in range(self.dim)), c=self.data_color)
         self.f.show()
 

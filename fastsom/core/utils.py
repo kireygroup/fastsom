@@ -3,7 +3,7 @@ This file contains various project-wide utilities.
 
 """
 
-from typing import Collection, Callable
+from typing import Collection, Callable, Iterable
 from functools import reduce
 
 
@@ -15,6 +15,8 @@ __all__ = [
     "setify",
     "compose",
     "enum_eq",
+    "find",
+    "any_matches",
 ]
 
 
@@ -181,3 +183,39 @@ def enum_eq(enum, value) -> bool:
         The value or enumerator instance to be compared.
     """
     return (enum == value or enum.value == value)
+
+
+def any_matches(iterable: Iterable, cond_fn: Callable = bool) -> bool:
+    """
+    Returns `True` if `cond_fn` is `True`
+    for one or more elements in `iterable`.
+
+    Parameters
+    ----------torch
+    iterable : Iterable
+        The iterable to be checked
+    cond_fn : Callable
+        The condition function to be applied
+    """
+    return any(map(cond_fn, iterable))
+
+
+def find(iterable: Iterable, cond_fn: Callable, last: bool = False) -> any:
+    """
+    Finds the first (or last, if `last=True`) element of `iterable`
+    for which `cond_fn` is `True`.
+
+    Parameters
+    ----------
+    iterable : Iterable
+        The iterable to be checked
+    cond_fn : Callable
+        The conditional function, applied on each element
+    last : bool default=False
+        Whether to returns the last matching element instead of the first
+    """
+    i = reversed(iterable) if last else iterable
+    for item in i:
+        if cond_fn(item):
+            return item
+    return None
