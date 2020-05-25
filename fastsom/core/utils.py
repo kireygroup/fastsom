@@ -3,7 +3,7 @@ This file contains various project-wide utilities.
 
 """
 
-from typing import Collection, Callable, Iterable
+from typing import Collection, Callable, Iterable, Generator
 from functools import reduce
 
 
@@ -17,6 +17,7 @@ __all__ = [
     "enum_eq",
     "find",
     "any_matches",
+    "slices",
 ]
 
 
@@ -191,7 +192,7 @@ def any_matches(iterable: Iterable, cond_fn: Callable = bool) -> bool:
     for one or more elements in `iterable`.
 
     Parameters
-    ----------torch
+    ----------
     iterable : Iterable
         The iterable to be checked
     cond_fn : Callable
@@ -219,3 +220,24 @@ def find(iterable: Iterable, cond_fn: Callable, last: bool = False) -> any:
         if cond_fn(item):
             return item
     return None
+
+
+def slices(iterable: Iterable, size: int) -> Generator[any, None, None]:
+    """
+    Returns a generator of slices of size `size` over `iterable`.
+
+    Parameters
+    ----------
+    iterable: Iterable
+        The elements to be sliced
+    size: int
+        The slice size
+    """
+    items = []
+    for item in iterable:
+        items.append(item)
+        if len(items) == size:
+            yield items
+            items = []
+    if len(items) > 0:
+        yield items

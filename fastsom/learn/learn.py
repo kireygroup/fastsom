@@ -5,11 +5,11 @@ import torch
 import pandas as pd
 import numpy as np
 
-from typing import Optional, Callable, Collection, List, Type, Dict, Tuple
+from typing import Callable, Collection, List, Type, Tuple, Dict
 from functools import partial
 from fastai.basic_train import Learner
 from fastai.basic_data import DataBunch
-from fastai.tabular import TabularDataBunch
+from fastai.tabular import TabularDataBunch, Normalize
 from fastai.train import *
 from fastai.callback import Callback
 
@@ -18,9 +18,9 @@ from .loss import SomLoss
 from .optim import SomOptimizer
 
 from ..core import ifnone, setify, index_tensor, find
-from ..datasets import get_xy, ToBeContinuousProc
+from ..data_block import get_xy, ToBeContinuousProc, Vectorize
 from ..interp import SomTrainingViz, SomHyperparamsViz, SomBmuViz, mean_quantization_err
-from ..som import Som
+from ..som import Som, grouped_distance, split_distance, pcosdist
 
 
 __all__ = [
@@ -33,7 +33,6 @@ def visualization_callbacks(visualize: List[str], visualize_on: str, learn: Lear
     cbs = []
     visualize_on = ifnone(visualize_on, 'epoch')
     s_visualize = setify(visualize)
-
     if 'weights' in s_visualize:
         cbs.append(SomTrainingViz(learn, update_on_batch=(visualize_on == 'batch')))
     if 'hyperparams' in s_visualize:
@@ -44,6 +43,12 @@ def visualization_callbacks(visualize: List[str], visualize_on: str, learn: Lear
 
 
 class UnifyDataCallback(Callback):
+    """
+    Callback for `SomLearner`, automatically added when the
+    data class is a `TabularDataBunch`.
+    Filters out categorical features, forwarding continous
+    features to the SOM model.
+    """
     def on_batch_begin(self, **kwargs):
         x_cat, x_cont = kwargs['last_input']
         return {'last_input': x_cont}
@@ -80,7 +85,6 @@ class SomLearner(Learner):
     init_weights : str default='random'
         SOM weight initialization strategy. Defaults to random sampling in the train dataset space.
     """
-
     def __init__(
             self,
             data: DataBunch,
@@ -115,6 +119,23 @@ class SomLearner(Learner):
         # Add optional data compatibility callback
         if isinstance(data, TabularDataBunch):
             self.callbacks.append(UnifyDataCallback())
+            # If categorical features are encoded as embeddings, we need to ensure the correct distance function is used
+            vec_proc = find(data.processor[0].procs, lambda p: isinstance(p, Vectorize))
+            if vec_proc is not None:
+                chunked_emb_dist = partial(grouped_distance, dist_fn=pcosdist, n_groups=vec_proc._ft.vector_size)
+                chunked_emb_dist.__name__ = f'{grouped_distance.__name__}(dist_fn={pcosdist.__name__}, n_groups={vec_proc._ft.vector_size})'
+                if vec_proc._is_mixed():
+                    # TODO: check split idx
+                    split_dist = partial(split_distance,
+                                         split_idx=len(vec_proc._out_cat_names),
+                                         dist_fn_1=chunked_emb_dist,
+                                         dist_fn_2=self.model.dist_fn)
+                    split_dist.__name__ = f'{split_distance.__name__}(\
+                                            dist_fn_1={chunked_emb_dist.__name__},\
+                                            dist_fn_2={self.model.dist_fn.__name__})'
+                    self.model.dist_fn = split_dist
+                else:
+                    self.model.dist_fn = chunked_emb_dist
         self.callbacks = list(set(self.callbacks))
 
     def codebook_to_df(self, recategorize: bool = False) -> pd.DataFrame:
@@ -130,30 +151,56 @@ class SomLearner(Learner):
         w = self.model.weights.clone().cpu()
         w = w.view(-1, w.shape[-1])
 
-        # TODO: Change with our tabular subclass
-        if True or isinstance(self.data, TabularDataBunch) and recategorize:
-            # TODO: retrieve denormalized data
-            # Optional(?) feature recategorization
-            # encoding_proc = find(self.data.processor[0].procs, lambda proc: isinstance(proc, ToBeContinuousProc))
-            encoding_proc = self.data.processor[0].procs[-2]
-            if encoding_proc is None:
-                raise ValueError('Attribute recategorize=True, but no proc of type ToBeContinuousProc was found')
-            cont_names, cat_names = encoding_proc.original_cont_names, encoding_proc.original_cat_names
-            encoded_cat_names = encoding_proc.cat_names
-            print(len(cont_names), len(cat_names))
-            cat_features = encoding_proc.apply_backwards(w[:, :len(encoded_cat_names)])
-            print(cat_features.shape)
-            cont_features = w[:, len(encoded_cat_names):]
-            w = np.concatenate([cat_features, cont_features], axis=-1)
-            columns = cat_names+cont_names
+        if isinstance(self.data, TabularDataBunch):    
+            if recategorize:
+                # Feature recategorization
+                encoding_proc = find(self.data.processor[0].procs, lambda proc: isinstance(proc, ToBeContinuousProc))
+                if encoding_proc is None:
+                    raise ValueError('Attribute recategorize=True, but no proc of type ToBeContinuousProc was found')
+                cont_names, cat_names = encoding_proc.original_cont_names, encoding_proc.original_cat_names
+                encoded_cat_names = encoding_proc.cat_names
+                cat_features = encoding_proc.apply_backwards(w[..., :len(encoded_cat_names)])
+                cont_features = w[..., len(encoded_cat_names):]
+            else:
+                cont_names, cat_names = self.data.cont_names, self.data.cat_names
+                cont_features = w[..., len(cat_names):]
+                cat_features = w[..., :len(cat_names)]
+            # Continuous features denormalization
+            normalize_proc = find(self.data.processor[0].procs, lambda proc: isinstance(proc, Normalize))
+            if normalize_proc is not None:
+                cont_features = denormalize(cont_features, normalize_proc.means, normalize_proc.stds)
+
+            df = pd.DataFrame(data=np.concatenate([cat_features, cont_features], axis=-1), columns=cat_names+cont_names)
+            df[cont_names] = df[cont_names].astype(float)
+            df[cat_names] = df[cat_names].astype(str)    
         else:
             # TODO: retrieve column names in some way for other types of DataBunch
             w = w.numpy()
             columns = list(map(lambda i: f'Feature #{i+1}', range(w.shape[-1])))
+            df = pd.DataFrame(data=w, columns=columns)
         # Create the DataFrame
-        df = pd.DataFrame(data=w, columns=columns)
+        # for col in df.columns:
+            # df[col] = df[col].astype(get_type(pd.api.types.infer_dtype(df[col])))
         # Add SOM rows/cols coordinates into the `df`
         coords = index_tensor(self.model.size[:-1]).cpu().view(-1, 2).numpy()
         df['som_row'] = coords[:, 0]
         df['som_col'] = coords[:, 1]
         return df
+
+
+def denormalize(data: torch.Tensor, means: Dict[str, float], stds: Dict[str, float]) -> torch.Tensor:
+    """
+    """
+    means = torch.tensor(list(means.values()))
+    stds = torch.tensor(list(stds.values()))
+    return stds * data + means
+
+
+def get_type(t: str) -> Type:
+    print(t)
+    if t == 'string':
+        return str
+    if t == 'integer':
+        return np.int64
+    if t == 'float':
+        return float

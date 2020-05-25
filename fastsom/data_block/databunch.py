@@ -1,25 +1,38 @@
-import torch
+"""
+This module contains a customization of some Fastai.tabular classes.
+This allows for additional transforms (e.g. OneHotEncode) to be defined,
+while maintaining the same data block syntax as the original API.
+"""
 import numpy as np
-import pandas as pd
 
-from fastai.basic_data import DatasetType
-from fastai.tabular import TabularList, TabularProcessor, TabularProc, TabularDataBunch, OrderedDict
+from fastai.tabular import TabularLine, TabularList, TabularProcessor, TabularProc, TabularDataBunch, OrderedDict
 
 from ..core import ifnone, find
+from .transform import ToBeContinuousProc
 
 
-__all__ = [
-    'MyTabularProcessor',
-    'MyTabularList',
-]
+__all__ = ['SomTabularList', 'CustomTabularProcessor']
 
 
-class MyTabularProcessor(TabularProcessor):
-
+class CustomTabularProcessor(TabularProcessor):
+    """
+    Custom `TabularProcessor` that stores information about
+    categorical/continuous feature names that go into each
+    `TabularProc`, allowing for additional procs to be defined
+    while maintaining compatibility with existing transforms.
+    """
+    # cat_names/cont_names for each proc
     _stages = None
 
-    def process(self, ds):
-        """Processes a dataset, either train_ds or valid_ds."""
+    def process(self, ds: TabularList):
+        """
+        Processes a dataset, either train_ds or valid_ds.
+
+        Parameters
+        ----------
+        ds: TabularList
+            The dataset
+        """
         if ds.inner_df is None:
             ds.classes, ds.cat_names, ds.cont_names = self.classes, self.cat_names, self.cont_names
             ds.col_names = self.cat_names + self.cont_names
@@ -67,11 +80,14 @@ class MyTabularProcessor(TabularProcessor):
         ds.col_names = cat_cols + cont_cols
         ds.preprocessed = True
 
-    def process_one(self, item):
+    def process_one(self, item: TabularLine):
         print('process_one')
         return super().process_one(item)
 
 
-class MyTabularList(TabularList):
+class SomTabularList(TabularList):
+    """
+    `TabularList` with bindings for `CustomTabularProcessor`.
+    """
     _bunch = TabularDataBunch
-    _processor = MyTabularProcessor
+    _processor = CustomTabularProcessor
