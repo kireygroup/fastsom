@@ -58,8 +58,7 @@ class CustomTabularProcessor(TabularProcessor):
         # to move all cat names from that proc to cont names
         last_tobecont_proc = find(self.procs, lambda p: isinstance(p, ToBeContinuousProc), last=True)
         if last_tobecont_proc is not None:
-            cat_names = last_tobecont_proc._out_cat_names
-            ds.cont_names = cat_names + ds.cont_names
+            ds.cont_names = last_tobecont_proc.original_cont_names + last_tobecont_proc._out_cat_names
             ds.cat_names = []
         # original Fast.ai code to maintain compatibility
         if len(ds.cat_names) != 0:
@@ -78,16 +77,18 @@ class CustomTabularProcessor(TabularProcessor):
             ds.conts, cont_cols = None, []
 
         ds.col_names = cat_cols + cont_cols
+        self.cat_names, self.cont_names = cat_cols, cont_cols
         ds.preprocessed = True
 
     def process_one(self, item: TabularLine):
-        print('process_one')
         return super().process_one(item)
 
 
 class SomTabularList(TabularList):
     """
     `TabularList` with bindings for `CustomTabularProcessor`.
+    Can be used the same way as a regular `TabularList`, but also
+    supports additional transforms for categorical features.
     """
     _bunch = TabularDataBunch
     _processor = CustomTabularProcessor

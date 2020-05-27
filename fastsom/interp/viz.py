@@ -17,13 +17,20 @@ from ..data_block import get_xy
 
 
 __all__ = [
+    "SomVizCallback",
     "SomTrainingViz",
     "SomHyperparamsViz",
     "SomBmuViz",
 ]
 
 
-class SomTrainingViz(Callback):
+class SomVizCallback(Callback):
+    """Base class for SOM visualization callbacks."""
+    def __init__(self, learn: Learner):
+        self.learn = learn
+
+
+class SomTrainingViz(SomVizCallback):
     """
     `Callback` used to visualize an approximation of the Som weight update.
 
@@ -35,8 +42,8 @@ class SomTrainingViz(Callback):
     # https://jakevdp.github.io/PythonDataScienceHandbook/04.12-three-dimensional-plotting.html
 
     def __init__(self, learn: Learner, update_on_batch: bool = False) -> None:
+        super().__init__(learn)
         self.dim = 2
-        self.learn = learn
         self.model = learn.model
         self.input_el_size = None
         self.data_color, self.weights_color = '#539dcc', '#e58368'
@@ -84,7 +91,7 @@ class SomTrainingViz(Callback):
         del self.pca
 
 
-class SomHyperparamsViz(Callback):
+class SomHyperparamsViz(SomVizCallback):
     """
     Displays a lineplot for each SOM hyperparameter.
 
@@ -95,7 +102,7 @@ class SomHyperparamsViz(Callback):
     """
 
     def __init__(self, learn: Learner) -> None:
-        self.learn = learn
+        super().__init__(learn)
         self.model = learn.model
         self.fig, self.plots = None, None
         self.alphas, self.sigmas = [], []
@@ -127,7 +134,7 @@ class SomHyperparamsViz(Callback):
         self.fig.canvas.draw()
 
 
-class SomBmuViz(Callback):
+class SomBmuViz(SomVizCallback):
     """
     Visualization callback for SOM training.
     Stores BMU locations for each batch and displays them on epoch end.
@@ -139,7 +146,7 @@ class SomBmuViz(Callback):
     """
 
     def __init__(self, learn: Learner, update_on_batch: bool = False) -> None:
-        self.learn = learn
+        super().__init__(learn)
         self.model = learn.model
         self.epoch_counts = torch.zeros(self.model.size[0] * self.model.size[1])
         self.total_counts = torch.zeros(self.model.size[0] * self.model.size[1])

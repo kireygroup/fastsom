@@ -5,8 +5,6 @@ import pandas as pd
 from typing import List, Generator, Iterable
 from fastai.tabular import TabularProc
 
-from ..core import slices
-
 
 __all__ = [
     'ToBeContinuousProc',
@@ -125,14 +123,20 @@ class Vectorize(ToBeContinuousProc):
         out_cat_names = np.array([[f'{col}_feature{i+1}' for i in r] for col, r in zip(self.cat_names, ft_sizes)]).flatten().tolist()
         df[out_cat_names] = pd.DataFrame(preds, index=df.index)
         self.cat_names = self._out_cat_names
+        print(len(self.cat_names))
 
     def apply_backwards(self, data: torch.Tensor) -> np.ndarray:
         """Applies the inverse transform on `data`."""
         return np.array(self._inverse_preds(data.cpu().numpy()))
 
-    def _is_mixed(self) -> bool:
+    @property
+    def is_mixed(self) -> bool:
         """Checks if this transform encodes all features or if it is mixed."""
         return len(self.original_cont_names) > 0
+
+    @property
+    def vector_size(self) -> int:
+        return self._ft.vector_size
 
     def _check_module(self) -> None:
         """Ensures that the optional dependencies for the embedding model are installed."""

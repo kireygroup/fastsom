@@ -23,11 +23,12 @@ def get_xy(data: DataBunch, ds_type: DatasetType = DatasetType.Train) -> Tuple[U
     dl = data.dl(ds_type=ds_type)
 
     if isinstance(data, TabularDataBunch):
-        if dl.x.codes is None:
+        # For some reason Fast.ai dataloaders have a size of 1 when empty
+        if len(dl.x) > 1:
             x = dl.x.conts
         else:
-            # todo concatenate categoricals
-            x = dl.x.conts
+            # In case the dataloader is empty (e.g. when loading from file)
+            x = torch.tensor([])
         y = None  # todo return dl.y.data if
         return x, y
     else:

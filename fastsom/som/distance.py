@@ -1,8 +1,8 @@
 import torch
 import torch.nn.functional as F
 
-from functools import reduce
-from typing import Callable, Union, Tuple, List
+from functools import partial, reduce
+from typing import Callable, Union, Tuple, List, Optional
 
 
 __all__ = [
@@ -12,6 +12,8 @@ __all__ = [
     "manhattan_dist",
     "grouped_distance",
     "split_distance",
+    "MixedEmbeddingDistance",
+    "MixedOneHotDistance",
 ]
 
 
@@ -138,3 +140,53 @@ def split_distance(a: torch.Tensor, b: torch.Tensor, dist_fn_1: Callable, dist_f
     dist_1 = normalize(dist_1)
     dist_2 = normalize(dist_2)
     return dist_1 + dist_2
+
+
+class MixedEmbeddingDistance(Callable):
+
+    def __init__(self, emb_sz: int, split_idx: Optional[int] = None):
+        self.emb_sz = emb_sz
+        self.split_idx = split_idx
+        self._embs_dist = partial(grouped_distance, dist_fn=pcosdist, n_groups=self.emb_sz)
+        self._cont_dist = pdist
+        if split_idx is None:
+            self._dist_fn = self._embs_dist
+        else:
+            self._dist_fn = partial(split_distance, split_idx=self.split_idx, dist_fn_1=self._embs_dist, dist_fn_2=self._cont_dist)
+
+    def __call__(self, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+        return self._dist_fn(a, b)
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}'
+
+
+def onehot_dist(a, b):
+    raise NotImplementedError
+
+
+class MixedOneHotDistance(Callable):
+
+    def __init__(self, split_idx: Optional[int] = None):
+        self.split_idx = split_idx
+        self._embs_dist = partial(grouped_distance, dist_fn=onehot_dist, n_groups=self.emb_sz)
+        self._cont_dist = pdist
+        self._dist_fn = partial(split_distance, split_idx=self.split_idx, dist_fn_1=self._embs_dist, dist_fn_2=self._cont_dist)
+
+    def __call__(self, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+        return self._dist_fn(a, b)
+
+    def __repr__(self):
+        return f'{self.__class__.__name__} - TODO repr'
+
+    # # TODO: check split idx
+    #             split_dist = partial(split_distance,
+    #                                  split_idx=len(vec_proc._out_cat_names),
+    #                                  dist_fn_1=chunked_emb_dist,
+    #                                  dist_fn_2=self.model.dist_fn)
+    #             split_dist.__name__ = f'{split_distance.__name__}(\
+    #                                     dist_fn_1={chunked_emb_dist.__name__},\
+    #                                     dist_fn_2={self.model.dist_fn.__name__})'
+    #             self.model.dist_fn = split_dist
+    #         else:
+    #             self.model.dist_fn = chunked_emb_dist

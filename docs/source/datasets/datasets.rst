@@ -3,7 +3,7 @@ fastsom.datasets
 ================
 
 DataBunch subclasses
-----------------------------------
+--------------------
 .. include:: datasets.inc
 
 Categorical features encoders

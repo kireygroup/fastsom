@@ -14,7 +14,7 @@ Fastsom is a PyTorch and Fastai based implementation of Self-Organizing Maps.
    :caption: API
 
    core/core
-   datasets/datasets
+   data_block/data_block
    interp/interp
    learn/learn
    som/som

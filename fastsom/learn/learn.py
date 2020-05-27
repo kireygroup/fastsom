@@ -9,18 +9,20 @@ from typing import Callable, Collection, List, Type, Tuple, Dict
 from functools import partial
 from fastai.basic_train import Learner
 from fastai.basic_data import DataBunch
-from fastai.tabular import TabularDataBunch, Normalize
-from fastai.train import *
 from fastai.callback import Callback
+from fastai.data_block import EmptyLabelList
+from fastai.tabular import TabularDataBunch, Normalize
+from fastai.torch_core import PathLikeOrBinaryStream
+from fastai.train import *
 
 from .callbacks import SomTrainer, ExperimentalSomTrainer
 from .loss import SomLoss
 from .optim import SomOptimizer
 
 from ..core import ifnone, setify, index_tensor, find
-from ..data_block import get_xy, ToBeContinuousProc, Vectorize
-from ..interp import SomTrainingViz, SomHyperparamsViz, SomBmuViz, mean_quantization_err
-from ..som import Som, grouped_distance, split_distance, pcosdist
+from ..data_block import get_xy, ToBeContinuousProc, Vectorize, OneHotEncode
+from ..interp import SomVizCallback, SomTrainingViz, SomHyperparamsViz, SomBmuViz, mean_quantization_err
+from ..som import Som, MixedEmbeddingDistance, MixedOneHotDistance
 
 
 __all__ = [
@@ -49,6 +51,9 @@ class UnifyDataCallback(Callback):
     Filters out categorical features, forwarding continous
     features to the SOM model.
     """
+    def __init__(self):
+        pass
+
     def on_batch_begin(self, **kwargs):
         x_cat, x_cont = kwargs['last_input']
         return {'last_input': x_cont}
@@ -119,24 +124,22 @@ class SomLearner(Learner):
         # Add optional data compatibility callback
         if isinstance(data, TabularDataBunch):
             self.callbacks.append(UnifyDataCallback())
-            # If categorical features are encoded as embeddings, we need to ensure the correct distance function is used
-            vec_proc = find(data.processor[0].procs, lambda p: isinstance(p, Vectorize))
-            if vec_proc is not None:
-                chunked_emb_dist = partial(grouped_distance, dist_fn=pcosdist, n_groups=vec_proc._ft.vector_size)
-                chunked_emb_dist.__name__ = f'{grouped_distance.__name__}(dist_fn={pcosdist.__name__}, n_groups={vec_proc._ft.vector_size})'
-                if vec_proc._is_mixed():
-                    # TODO: check split idx
-                    split_dist = partial(split_distance,
-                                         split_idx=len(vec_proc._out_cat_names),
-                                         dist_fn_1=chunked_emb_dist,
-                                         dist_fn_2=self.model.dist_fn)
-                    split_dist.__name__ = f'{split_distance.__name__}(\
-                                            dist_fn_1={chunked_emb_dist.__name__},\
-                                            dist_fn_2={self.model.dist_fn.__name__})'
-                    self.model.dist_fn = split_dist
-                else:
-                    self.model.dist_fn = chunked_emb_dist
+            self.__maybe_adjust_model_dist_fn()
         self.callbacks = list(set(self.callbacks))
+
+    def __maybe_adjust_model_dist_fn(self):
+        # If categorical features are encoded as embeddings, we need to ensure that
+        # cosine distance is used for the embedding features
+        vec_proc = find(self.data.processor[0].procs, lambda p: isinstance(p, Vectorize))
+        if vec_proc is not None and not isinstance(self.model.dist_fn, MixedEmbeddingDistance):
+            split_idx = len(vec_proc._out_cat_names) if vec_proc.is_mixed else None
+            self.model.dist_fn = MixedEmbeddingDistance(vec_proc.vector_size, split_idx=split_idx)
+        # If categorical features are one-hot encoded, we need to ensure that
+        # distance for the encodings is coherent with the one used for continuous features
+        # ohe_proc = find(self.data.processor[0].procs, lambda p: isinstance(p, OneHotEncode))
+        # if ohe_proc is not None and not isinstance(self.model.dist_fn, MixedOneHotDistance):
+        #     split_idx = len(vec_proc._out_cat_names) if vec_proc.is_mixed else None
+        #     self.model.dist_fn = MixedOneHotDistance(split_idx=split_idx)
 
     def codebook_to_df(self, recategorize: bool = False) -> pd.DataFrame:
         """
@@ -151,28 +154,17 @@ class SomLearner(Learner):
         w = self.model.weights.clone().cpu()
         w = w.view(-1, w.shape[-1])
 
-        if isinstance(self.data, TabularDataBunch):    
+        if isinstance(self.data, TabularDataBunch):
             if recategorize:
-                # Feature recategorization
-                encoding_proc = find(self.data.processor[0].procs, lambda proc: isinstance(proc, ToBeContinuousProc))
-                if encoding_proc is None:
-                    raise ValueError('Attribute recategorize=True, but no proc of type ToBeContinuousProc was found')
-                cont_names, cat_names = encoding_proc.original_cont_names, encoding_proc.original_cat_names
-                encoded_cat_names = encoding_proc.cat_names
-                cat_features = encoding_proc.apply_backwards(w[..., :len(encoded_cat_names)])
-                cont_features = w[..., len(encoded_cat_names):]
+                w, cat_names, cont_names = self.recategorize(w, return_names=True)
             else:
                 cont_names, cat_names = self.data.cont_names, self.data.cat_names
-                cont_features = w[..., len(cat_names):]
-                cat_features = w[..., :len(cat_names)]
+            cat_features, cont_features = w[..., :len(cat_names)], w[..., len(cat_names):]
             # Continuous features denormalization
-            normalize_proc = find(self.data.processor[0].procs, lambda proc: isinstance(proc, Normalize))
-            if normalize_proc is not None:
-                cont_features = denormalize(cont_features, normalize_proc.means, normalize_proc.stds)
-
+            self.denormalize(cont_features)
             df = pd.DataFrame(data=np.concatenate([cat_features, cont_features], axis=-1), columns=cat_names+cont_names)
             df[cont_names] = df[cont_names].astype(float)
-            df[cat_names] = df[cat_names].astype(str)    
+            df[cat_names] = df[cat_names].astype(str)
         else:
             # TODO: retrieve column names in some way for other types of DataBunch
             w = w.numpy()
@@ -187,20 +179,65 @@ class SomLearner(Learner):
         df['som_col'] = coords[:, 1]
         return df
 
+    def export(self, file: PathLikeOrBinaryStream = 'export.pkl', destroy: bool = False):
+        cbs = list(self.callbacks)
+        self.callbacks = list(filter(lambda cb: not isinstance(cb, (SomTrainer, SomVizCallback)), self.callbacks))
+        super().export(file=file, destroy=destroy)
+        if not destroy:
+            self.callbacks = cbs
+
+    def recategorize(self, data: torch.Tensor, return_names: bool = False) -> np.ndarray:
+        """Recategorizes `data`, optionally returning cat/cont names."""
+        if not isinstance(self.data, TabularDataBunch):
+            raise ValueError('Recategorization is available only when using TabularDataBunch')
+        encoding_proc = find(self.data.processor[0].procs, lambda proc: isinstance(proc, ToBeContinuousProc))
+        if encoding_proc is None:
+            raise ValueError('No proc of type ToBeContinuousProc was found during recategorization')
+        cont_names, cat_names = encoding_proc.original_cont_names, encoding_proc.original_cat_names
+        encoded_cat_names = encoding_proc.cat_names
+        if data.shape[-1] == self.model.weights.size(-1):
+            # split cat / cont
+            cats, conts = data[:len(encoded_cat_names)], data[len(encoded_cat_names):]
+        else:
+            cats, conts = data, None
+        cats = encoding_proc.apply_backwards(cats)
+        ret = np.concatenate([cats, conts], axis=-1) if (conts is not None and len(conts) > 0) else cats
+        if return_names:
+            return ret, cat_names, cont_names
+        else:
+            return ret
+
+    def denormalize(self, data: torch.Tensor) -> torch.Tensor:
+        """Denormalizes `data`."""
+        if isinstance(self.data, TabularDataBunch):
+            normalize_proc = find(self.data.processor[0].procs, lambda proc: isinstance(proc, Normalize))
+            if normalize_proc is not None:
+                if data.shape[-1] > len(normalize_proc.means):
+                    conts, cats = data[..., :len(normalize_proc.means)], data[..., len(normalize_proc.means):]
+                    return torch.cat([denormalize(conts, normalize_proc.means, normalize_proc.stds), cats], dim=-1)
+                else:
+                    return denormalize(data, normalize_proc.means, normalize_proc.stds)
+        # TODO: implement for other databunch types
+        return data
+
+    @property
+    def has_labels(self):
+        return not isinstance(self.data.train_ds.y, EmptyLabelList)
+
 
 def denormalize(data: torch.Tensor, means: Dict[str, float], stds: Dict[str, float]) -> torch.Tensor:
     """
+    Denormalizes `data` using `means` and `stds`.
+
+    Parameters
+    ----------
+    data : torch.Tensor
+        The tensor to be normalized. Features will be picked from the last dimension.
+    means : Dict[str, float]
+        A dict in the form {feature_name: feature_mean}
+    stds : Dict[str, float]
+        A dict in the form {feature_name: feature_std}
     """
     means = torch.tensor(list(means.values()))
     stds = torch.tensor(list(stds.values()))
     return stds * data + means
-
-
-def get_type(t: str) -> Type:
-    print(t)
-    if t == 'string':
-        return str
-    if t == 'integer':
-        return np.int64
-    if t == 'float':
-        return float
