@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from fastai.callback import Callback
 
-from ..som import Som
+from fastsom.som import Som
 
 __all__ = [
     "SomTrainer",

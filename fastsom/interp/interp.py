@@ -2,7 +2,6 @@
 This file contains interpretation
 utilities for Self-Organizing Maps.
 """
-import math
 import torch
 import numpy as np
 import seaborn as sns
@@ -18,7 +17,6 @@ from fastprogress.fastprogress import progress_bar
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
 from fastsom.core import ifnone, idxs_2d_to_1d
-from fastsom.datasets import get_xy
 
 
 __all__ = [

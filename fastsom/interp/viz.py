@@ -12,8 +12,8 @@ from fastai.basic_train import Learner
 from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 
-from ..core import idxs_2d_to_1d
-from ..data_block import get_xy
+from fastsom.core import idxs_2d_to_1d
+from fastsom.data_block import get_xy
 
 
 __all__ = [

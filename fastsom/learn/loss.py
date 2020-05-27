@@ -6,9 +6,9 @@ from torch import Tensor
 from functools import partial
 from typing import Callable
 
-from ..core import timeit, idxs_2d_to_1d
-from ..som import Som
-from ..interp import mean_quantization_err, topologic_err, codebook_err
+from fastsom.core import timeit, idxs_2d_to_1d
+from fastsom.som import Som
+from fastsom.interp import mean_quantization_err, topologic_err, codebook_err
 
 
 __all__ = [

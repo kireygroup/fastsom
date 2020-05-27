@@ -7,7 +7,7 @@ import numpy as np
 
 from fastai.tabular import TabularLine, TabularList, TabularProcessor, TabularProc, TabularDataBunch, OrderedDict
 
-from ..core import ifnone, find
+from fastsom.core import ifnone, find
 from .transform import ToBeContinuousProc
 
 

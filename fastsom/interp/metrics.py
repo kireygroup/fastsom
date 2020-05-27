@@ -9,7 +9,7 @@ from typing import Tuple
 
 from fastsom.som import Som, pdist
 
-from ..core import expanded, idxs_2d_to_1d, idxs_1d_to_2d
+from fastsom.core import expanded, idxs_2d_to_1d, idxs_1d_to_2d
 
 __all__ = [
     "cluster_stats",

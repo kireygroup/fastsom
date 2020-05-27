@@ -4,7 +4,7 @@ from fastai.torch_core import Module
 
 from .neighborhood import neigh_gauss, neigh_diff_standard
 from .distance import pdist
-from ..core import expanded, ifnone, index_tensor
+from fastsom.core import expanded, ifnone, index_tensor
 
 
 class Som(Module):

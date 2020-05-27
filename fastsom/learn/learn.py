@@ -19,10 +19,10 @@ from .callbacks import SomTrainer, ExperimentalSomTrainer
 from .loss import SomLoss
 from .optim import SomOptimizer
 
-from ..core import ifnone, setify, index_tensor, find
-from ..data_block import get_xy, ToBeContinuousProc, Vectorize, OneHotEncode
-from ..interp import SomVizCallback, SomTrainingViz, SomHyperparamsViz, SomBmuViz, mean_quantization_err
-from ..som import Som, MixedEmbeddingDistance, MixedOneHotDistance
+from fastsom.core import ifnone, setify, index_tensor, find
+from fastsom.data_block import get_xy, ToBeContinuousProc, Vectorize, OneHotEncode
+from fastsom.interp import SomVizCallback, SomTrainingViz, SomHyperparamsViz, SomBmuViz, mean_quantization_err
+from fastsom.som import Som, MixedEmbeddingDistance, MixedOneHotDistance
 
 
 __all__ = [
