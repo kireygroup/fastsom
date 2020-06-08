@@ -111,7 +111,8 @@ class SomHyperparamsViz(SomVizCallback):
         """Initializes the plots."""
         n_epochs = kwargs['n_epochs']
         plt.ion()
-        self.fig, self.plots = plt.subplots(2, figsize=(15, 5))
+        self.fig, self.plots = plt.subplots(1, 2, figsize=(12, 10))
+        self.plots = self.plots.flatten()
 
         self.plots[0].set_title('Alpha Hyperparameter')
         self.plots[0].set_xlabel('Epoch')
@@ -129,8 +130,8 @@ class SomHyperparamsViz(SomVizCallback):
         """Updates hyperparameters and plots."""
         self.alphas.append(self.model.alpha.cpu().numpy())
         self.sigmas.append(self.model.sigma.cpu().numpy())
-        self.alphas_plt.plot(self.alphas, c='#589c7e')
-        self.sigmas_plt.plot(self.sigmas, c='#4791c5')
+        self.plots[0].plot(self.alphas, c='#589c7e')
+        self.plots[1].plot(self.sigmas, c='#4791c5')
         self.fig.canvas.draw()
 
 

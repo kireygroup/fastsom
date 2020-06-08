@@ -16,7 +16,8 @@ from sklearn.preprocessing import KBinsDiscretizer
 from fastprogress.fastprogress import progress_bar
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
-from fastsom.core import ifnone, idxs_2d_to_1d
+from fastsom.core import ifnone, idxs_2d_to_1d, find
+from fastsom.data_block import ToBeContinuousProc
 
 
 __all__ = [
@@ -124,7 +125,11 @@ class SomInterpretation():
         xb, _ = next(self._get_train_batched(progress=False))
         n_variables = xb.shape[-1]
         if isinstance(self.learn.data, TabularDataBunch):
-            cat_labels, cont_labels = self.learn.data.cat_names, self.learn.data.cont_names
+            tobecont_proc = find(self.learn.data.processor[0].procs, lambda p: isinstance(p, ToBeContinuousProc))
+            if tobecont_proc is not None:
+                cat_labels, cont_labels = tobecont_proc.original_cat_names, tobecont_proc.original_cont_names
+            else:
+                cat_labels, cont_labels = self.learn.data.cat_names, self.learn.data.cont_names
         else:
             cat_labels = ifnone(cat_labels, [])
             cont_labels = ifnone(cont_labels, [])
@@ -132,7 +137,10 @@ class SomInterpretation():
         feature_indices = list(range(len(labels))) if feature_indices is None else feature_indices if isinstance(feature_indices, list) else [feature_indices]
 
         # Optionally recategorize categorical variables
-        w = self.learn.recategorize(self.w) if recategorize else self.w
+        if recategorize:
+            w = self.learn.recategorize(self.w, denorm=True)
+        else:
+            w = self.denormalize(self.w).numpy()
         # gather feature indices from weights
         w = np.take(w, feature_indices, axis=-1)
 
@@ -212,7 +220,7 @@ class SomInterpretation():
 
         if continuous_labels and n_bins > 0:
             # Split labels into bins
-            labels = KBinsDiscretizer(n_bins=n_bins, encode='ordinal').fit_transform(labels.numpy())
+            labels = KBinsDiscretizer(n_bins=n_bins, encode='ordinal').fit_transform(labels.unsqueeze(-1).numpy())
             labels = torch.tensor(labels)
 
         map_size = (self.learn.model.size[0], self.learn.model.size[1])
@@ -227,7 +235,6 @@ class SomInterpretation():
         for idx, bmu in enumerate(unique_bmus):
             # Get labels corresponding to this BMU
             bmu_labels = labels[(preds_1d == bmu).nonzero()]
-
             if continuous_labels and n_bins <= 0:
                 data[idx] = bmu_labels.mean()
             else:

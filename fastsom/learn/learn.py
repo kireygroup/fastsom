@@ -22,7 +22,7 @@ from .optim import SomOptimizer
 from fastsom.core import ifnone, setify, index_tensor, find
 from fastsom.data_block import get_xy, ToBeContinuousProc, Vectorize, OneHotEncode
 from fastsom.interp import SomVizCallback, SomTrainingViz, SomHyperparamsViz, SomBmuViz, mean_quantization_err
-from fastsom.som import Som, MixedEmbeddingDistance, MixedOneHotDistance
+from fastsom.som import Som, MixedEmbeddingDistance, MixedCategoricalDistance
 
 
 __all__ = [
@@ -44,7 +44,7 @@ def visualization_callbacks(visualize: List[str], visualize_on: str, learn: Lear
     return cbs
 
 
-class UnifyDataCallback(Callback):
+class ForwardContsCallback(Callback):
     """
     Callback for `SomLearner`, automatically added when the
     data class is a `TabularDataBunch`.
@@ -57,6 +57,20 @@ class UnifyDataCallback(Callback):
     def on_batch_begin(self, **kwargs):
         x_cat, x_cont = kwargs['last_input']
         return {'last_input': x_cont}
+
+
+class UnifyDataCallback(Callback):
+    """
+    Callback for `SomLearner`, automatically added when the
+    data class is a `TabularDataBunch`.
+    Merges categorical and continuous features into a single tensor.
+    """
+    def __init__(self):
+        pass
+
+    def on_batch_begin(self, **kwargs):
+        x_cat, x_cont = kwargs['last_input']
+        return {'last_input': torch.cat([x_cat.float(), x_cont], dim=-1)}
 
 
 class SomLearner(Learner):
@@ -113,7 +127,7 @@ class SomLearner(Learner):
         # Wrap the loss function
         loss_func = SomLoss(loss_func, model)
         # Initialize the trainer with the model
-        callbacks.append(trainer(model))
+        callbacks.append(trainer(model, data))
         # Pass model reference to metrics
         metrics = list(map(lambda fn: partial(fn, som=model), metrics)) if metrics is not None else []
         if 'opt_func' not in learn_kwargs:
@@ -123,23 +137,22 @@ class SomLearner(Learner):
         self.callbacks += visualization_callbacks(visualize, visualize_on, self)
         # Add optional data compatibility callback
         if isinstance(data, TabularDataBunch):
-            self.callbacks.append(UnifyDataCallback())
             self.__maybe_adjust_model_dist_fn()
         self.callbacks = list(set(self.callbacks))
 
     def __maybe_adjust_model_dist_fn(self):
-        # If categorical features are encoded as embeddings, we need to ensure that
-        # cosine distance is used for the embedding features
-        vec_proc = find(self.data.processor[0].procs, lambda p: isinstance(p, Vectorize))
-        if vec_proc is not None and not isinstance(self.model.dist_fn, MixedEmbeddingDistance):
-            split_idx = len(vec_proc._out_cat_names) if vec_proc.is_mixed else None
-            self.model.dist_fn = MixedEmbeddingDistance(vec_proc.vector_size, split_idx=split_idx)
-        # If categorical features are one-hot encoded, we need to ensure that
-        # distance for the encodings is coherent with the one used for continuous features
-        # ohe_proc = find(self.data.processor[0].procs, lambda p: isinstance(p, OneHotEncode))
-        # if ohe_proc is not None and not isinstance(self.model.dist_fn, MixedOneHotDistance):
-        #     split_idx = len(vec_proc._out_cat_names) if vec_proc.is_mixed else None
-        #     self.model.dist_fn = MixedOneHotDistance(split_idx=split_idx)
+        """Changes the SOM distance function if the data type requires it."""
+        tobecont_proc = find(self.data.processor[0].procs, lambda p: isinstance(p, ToBeContinuousProc))
+        if tobecont_proc is not None:
+            if isinstance(tobecont_proc, Vectorize):
+                if not isinstance(self.model.dist_fn, MixedEmbeddingDistance):
+                    split_idx = len(tobecont_proc.transformed_cat_names) if tobecont_proc.is_mixed else None
+                    self.model.dist_fn = MixedEmbeddingDistance(tobecont_proc.vector_size, split_idx=split_idx)
+                self.callbacks.append(ForwardContsCallback())
+            elif isinstance(tobecont_proc, OneHotEncode):
+                # TODO: Implement OneHot-based distance
+                # For now only forward continuous features
+                self.callbacks.append(ForwardContsCallback())
 
     def codebook_to_df(self, recategorize: bool = False) -> pd.DataFrame:
         """
@@ -156,13 +169,13 @@ class SomLearner(Learner):
 
         if isinstance(self.data, TabularDataBunch):
             if recategorize:
-                w, cat_names, cont_names = self.recategorize(w, return_names=True)
+                w, cat_names, cont_names = self.recategorize(w, return_names=True, denorm=True)
             else:
                 cont_names, cat_names = self.data.cont_names, self.data.cat_names
+                w = w.numpy()
             cat_features, cont_features = w[..., :len(cat_names)], w[..., len(cat_names):]
-            # Continuous features denormalization
-            self.denormalize(cont_features)
-            df = pd.DataFrame(data=np.concatenate([cat_features, cont_features], axis=-1), columns=cat_names+cont_names)
+            data = np.concatenate([cat_features, cont_features], axis=-1)
+            df = pd.DataFrame(data=data, columns=cat_names+cont_names)
             df[cont_names] = df[cont_names].astype(float)
             df[cat_names] = df[cat_names].astype(str)
         else:
@@ -180,13 +193,14 @@ class SomLearner(Learner):
         return df
 
     def export(self, file: PathLikeOrBinaryStream = 'export.pkl', destroy: bool = False):
+        """Exports the Learner to file, removing unneeded callbacks."""
         cbs = list(self.callbacks)
         self.callbacks = list(filter(lambda cb: not isinstance(cb, (SomTrainer, SomVizCallback)), self.callbacks))
         super().export(file=file, destroy=destroy)
         if not destroy:
             self.callbacks = cbs
 
-    def recategorize(self, data: torch.Tensor, return_names: bool = False) -> np.ndarray:
+    def recategorize(self, data: torch.Tensor, return_names: bool = False, denorm: bool = False) -> np.ndarray:
         """Recategorizes `data`, optionally returning cat/cont names."""
         if not isinstance(self.data, TabularDataBunch):
             raise ValueError('Recategorization is available only when using TabularDataBunch')
@@ -194,14 +208,22 @@ class SomLearner(Learner):
         if encoding_proc is None:
             raise ValueError('No proc of type ToBeContinuousProc was found during recategorization')
         cont_names, cat_names = encoding_proc.original_cont_names, encoding_proc.original_cat_names
-        encoded_cat_names = encoding_proc.cat_names
+        encoded_cat_names = encoding_proc.cont_names[len(cont_names):]
         if data.shape[-1] == self.model.weights.size(-1):
-            # split cat / cont
-            cats, conts = data[:len(encoded_cat_names)], data[len(encoded_cat_names):]
+            if denorm:
+                # Vectorized categoricals are usually normalized too, so we need to denormalize them
+                if isinstance(encoding_proc, Vectorize):
+                    data = self.denormalize(data)
+                    cats, conts = data[..., :len(encoded_cat_names)], data[..., len(encoded_cat_names):]
+                else:
+                    cats, conts = data[..., :len(encoded_cat_names)], data[..., len(encoded_cat_names):]
+                    conts = self.denormalize(conts)
+            else:
+                cats, conts = data[..., :len(encoded_cat_names)], data[..., len(encoded_cat_names):]
         else:
             cats, conts = data, None
         cats = encoding_proc.apply_backwards(cats)
-        ret = np.concatenate([cats, conts], axis=-1) if (conts is not None and len(conts) > 0) else cats
+        ret = np.concatenate([cats, conts.numpy()], axis=-1) if (conts is not None and conts.shape[-1] > 0) else cats
         if return_names:
             return ret, cat_names, cont_names
         else:
@@ -214,7 +236,7 @@ class SomLearner(Learner):
             if normalize_proc is not None:
                 if data.shape[-1] > len(normalize_proc.means):
                     conts, cats = data[..., :len(normalize_proc.means)], data[..., len(normalize_proc.means):]
-                    return torch.cat([denormalize(conts, normalize_proc.means, normalize_proc.stds), cats], dim=-1)
+                    return torch.cat([cats, denormalize(conts, normalize_proc.means, normalize_proc.stds)], dim=-1)
                 else:
                     return denormalize(data, normalize_proc.means, normalize_proc.stds)
         # TODO: implement for other databunch types
@@ -223,6 +245,10 @@ class SomLearner(Learner):
     @property
     def has_labels(self):
         return not isinstance(self.data.train_ds.y, EmptyLabelList)
+
+
+def print_stats(t: torch.Tensor, dim: int = -1):
+    print(f'Mean: {t.mean()}, Std: {t.std()}, Min: {t.min()}, Max: {t.max()}, Shape: {t.shape}')
 
 
 def denormalize(data: torch.Tensor, means: Dict[str, float], stds: Dict[str, float]) -> torch.Tensor:

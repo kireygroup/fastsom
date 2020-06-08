@@ -44,11 +44,13 @@ class CustomTabularProcessor(TabularProcessor):
                 # If the process is already an instance of TabularProc,
                 # this means we already ran it on the train set!
                 proc.cat_names, proc.cont_names = self._stages[proc.__class__.__name__]
+                print(proc.__class__.__name__, len(proc.cat_names), len(proc.cont_names))
                 proc(ds.inner_df, test=True)
             else:
                 # otherwise, we need to instantiate it first
                 # cat and cont names may have been changed by transform (like Fill_NA)
-                self._stages[proc.__name__] = ds.cat_names, ds.cont_names
+                self._stages[proc.__name__] = (ds.cat_names.copy(), ds.cont_names.copy())
+                print(proc.__name__, len(ds.cat_names), len(ds.cont_names))
                 proc = proc(ds.cat_names, ds.cont_names)
                 proc(ds.inner_df)
                 ds.cat_names, ds.cont_names = proc.cat_names, proc.cont_names
@@ -58,7 +60,7 @@ class CustomTabularProcessor(TabularProcessor):
         # to move all cat names from that proc to cont names
         last_tobecont_proc = find(self.procs, lambda p: isinstance(p, ToBeContinuousProc), last=True)
         if last_tobecont_proc is not None:
-            ds.cont_names = last_tobecont_proc.original_cont_names + last_tobecont_proc._out_cat_names
+            ds.cont_names = last_tobecont_proc.cont_names  # + last_tobecont_proc.transformed_cat_names
             ds.cat_names = []
         # original Fast.ai code to maintain compatibility
         if len(ds.cat_names) != 0:
