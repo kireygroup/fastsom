@@ -12,17 +12,25 @@ from fastai.basic_train import Learner
 from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 
-from ..core import idxs_2d_to_1d
+from fastsom.core import idxs_2d_to_1d
+from fastsom.data_block import get_xy
 
 
 __all__ = [
+    "SomVizCallback",
     "SomTrainingViz",
     "SomHyperparamsViz",
     "SomBmuViz",
 ]
 
 
-class SomTrainingViz(Callback):
+class SomVizCallback(Callback):
+    """Base class for SOM visualization callbacks."""
+    def __init__(self, learn: Learner):
+        self.learn = learn
+
+
+class SomTrainingViz(SomVizCallback):
     """
     `Callback` used to visualize an approximation of the Som weight update.
 
@@ -34,30 +42,31 @@ class SomTrainingViz(Callback):
     # https://jakevdp.github.io/PythonDataScienceHandbook/04.12-three-dimensional-plotting.html
 
     def __init__(self, learn: Learner, update_on_batch: bool = False) -> None:
+        super().__init__(learn)
         self.dim = 2
-        self.learn = learn
         self.model = learn.model
-        self.data = learn.data.train_ds.tensors[0].clone().cpu().numpy()
-        self.input_el_size = self.data.shape[-1]
+        self.input_el_size = None
         self.data_color, self.weights_color = '#539dcc', '#e58368'
         self.pca, self.f, self.ax, self.scatter = None, None, None, None
         self.update_on_batch = update_on_batch
 
     def on_train_begin(self, **kwargs):
         "Initializes the PCA on the dataset and creates the plot."
+        # Retrieve data
+        data, _ = get_xy(self.learn.data)
+        self.input_el_size = data.shape[-1]
         # Init + fit the PCA
         self.pca = PCA(n_components=self.dim)
-        self.pca.fit(self.data)
+        d = self.pca.fit_transform(data)
         # Make the chart interactive
         plt.ion()
         self.f = plt.figure()
         self.ax = self.f.add_subplot(111, projection='3d' if self.dim == 3 else None)
+        # Calculate PCA of the weights
         w = self.pca.transform(self.model.weights.view(-1, self.input_el_size).cpu().numpy())
-
         # Plot weights
         self.scatter = self.ax.scatter(*tuple([el[i] for el in w] for i in range(self.dim)), c=self.weights_color, zorder=100)
         # Plot data
-        d = self.pca.transform(self.data)
         self.ax.scatter(*tuple([el[i] for el in d] for i in range(self.dim)), c=self.data_color)
         self.f.show()
 
@@ -82,7 +91,7 @@ class SomTrainingViz(Callback):
         del self.pca
 
 
-class SomHyperparamsViz(Callback):
+class SomHyperparamsViz(SomVizCallback):
     """
     Displays a lineplot for each SOM hyperparameter.
 
@@ -93,7 +102,7 @@ class SomHyperparamsViz(Callback):
     """
 
     def __init__(self, learn: Learner) -> None:
-        self.learn = learn
+        super().__init__(learn)
         self.model = learn.model
         self.fig, self.plots = None, None
         self.alphas, self.sigmas = [], []
@@ -102,7 +111,8 @@ class SomHyperparamsViz(Callback):
         """Initializes the plots."""
         n_epochs = kwargs['n_epochs']
         plt.ion()
-        self.fig, self.plots = plt.subplots(2, figsize=(15, 5))
+        self.fig, self.plots = plt.subplots(1, 2, figsize=(12, 10))
+        self.plots = self.plots.flatten()
 
         self.plots[0].set_title('Alpha Hyperparameter')
         self.plots[0].set_xlabel('Epoch')
@@ -120,12 +130,12 @@ class SomHyperparamsViz(Callback):
         """Updates hyperparameters and plots."""
         self.alphas.append(self.model.alpha.cpu().numpy())
         self.sigmas.append(self.model.sigma.cpu().numpy())
-        self.alphas_plt.plot(self.alphas, c='#589c7e')
-        self.sigmas_plt.plot(self.sigmas, c='#4791c5')
+        self.plots[0].plot(self.alphas, c='#589c7e')
+        self.plots[1].plot(self.sigmas, c='#4791c5')
         self.fig.canvas.draw()
 
 
-class SomBmuViz(Callback):
+class SomBmuViz(SomVizCallback):
     """
     Visualization callback for SOM training.
     Stores BMU locations for each batch and displays them on epoch end.
@@ -137,7 +147,7 @@ class SomBmuViz(Callback):
     """
 
     def __init__(self, learn: Learner, update_on_batch: bool = False) -> None:
-        self.learn = learn
+        super().__init__(learn)
         self.model = learn.model
         self.epoch_counts = torch.zeros(self.model.size[0] * self.model.size[1])
         self.total_counts = torch.zeros(self.model.size[0] * self.model.size[1])

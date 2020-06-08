@@ -2,9 +2,9 @@ import torch
 from typing import Tuple, Callable
 from fastai.torch_core import Module
 
+from fastsom.core import expanded, ifnone, index_tensor
 from .neighborhood import neigh_gauss, neigh_diff_standard
 from .distance import pdist
-from ..core import expanded, ifnone, index_tensor
 
 
 class Som(Module):
@@ -47,7 +47,7 @@ class Som(Module):
         SOM forward pass.
 
         Does the following:
-         1. Calculate distance between `xb` and `weights`;
+         1. Calculate distance between `xb` and `weights`
          2. Find BMU for each element in `xb`
          3. Return BMUs indices
 
@@ -89,7 +89,6 @@ class Som(Module):
          2. Calculate neighbourhood scaling on index distances
          3. Update weights
         """
-        # get last batch data
         xb, bmus = self._recorder['xb'], self._recorder['bmus']
         batch_size = xb.shape[0]
         n_features = xb.shape[-1]
@@ -126,7 +125,7 @@ class Som(Module):
         return self.neigh_fn(index_diff, sigma).view(out_shape)
 
     def parameters(self):
-        return iter([self.weights, self.map_indices, self.dist_fn])
+        return iter([self.weights, self.map_indices])
 
     def to_device(self, device: torch.device = None) -> None:
         """Moves params and weights to the appropriate device."""

@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from fastai.callback import Callback
 
-from ..som import Som
+from fastsom.som import Som
 
 __all__ = [
     "SomTrainer",
@@ -18,8 +18,9 @@ __all__ = [
 class SomTrainer(Callback):
     """Base class for SOM training strategies."""
 
-    def __init__(self, model: Som):
-        pass
+    def __init__(self, model: Som, data):
+        self.model = model
+        self.data = data
 
 
 class LinearDecaySomTrainer(SomTrainer):
@@ -36,7 +37,6 @@ class LinearDecaySomTrainer(SomTrainer):
     """
 
     def __init__(self, model: Som):
-        self.model = model
         self.alpha = self.model.alpha
         self.sigma = self.model.sigma
         self.n_epochs = None
@@ -116,11 +116,12 @@ class ExperimentalSomTrainer(SomTrainer):
         The SOM model
     """
 
-    def __init__(self, model: Som):
-        self.model = model
+    def __init__(self, model: Som, data):
+        super().__init__(model, data)
         self.alpha = self.model.alpha.cpu().numpy()
         self.sigma = self.model.sigma.cpu().numpy()
         self.alphas, self.sigmas = [], []
+        self.bs = []
 
     def on_train_begin(self, **kwargs):
         n_epochs = kwargs['n_epochs']
@@ -139,7 +140,15 @@ class ExperimentalSomTrainer(SomTrainer):
         self.alphas = np.concatenate([alphas_1, alphas_2, alphas_3], axis=0)
         self.sigmas = np.concatenate([sigmas_1, sigmas_2, sigmas_3], axis=0)
 
+        bs_1 = [self.data.batch_size for _ in range(phase_1_iters)]
+        bs_2 = [max([8, self.data.batch_size // 2]) for _ in range(phase_2_iters)]
+        bs_3 = [max([1, self.data.batch_size // 6]) for _ in range(phase_3_iters)]
+
+        self.bs = np.concatenate([bs_1, bs_2, bs_3], axis=0).astype(int)
+
     def on_epoch_begin(self, **kwargs):
         epoch = kwargs['epoch']
         self.model.alpha = torch.tensor(self.alphas[epoch])
         self.model.sigma = torch.tensor(self.sigmas[epoch])
+        # self.data.batch_size = int(self.bs[epoch])
+        # print(self.bs[epoch])

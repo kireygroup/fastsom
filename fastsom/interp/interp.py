@@ -2,23 +2,22 @@
 This file contains interpretation
 utilities for Self-Organizing Maps.
 """
-import math
 import torch
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from torch import Tensor
-from torch.utils.data import TensorDataset, BatchSampler
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Tuple
 from fastai.basic_data import DatasetType
+from fastai.basic_train import Learner
+from fastai.tabular import TabularDataBunch
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import KBinsDiscretizer
 from fastprogress.fastprogress import progress_bar
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
-from fastsom.core import ifnone, idxs_2d_to_1d
-from fastsom.datasets import get_sampler
+from fastsom.core import ifnone, idxs_2d_to_1d, find
+from fastsom.data_block import ToBeContinuousProc
 
 
 __all__ = [
@@ -40,16 +39,16 @@ class SomInterpretation():
         The learner to be used for interpretation.
     """
 
-    def __init__(self, learn) -> None:
+    def __init__(self, learn: Learner) -> None:
         self.learn = learn
         self.data = learn.data
         self.pca = None
         self.w = learn.model.weights.clone().view(-1, learn.model.size[-1]).cpu()
-        if self.data.normalizer is not None:
-            self.w = self.data.denormalize(self.w).numpy()
+        # TODO: denormalization?
+        self.w = self.learn.denormalize(self.w)
 
     @classmethod
-    def from_learner(cls, learn):
+    def from_learner(cls, learn: Learner):
         """
         Creates a new instance of `SomInterpretation` from a `SomLearner`.\n
 
@@ -60,8 +59,16 @@ class SomInterpretation():
         """
         return cls(learn)
 
-    def _get_train(self):
-        return self.data.train_ds.tensors[0].cpu()
+    @property
+    def modelsize(self):
+        return self.learn.model.weights.shape[:-1]
+
+    def _get_train_batched(self, progress: bool = True):
+        iter_fn = progress_bar if progress else iter
+        for xb, yb in iter_fn(self.learn.data.train_dl):
+            if not isinstance(xb, torch.Tensor):
+                xb = xb[1]
+            yield xb, yb
 
     def _init_pca(self):
         "Initializes and fits the PCA instance."
@@ -79,8 +86,8 @@ class SomInterpretation():
         """
         _, ax = plt.subplots(figsize=(10, 10))
         preds = torch.zeros(0, 2).cpu().long()
-        for xb in progress_bar(self.learn.data.train_dl):
-            preds = torch.cat([preds, self.learn.model(xb[0]).cpu()], dim=0)
+        for xb, yb in self._get_train_batched():
+            preds = torch.cat([preds, self.learn.model(xb).cpu()], dim=0)
 
         out, counts = preds.unique(return_counts=True, dim=0)
         z = torch.zeros(self.learn.model.size[:-1]).long()
@@ -92,10 +99,11 @@ class SomInterpretation():
 
     def show_feature_heatmaps(
         self,
-        dim: Optional[Union[int, List[int]]] = None,
+        feature_indices: Optional[Union[int, List[int]]] = None,
         cat_labels: Optional[List[str]] = None,
         cont_labels: Optional[List[str]] = None,
         recategorize: bool = True,
+        figsize: Tuple[int, int] = (12, 12),
         save: bool = False
     ) -> None:
         """
@@ -114,45 +122,45 @@ class SomInterpretation():
         save : bool default=False
             If True, saves the charts into a file.
         """
-        n_variables = self._get_train().shape[-1]
-        cat_labels = ifnone(cat_labels, [])
-        cont_labels = ifnone(cont_labels, [])
-        labels = cat_labels+cont_labels if len(cat_labels+cont_labels) > 0 else [f'Feature #{i}' for i in range(n_variables)]
-
-        if dim is not None:
-            if isinstance(dim, list):
-                dims = dim
+        xb, _ = next(self._get_train_batched(progress=False))
+        n_variables = xb.shape[-1]
+        if isinstance(self.learn.data, TabularDataBunch):
+            tobecont_proc = find(self.learn.data.processor[0].procs, lambda p: isinstance(p, ToBeContinuousProc))
+            if tobecont_proc is not None:
+                cat_labels, cont_labels = tobecont_proc.original_cat_names, tobecont_proc.original_cont_names
             else:
-                dims = [dim]
+                cat_labels, cont_labels = self.learn.data.cat_names, self.learn.data.cont_names
         else:
-            dims = list(range(len(labels)))
-
-        cols = 4 if len(dims) > 4 else len(dims)
-        rows = math.ceil(len(dims) / cols)
-
-        fig, axs = plt.subplots(rows, cols, figsize=(8 * cols, 6 * rows))
+            cat_labels = ifnone(cat_labels, [])
+            cont_labels = ifnone(cont_labels, [])
+        labels = cat_labels+cont_labels if len(cat_labels+cont_labels) > 0 else [f'Feature #{i}' for i in range(n_variables)]
+        feature_indices = list(range(len(labels))) if feature_indices is None else feature_indices if isinstance(feature_indices, list) else [feature_indices]
 
         # Optionally recategorize categorical variables
         if recategorize:
-            w = torch.tensor(self.w)
-            encoded_count = self.w.shape[-1] - len(cont_labels)
-            cat = self.learn.data.cat_enc.make_categorical(w[:, :encoded_count])
-            w = np.concatenate([cat, torch.tensor(self.w[:, encoded_count:])], axis=-1)
+            w = self.learn.recategorize(self.w, denorm=True)
         else:
-            w = self.w
+            w = self.denormalize(self.w).numpy()
+        # gather feature indices from weights
+        w = np.take(w, feature_indices, axis=-1)
 
-        if len(dims) == 1:
-            axs = [[axs]]
-        elif rows == 1 or cols == 1:
-            axs = [axs]
+        # Initialize subplots
+        cols = min(2, len(feature_indices))
+        rows = max(1, len(feature_indices) // cols + 1)
+        fig, axs = plt.subplots(rows, cols, figsize=(figsize[0] * cols, figsize[1] * rows))
+        axs = axs.flatten() if isinstance(axs, np.ndarray) else [axs]
 
-        for d in progress_bar(range(len(dims))):
-            i = d // cols
-            j = d % cols
-            ax = axs[i][j]
-            ax.set_title(labels[d])
-            sns.heatmap(w[:, d].reshape(self.learn.model.size[:-1]), ax=ax, annot=True)
-        fig.show()
+        zipped_items = zip(range(len(feature_indices)), axs[:len(feature_indices)], np.split(w, w.shape[-1], axis=-1), labels)
+        for i, ax, data, label in progress_bar(list(zipped_items)):
+            ax.set_title(label)
+            if data.dtype.kind == 'S' or data.dtype.kind == 'U':
+                # TODO: apply colors to strings
+                data = data.astype(str)
+                numeric_data = (np.searchsorted(np.unique(data), data, side='left') + 1).reshape(self.modelsize)
+                sns.heatmap(numeric_data, ax=ax, annot=data.reshape(self.modelsize), fmt='s')
+            else:
+                sns.heatmap(data.reshape(self.modelsize), ax=ax, annot=True)
+            fig.show()
 
     def show_weights(self, save: bool = False) -> None:
         """
@@ -181,7 +189,13 @@ class SomInterpretation():
         plt.figure(figsize=(10, 10))
         plt.imshow(d.reshape(image_shape))
 
-    def show_preds(self, ds_type: DatasetType = DatasetType.Train, class_names: List[str] = None, n_bins: int = 5, save: bool = False, ) -> None:
+    def show_preds(
+        self,
+        ds_type: DatasetType = DatasetType.Train,
+        class_names: List[str] = None,
+        n_bins: int = 5,
+        save: bool = False
+    ) -> None:
         """
         Displays most frequent label for each map position in `ds_type` dataset.
         If labels are countinuous, binning on `n_bins` is performed.
@@ -195,9 +209,9 @@ class SomInterpretation():
         save : bool default=False
             Whether or not the output chart should be saved on a file.
         """
-        if not self.learn.data.has_labels:
+        if not self.learn.has_labels:
             raise RuntimeError('Unable to show predictions for a dataset that has no labels. \
-                Please pass labels when creating the `UnsupervisedDataBunch` or use `interp.show_hitmap()`')
+                Please pass labels when creating the `DataBunch` or use `interp.show_hitmap()`')
         # Run model predictions
         preds, labels = self.learn.get_preds(ds_type)
 
@@ -206,7 +220,7 @@ class SomInterpretation():
 
         if continuous_labels and n_bins > 0:
             # Split labels into bins
-            labels = KBinsDiscretizer(n_bins=n_bins, encode='ordinal').fit_transform(labels.numpy())
+            labels = KBinsDiscretizer(n_bins=n_bins, encode='ordinal').fit_transform(labels.unsqueeze(-1).numpy())
             labels = torch.tensor(labels)
 
         map_size = (self.learn.model.size[0], self.learn.model.size[1])
@@ -221,7 +235,6 @@ class SomInterpretation():
         for idx, bmu in enumerate(unique_bmus):
             # Get labels corresponding to this BMU
             bmu_labels = labels[(preds_1d == bmu).nonzero()]
-
             if continuous_labels and n_bins <= 0:
                 data[idx] = bmu_labels.mean()
             else:
