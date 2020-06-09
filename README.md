@@ -72,7 +72,7 @@ A run script is available:
 ./bin/run.sh
 ```
 
-This will mount the main `/fastsom` directory inside the container, allowing for code changes to be automatically replicated.
+This will mount the directories `/fastsom` and `/nbs` inside the container, allowing for code changes to be automatically replicated.
 
 Note: if you plan on using Nvidia-Docker, you should use one of the images available on the Nvidia Container Repository.
 
@@ -107,9 +107,4 @@ make docs
 
 ### Deploying the docs on GH Pages
 
-An additional build step was added to the Makefile to deploy documentation on the `gh-pages` branch automatically:
-
-```bash
-cd docs
-make deploy
-```
+Docs are automatically built from the master branch and pushed to the `gh-pages` branch on each version tag.

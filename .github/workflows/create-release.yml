@@ -1,0 +1,24 @@
+on:
+  push:
+    tags:
+      - "v*" # Matches version tags
+
+name: Push artifact on PyPi
+
+jobs:
+  build:
+    name: Push artifact on PyPi
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+      - name: Checkout master
+        uses: actions/checkout@v2
+      - name: Setup build dependencies
+        run: sudo pip3 install wheel twine
+      - name: Create package
+        run: sudo python3 setup.py sdist bdist_wheel
+      - name: Upload on PyPi
+        run: twine upload -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }} dist/*

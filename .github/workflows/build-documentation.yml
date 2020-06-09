@@ -1,0 +1,43 @@
+on:
+  push:
+    tags:
+      - "v*" # Matches version tags
+
+name: Build docs & push to gh-pages
+
+jobs:
+  build:
+    name: Build docs & push to gh-pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+      - name: Checkout master
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build docs
+        run: |
+          sudo pip3 install sphinx
+          sudo python3 docs/setup_path.py
+          sudo pip3 install -r docs/requirements.txt
+          sudo apt-get update -y && sudo apt-get install -y pandoc
+          cd docs
+          make docs
+          cd ..
+          cp -r docs ../__fastsom_docs
+          git stash
+      - name: Commit documentation changes
+        run: |
+          git checkout gh-pages
+          find . -path ./.git -prune -o \! -name 'README.md' \! -name '.gitignore' -exec rm -rf {} \; || true
+          cp -a ../__fastsom_docs/build/html/. ./
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Update docs for ${{ github.ref }}" -a || true
+      - name: Push changes
+        run: |
+          git push
