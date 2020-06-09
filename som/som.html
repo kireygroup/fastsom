@@ -114,7 +114,7 @@
           </li>
 
         
-          <li class="toctree-l1 "><a href="../datasets/datasets.html" class="reference internal ">fastsom.datasets</a>
+          <li class="toctree-l1 "><a href="../data_block/data_block.html" class="reference internal ">fastsom.data_block</a>
 
             
           </li>
@@ -213,7 +213,7 @@
 <h3><span class="hidden-section">Som</span><a class="headerlink" href="#som" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt id="fastsom.som.som.Som">
-<em class="property">class </em><code class="sig-prename descclassname">fastsom.som.som.</code><code class="sig-name descname">Som</code><span class="sig-paren">(</span><em class="sig-param">size: Tuple[int, int, int], dist_fn: Callable = &lt;function pdist&gt;, neigh_fn: Callable = &lt;function neigh_gauss&gt;, neigh_diff_fn: Callable = &lt;function neigh_diff_standard&gt;</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/som.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.som.Som" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.som.som.</code><code class="sig-name descname">Som</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/som.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.som.Som" title="Permalink to this definition">¶</a></dt>
 <dd><p>Self-Organizing Map module.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -341,20 +341,45 @@ Assumes tensor shapes are compatible.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="fastsom.som.distance.pcosim">
-<code class="sig-prename descclassname">fastsom.som.distance.</code><code class="sig-name descname">pcosim</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">b</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">p</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/distance.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.distance.pcosim" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the cosine similarity of order <cite>p</cite> between <cite>a</cite> and <cite>b</cite>.
-Assumes tensor shapes are compatible.</p>
+<dt id="fastsom.som.distance.grouped_distance">
+<code class="sig-prename descclassname">fastsom.som.distance.</code><code class="sig-name descname">grouped_distance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">b</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">dist_fn</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="n">n_groups</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>int<span class="p">, </span>List<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/distance.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.distance.grouped_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divides both <cite>a</cite> and <cite>b</cite> into smaller groups, then calls <cite>dist_fn</cite> on each pair of groups.
+Useful when computing distances over groups of embeddings, for example.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>a</strong> (<em>torch.Tensor</em>) – The first tensor</p></li>
-<li><p><strong>b</strong> (<em>torch.Tensor</em>) – The second tensor</p></li>
-<li><p><strong>p</strong> (<em>int default=2</em>) – The order.</p></li>
+<li><p><strong>a</strong> (<em>torch.Tensor</em>) – The first Tensor</p></li>
+<li><p><strong>b</strong> (<em>torch.Tensor</em>) – The second Tensor</p></li>
+<li><p><strong>dist_fn</strong> (<em>Callable</em>) – The actual distance function</p></li>
+<li><p><strong>groups</strong> (<em>int</em>) – The number of groups of equal size to be used.</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt id="fastsom.som.distance.split_distance">
+<code class="sig-prename descclassname">fastsom.som.distance.</code><code class="sig-name descname">split_distance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">b</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">dist_fn_1</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="n">dist_fn_2</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="n">split_idx</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/distance.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.distance.split_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits both <cite>a</cite> and <cite>b</cite> in two parts at <cite>split_idx</cite>, then applies two
+different distance functions for each part.</p>
+<p>This is useful on a mixed dataset containing embeddings and continous values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>torch.Tensor</em>) – The first Tensor</p></li>
+<li><p><strong>b</strong> (<em>torch.Tensor</em>) – The second Tensor</p></li>
+<li><p><strong>dist_fn_1</strong> (<em>Callable</em>) – The distance function for the first chunks</p></li>
+<li><p><strong>dist_fn_2</strong> (<em>Callable</em>) – The distance function for the second chunks</p></li>
+<li><p><strong>split_idx</strong> (<em>int</em>) – The split point for <cite>a</cite> and <cite>b</cite></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.som.distance.MixedEmbeddingDistance">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.som.distance.</code><code class="sig-name descname">MixedEmbeddingDistance</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/som/distance.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.som.distance.MixedEmbeddingDistance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 </div>
@@ -374,7 +399,7 @@ Assumes tensor shapes are compatible.</p>
 </ul><div class="footer" role="contentinfo">
       &#169; Copyright 2020, Kirey Group.
     <br>
-    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.2 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
 </div>
             </div>
           </div>

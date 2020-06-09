@@ -113,7 +113,7 @@
           </li>
 
         
-          <li class="toctree-l1 "><a href="datasets/datasets.html" class="reference internal ">fastsom.datasets</a>
+          <li class="toctree-l1 "><a href="data_block/data_block.html" class="reference internal ">fastsom.data_block</a>
 
             
           </li>
@@ -185,7 +185,8 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#C"><strong>C</strong></a>
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
@@ -200,25 +201,52 @@
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
- | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
  
 </div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="data_block/data_block.html#fastsom.data_block.transform.OneHotEncode.apply_backwards">apply_backwards() (fastsom.data_block.transform.OneHotEncode method)</a>
+
+      <ul>
+        <li><a href="data_block/data_block.html#fastsom.data_block.transform.ToBeContinuousProc.apply_backwards">(fastsom.data_block.transform.ToBeContinuousProc method)</a>
+</li>
+        <li><a href="data_block/data_block.html#fastsom.data_block.transform.Vectorize.apply_backwards">(fastsom.data_block.transform.Vectorize method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="data_block/data_block.html#fastsom.data_block.transform.OneHotEncode.apply_test">apply_test() (fastsom.data_block.transform.OneHotEncode method)</a>
+
+      <ul>
+        <li><a href="data_block/data_block.html#fastsom.data_block.transform.Vectorize.apply_test">(fastsom.data_block.transform.Vectorize method)</a>
+</li>
+      </ul></li>
+      <li><a href="data_block/data_block.html#fastsom.data_block.transform.OneHotEncode.apply_train">apply_train() (fastsom.data_block.transform.OneHotEncode method)</a>
+
+      <ul>
+        <li><a href="data_block/data_block.html#fastsom.data_block.transform.Vectorize.apply_train">(fastsom.data_block.transform.Vectorize method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.CatEncoder">CatEncoder (class in fastsom.datasets.cat_encoders)</a>
-</li>
       <li><a href="interp/interp.html#fastsom.interp.metrics.cluster_stats">cluster_stats() (in module fastsom.interp.metrics)</a>
+</li>
+      <li><a href="interp/interp.html#fastsom.interp.metrics.codebook_err">codebook_err() (in module fastsom.interp.metrics)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="interp/interp.html#fastsom.interp.metrics.codebook_err">codebook_err() (in module fastsom.interp.metrics)</a>
-</li>
       <li><a href="learn/learn.html#fastsom.learn.learn.SomLearner.codebook_to_df">codebook_to_df() (fastsom.learn.learn.SomLearner method)</a>
 </li>
       <li><a href="core/core.html#fastsom.core.utils.compose">compose() (in module fastsom.core.utils)</a>
+</li>
+      <li><a href="data_block/data_block.html#fastsom.data_block.databunch.CustomTabularProcessor">CustomTabularProcessor (class in fastsom.data_block.databunch)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -226,14 +254,8 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="datasets/datasets.html#fastsom.datasets.datasets.UnsupervisedDataBunch.denormalize">denormalize() (fastsom.datasets.datasets.UnsupervisedDataBunch method)</a>
-
-      <ul>
-        <li><a href="datasets/datasets.html#fastsom.datasets.normalizers.Normalizer.denormalize">(fastsom.datasets.normalizers.Normalizer method)</a>
+      <li><a href="learn/learn.html#fastsom.learn.learn.SomLearner.denormalize">denormalize() (fastsom.learn.learn.SomLearner method)</a>
 </li>
-        <li><a href="datasets/datasets.html#fastsom.datasets.normalizers.VarianceNormalizer.denormalize">(fastsom.datasets.normalizers.VarianceNormalizer method)</a>
-</li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -242,11 +264,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/core.html#fastsom.core.utils.enum_eq">enum_eq() (in module fastsom.core.utils)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/core.html#fastsom.core.tensor.expanded">expanded() (in module fastsom.core.tensor)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="learn/learn.html#fastsom.learn.callbacks.ExperimentalSomTrainer">ExperimentalSomTrainer (class in fastsom.learn.callbacks)</a>
+</li>
+      <li><a href="learn/learn.html#fastsom.learn.learn.SomLearner.export">export() (fastsom.learn.learn.SomLearner method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -254,23 +278,7 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.FastTextCatEncoder">FastTextCatEncoder (class in fastsom.datasets.cat_encoders)</a>
-</li>
-      <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.CatEncoder.fit">fit() (fastsom.datasets.cat_encoders.CatEncoder method)</a>
-
-      <ul>
-        <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.FastTextCatEncoder.fit">(fastsom.datasets.cat_encoders.FastTextCatEncoder method)</a>
-</li>
-        <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.OneHotCatEncoder.fit">(fastsom.datasets.cat_encoders.OneHotCatEncoder method)</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="datasets/datasets.html#fastsom.datasets.datasets.UnsupervisedDataBunch.from_df">from_df() (fastsom.datasets.datasets.UnsupervisedDataBunch class method)</a>
-</li>
       <li><a href="interp/interp.html#fastsom.interp.interp.SomInterpretation.from_learner">from_learner() (fastsom.interp.interp.SomInterpretation class method)</a>
-</li>
-      <li><a href="datasets/datasets.html#fastsom.datasets.datasets.UnsupervisedDataBunch.from_tabular_databunch">from_tabular_databunch() (fastsom.datasets.datasets.UnsupervisedDataBunch class method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -278,11 +286,7 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.get_cat_encoder">get_cat_encoder (class in fastsom.datasets.cat_encoders)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="datasets/datasets.html#fastsom.datasets.normalizers.get_normalizer">get_normalizer() (in module fastsom.datasets.normalizers)</a>
+      <li><a href="som/som.html#fastsom.som.distance.grouped_distance">grouped_distance() (in module fastsom.som.distance)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -303,6 +307,8 @@
       <li><a href="core/core.html#fastsom.core.tensor.index_tensor">index_tensor() (in module fastsom.core.tensor)</a>
 </li>
       <li><a href="core/core.html#fastsom.core.utils.is_iterable">is_iterable() (in module fastsom.core.utils)</a>
+</li>
+      <li><a href="data_block/data_block.html#fastsom.data_block.transform.Vectorize.is_mixed">is_mixed() (fastsom.data_block.transform.Vectorize property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -330,29 +336,11 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.CatEncoder.make_categorical">make_categorical() (fastsom.datasets.cat_encoders.CatEncoder method)</a>
-
-      <ul>
-        <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.FastTextCatEncoder.make_categorical">(fastsom.datasets.cat_encoders.FastTextCatEncoder method)</a>
-</li>
-        <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.OneHotCatEncoder.make_categorical">(fastsom.datasets.cat_encoders.OneHotCatEncoder method)</a>
-</li>
-        <li><a href="datasets/datasets.html#fastsom.datasets.datasets.UnsupervisedDataBunch.make_categorical">(fastsom.datasets.datasets.UnsupervisedDataBunch method)</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.CatEncoder.make_continuous">make_continuous() (fastsom.datasets.cat_encoders.CatEncoder method)</a>
-
-      <ul>
-        <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.FastTextCatEncoder.make_continuous">(fastsom.datasets.cat_encoders.FastTextCatEncoder method)</a>
-</li>
-        <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.OneHotCatEncoder.make_continuous">(fastsom.datasets.cat_encoders.OneHotCatEncoder method)</a>
-</li>
-      </ul></li>
       <li><a href="interp/interp.html#fastsom.interp.metrics.mean_quantization_err">mean_quantization_err() (in module fastsom.interp.metrics)</a>
 </li>
-      <li><a href="datasets/datasets.html#fastsom.datasets.normalizers.MinMaxScaler">MinMaxScaler (class in fastsom.datasets.normalizers)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="som/som.html#fastsom.som.distance.MixedEmbeddingDistance">MixedEmbeddingDistance (class in fastsom.som.distance)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -364,23 +352,13 @@
 </li>
       <li><a href="som/som.html#fastsom.som.neighborhood.neigh_diff_toroidal">neigh_diff_toroidal() (in module fastsom.som.neighborhood)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="som/som.html#fastsom.som.neighborhood.neigh_gauss">neigh_gauss() (in module fastsom.som.neighborhood)</a>
 </li>
       <li><a href="som/som.html#fastsom.som.neighborhood.neigh_rhomb">neigh_rhomb() (in module fastsom.som.neighborhood)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="som/som.html#fastsom.som.neighborhood.neigh_square">neigh_square() (in module fastsom.som.neighborhood)</a>
-</li>
-      <li><a href="datasets/datasets.html#fastsom.datasets.datasets.UnsupervisedDataBunch.normalize">normalize() (fastsom.datasets.datasets.UnsupervisedDataBunch method)</a>
-
-      <ul>
-        <li><a href="datasets/datasets.html#fastsom.datasets.normalizers.Normalizer.normalize">(fastsom.datasets.normalizers.Normalizer method)</a>
-</li>
-      </ul></li>
-      <li><a href="datasets/datasets.html#fastsom.datasets.normalizers.Normalizer.normalize_by">normalize_by() (fastsom.datasets.normalizers.Normalizer method)</a>
-</li>
-      <li><a href="datasets/datasets.html#fastsom.datasets.normalizers.Normalizer">Normalizer (class in fastsom.datasets.normalizers)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -430,7 +408,7 @@
         <li><a href="interp/interp.html#fastsom.interp.viz.SomTrainingViz.on_train_end">(fastsom.interp.viz.SomTrainingViz method)</a>
 </li>
       </ul></li>
-      <li><a href="datasets/datasets.html#fastsom.datasets.cat_encoders.OneHotCatEncoder">OneHotCatEncoder (class in fastsom.datasets.cat_encoders)</a>
+      <li><a href="data_block/data_block.html#fastsom.data_block.transform.OneHotEncode">OneHotEncode (class in fastsom.data_block.transform)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -438,13 +416,13 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="som/som.html#fastsom.som.distance.pcosim">pcosim() (in module fastsom.som.distance)</a>
+      <li><a href="som/som.html#fastsom.som.distance.pdist">pdist() (in module fastsom.som.distance)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="som/som.html#fastsom.som.distance.pdist">pdist() (in module fastsom.som.distance)</a>
-</li>
       <li><a href="som/som.html#fastsom.som.distance.pnorm">pnorm() (in module fastsom.som.distance)</a>
+</li>
+      <li><a href="data_block/data_block.html#fastsom.data_block.databunch.CustomTabularProcessor.process">process() (fastsom.data_block.databunch.CustomTabularProcessor method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -453,6 +431,10 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="learn/learn.html#fastsom.learn.initializers.RandomInitializer">RandomInitializer (class in fastsom.learn.initializers)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="learn/learn.html#fastsom.learn.learn.SomLearner.recategorize">recategorize() (fastsom.learn.learn.SomLearner method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -472,19 +454,23 @@
 </li>
       <li><a href="som/som.html#fastsom.som.som.Som">Som (class in fastsom.som.som)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="interp/interp.html#fastsom.interp.viz.SomBmuViz">SomBmuViz (class in fastsom.interp.viz)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="interp/interp.html#fastsom.interp.viz.SomHyperparamsViz">SomHyperparamsViz (class in fastsom.interp.viz)</a>
 </li>
       <li><a href="interp/interp.html#fastsom.interp.interp.SomInterpretation">SomInterpretation (class in fastsom.interp.interp)</a>
 </li>
       <li><a href="learn/learn.html#fastsom.learn.learn.SomLearner">SomLearner (class in fastsom.learn.learn)</a>
 </li>
+      <li><a href="data_block/data_block.html#fastsom.data_block.databunch.SomTabularList">SomTabularList (class in fastsom.data_block.databunch)</a>
+</li>
       <li><a href="learn/learn.html#fastsom.learn.callbacks.SomTrainer">SomTrainer (class in fastsom.learn.callbacks)</a>
 </li>
       <li><a href="interp/interp.html#fastsom.interp.viz.SomTrainingViz">SomTrainingViz (class in fastsom.interp.viz)</a>
+</li>
+      <li><a href="som/som.html#fastsom.som.distance.split_distance">split_distance() (in module fastsom.som.distance)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -492,19 +478,13 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="data_block/data_block.html#fastsom.data_block.transform.ToBeContinuousProc">ToBeContinuousProc (class in fastsom.data_block.transform)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="interp/interp.html#fastsom.interp.metrics.topologic_err">topologic_err() (in module fastsom.interp.metrics)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="learn/learn.html#fastsom.learn.callbacks.TwoPhaseSomTrainer">TwoPhaseSomTrainer (class in fastsom.learn.callbacks)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="U">U</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="datasets/datasets.html#fastsom.datasets.datasets.UnsupervisedDataBunch">UnsupervisedDataBunch (class in fastsom.datasets.datasets)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -512,7 +492,11 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="datasets/datasets.html#fastsom.datasets.normalizers.VarianceNormalizer">VarianceNormalizer (class in fastsom.datasets.normalizers)</a>
+      <li><a href="data_block/data_block.html#fastsom.data_block.transform.Vectorize.vector_size">vector_size() (fastsom.data_block.transform.Vectorize property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="data_block/data_block.html#fastsom.data_block.transform.Vectorize">Vectorize (class in fastsom.data_block.transform)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -533,7 +517,7 @@
 </ul><div class="footer" role="contentinfo">
       &#169; Copyright 2020, Kirey Group.
     <br>
-    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.2 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
 </div>
             </div>
           </div>

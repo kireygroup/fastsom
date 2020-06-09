@@ -114,7 +114,7 @@
           </li>
 
         
-          <li class="toctree-l1 "><a href="../datasets/datasets.html" class="reference internal ">fastsom.datasets</a>
+          <li class="toctree-l1 "><a href="../data_block/data_block.html" class="reference internal ">fastsom.data_block</a>
 
             
           </li>
@@ -212,7 +212,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<a class="reference internal" href="../datasets/datasets.html#fastsom.datasets.datasets.UnsupervisedDataBunch" title="fastsom.datasets.datasets.UnsupervisedDataBunch"><em>UnsupervisedDataBunch</em></a>) – Contains train and validations datasets, along with sampling and normalization utils.</p></li>
+<li><p><strong>data</strong> (<em>UnsupervisedDataBunch</em>) – Contains train and validations datasets, along with sampling and normalization utils.</p></li>
 <li><p><strong>model</strong> (<em>Som default=None</em>) – The Self-Organizing Map model.</p></li>
 <li><p><strong>size</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>] </em><em>default=</em><em>(</em><em>10</em><em>, </em><em>10</em><em>)</em>) – The map size to use if <cite>model</cite> is None.</p></li>
 <li><p><strong>lr</strong> (<em>float</em>) – The learning rate to be used for training.</p></li>
@@ -228,20 +228,31 @@
 </dl>
 <dl class="py method">
 <dt id="fastsom.learn.learn.SomLearner.codebook_to_df">
-<code class="sig-name descname">codebook_to_df</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cat_values</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Dict<span class="p">[</span>int<span class="p">, </span>str<span class="p">]</span><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cat_as_str</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/learn.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.learn.SomLearner.codebook_to_df" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">codebook_to_df</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">recategorize</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/learn.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.learn.SomLearner.codebook_to_df" title="Permalink to this definition">¶</a></dt>
 <dd><p>Exports the SOM model codebook as a Pandas DataFrame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cat_values</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Dict</em><em>[</em><em>int</em><em>, </em><em>str</em><em>] </em><em>default=None</em>) – Nested dict of per-feature value-to-string mappings.</p></li>
-<li><p><strong>cat_as_str</strong> (<em>bool default=True</em>) – </p></li>
-</ul>
+<dd class="field-odd"><p><strong>recategorize</strong> (<em>bool = False default=False</em>) – Thether to apply backwards transformation of encoded categorical features. Only works with <cite>TabularDataBunch</cite>.</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">codebook_to_df</span><span class="p">(</span><span class="n">cat_values</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">feature_a</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="mi">0</span><span class="o">=</span><span class="s1">&#39;Feature A - Value Zero&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="o">=</span><span class="s1">&#39;Feature A - Value One&#39;</span><span class="p">)))</span>
-</pre></div>
-</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.learn.learn.SomLearner.denormalize">
+<code class="sig-name descname">denormalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; torch.Tensor<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/learn.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.learn.SomLearner.denormalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Denormalizes <cite>data</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.learn.learn.SomLearner.export">
+<code class="sig-name descname">export</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>pathlib.Path<span class="p">, </span>str<span class="p">, </span>_io.BufferedWriter<span class="p">, </span>_io.BytesIO<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'export.pkl'</span></em>, <em class="sig-param"><span class="n">destroy</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/learn.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.learn.SomLearner.export" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exports the Learner to file, removing unneeded callbacks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.learn.learn.SomLearner.recategorize">
+<code class="sig-name descname">recategorize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">torch.Tensor</span></em>, <em class="sig-param"><span class="n">return_names</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">denorm</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/learn.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.learn.SomLearner.recategorize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recategorizes <cite>data</cite>, optionally returning cat/cont names.</p>
 </dd></dl>
 
 </dd></dl>
@@ -251,13 +262,13 @@
 <h2>SOM Training strategies<a class="headerlink" href="#som-training-strategies" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="fastsom.learn.callbacks.SomTrainer">
-<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.callbacks.</code><code class="sig-name descname">SomTrainer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../som/som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.SomTrainer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.callbacks.</code><code class="sig-name descname">SomTrainer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../som/som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.SomTrainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for SOM training strategies.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt id="fastsom.learn.callbacks.ExperimentalSomTrainer">
-<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.callbacks.</code><code class="sig-name descname">ExperimentalSomTrainer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../som/som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.ExperimentalSomTrainer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.learn.callbacks.</code><code class="sig-name descname">ExperimentalSomTrainer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../som/som.html#fastsom.som.som.Som" title="fastsom.som.som.Som">fastsom.som.som.Som</a></span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/learn/callbacks.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.learn.callbacks.ExperimentalSomTrainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Experimental SOM training callback.</p>
 <p>Divides training in 3 phases with the following hyperparameter values*:</p>
 <blockquote>
@@ -389,7 +400,7 @@ More stable than other approaches, but usually requires longer training.</p>
 </ul><div class="footer" role="contentinfo">
       &#169; Copyright 2020, Kirey Group.
     <br>
-    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.2 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
 </div>
             </div>
           </div>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>fastsom.data_block</title>
+    
+      <link rel="stylesheet" href="../static/pygments.css">
+      <link rel="stylesheet" href="../static/theme.css">
+      <link rel="stylesheet" href="../static/sphinx_press_theme.css">
+          <link rel="stylesheet" href="../static/css/notebook_fix.css" type="text/css" />
+      
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../static/documentation_options.js"></script>
+
+      <!-- sphinx script_files -->
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/doctools.js"></script>
+        <script src="../static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+      
+      <script src="../static/theme-vendors.js"></script>
+      <script src="../static/theme.js" defer></script>
+    
+  <link rel="index" title="Index" href="../genindex.html" />
+  <link rel="search" title="Search" href="../search.html" />
+  <link rel="next" title="fastsom.interp" href="../interp/interp.html" />
+  <link rel="prev" title="fastsom.core" href="../core/core.html" /> 
+  </head>
+
+  <body>
+    <div id="app" class="theme-container" :class="pageClasses"><navbar @toggle-sidebar="toggleSidebar">
+  <router-link to="../index.html" class="home-link">
+    
+      <span class="site-name">fastsom</span>
+    
+  </router-link>
+
+  <div class="links">
+    <navlinks class="can-hide">
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+    </navlinks>
+  </div>
+</navbar>
+
+      
+      <div class="sidebar-mask" @click="toggleSidebar(false)">
+      </div>
+        <sidebar @toggle-sidebar="toggleSidebar">
+          
+          <navlinks>
+            
+
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link  router-link-active">
+         API
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="../index.html#fastsom-documentation"
+         class="nav-link ">
+         Examples
+      </a>
+    </div>
+  
+
+
+
+            
+          </navlinks><div id="searchbox" class="searchbox" role="search">
+  <div class="caption"><span class="caption-text">Quick search</span>
+    <div class="searchformwrapper">
+      <form class="search" action="../search.html" method="get">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div><div class="sidebar-links" role="navigation" aria-label="main navigation">
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">API</a></span>
+      </p>
+      <ul class="current">
+        
+          <li class="toctree-l1 "><a href="../core/core.html" class="reference internal ">fastsom.core</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 current"><a href="#" class="reference internal current">fastsom.data_block</a>
+
+            
+              <ul>
+                
+                  <li class="toctree-l2"><a href="#tabular-utilities" class="reference internal">Tabular Utilities</a></li>
+                
+                  <li class="toctree-l2"><a href="#additional-tabular-transforms" class="reference internal">Additional Tabular Transforms</a></li>
+                
+              </ul>
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../interp/interp.html" class="reference internal ">fastsom.interp</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../learn/learn.html" class="reference internal ">fastsom.learn</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../som/som.html" class="reference internal ">fastsom.som</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../index.html#fastsom-documentation">Examples</a></span>
+      </p>
+      <ul class="">
+        
+          <li class="toctree-l1 "><a href="../examples/colors.html" class="reference internal ">SOM Training on RGB Colors Dataset</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 "><a href="../examples/iris.html" class="reference internal ">SOM Training on IRIS Dataset</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+</div>
+        </sidebar>
+
+      <page>
+          <div class="body-header" role="navigation" aria-label="navigation">
+  
+  <ul class="breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+    
+    <li>fastsom.data_block</li>
+  </ul>
+  
+
+  <ul class="page-nav">
+  <li class="prev">
+    <a href="../core/core.html"
+       title="previous chapter">← fastsom.core</a>
+  </li>
+  <li class="next">
+    <a href="../interp/interp.html"
+       title="next chapter">fastsom.interp →</a>
+  </li>
+</ul>
+  
+</div>
+<hr>
+          <div class="content" role="main">
+            
+  <div class="section" id="fastsom-data-block">
+<h1>fastsom.data_block<a class="headerlink" href="#fastsom-data-block" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="tabular-utilities">
+<h2>Tabular Utilities<a class="headerlink" href="#tabular-utilities" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="fastsom.data_block.databunch.SomTabularList">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.data_block.databunch.</code><code class="sig-name descname">SomTabularList</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Iterator</span></em>, <em class="sig-param"><span class="n">cat_names</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Collection<span class="p">[</span>str<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cont_names</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Collection<span class="p">[</span>str<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">procs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/databunch.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.databunch.SomTabularList" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>TabularList</cite> with bindings for <cite>CustomTabularProcessor</cite>.
+Can be used the same way as a regular <cite>TabularList</cite>, but also
+supports additional transforms for categorical features.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.data_block.databunch.CustomTabularProcessor">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.data_block.databunch.</code><code class="sig-name descname">CustomTabularProcessor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ds</span><span class="p">:</span> <span class="n">fastai.core.ItemBase</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">procs</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/databunch.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.databunch.CustomTabularProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom <cite>TabularProcessor</cite> that stores information about
+categorical/continuous feature names that go into each
+<cite>TabularProc</cite>, allowing for additional procs to be defined
+while maintaining compatibility with existing transforms.</p>
+<dl class="py method">
+<dt id="fastsom.data_block.databunch.CustomTabularProcessor.process">
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ds</span><span class="p">:</span> <span class="n">fastai.tabular.data.TabularList</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/databunch.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.databunch.CustomTabularProcessor.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes a dataset, either train_ds or valid_ds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ds</strong> (<em>TabularList</em>) – The dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="additional-tabular-transforms">
+<h2>Additional Tabular Transforms<a class="headerlink" href="#additional-tabular-transforms" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="fastsom.data_block.transform.ToBeContinuousProc">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.data_block.transform.</code><code class="sig-name descname">ToBeContinuousProc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cat_names</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">cont_names</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/transform.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.transform.ToBeContinuousProc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Placeholder class for <cite>TabularProc`s that convert cat_names into cont_names.
+Tells `MyTabularProcessor</cite> to ignore cat_names and move own cat_names into cont_names.
+Also defines interface method to backward-encode values.</p>
+<dl class="py method">
+<dt id="fastsom.data_block.transform.ToBeContinuousProc.apply_backwards">
+<code class="sig-name descname">apply_backwards</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/transform.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.transform.ToBeContinuousProc.apply_backwards" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the inverse transform on <cite>data</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.data_block.transform.OneHotEncode">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.data_block.transform.</code><code class="sig-name descname">OneHotEncode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cat_names</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">cont_names</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/transform.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.transform.OneHotEncode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs One-Hot encoding of categorical values in <cite>df</cite>.</p>
+<dl class="py method">
+<dt id="fastsom.data_block.transform.OneHotEncode.apply_backwards">
+<code class="sig-name descname">apply_backwards</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/transform.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.transform.OneHotEncode.apply_backwards" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the inverse transform on <cite>data</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>torch.Tensor</em>) – The transformed data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.data_block.transform.OneHotEncode.apply_test">
+<code class="sig-name descname">apply_test</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/transform.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.transform.OneHotEncode.apply_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the transform on the training set, using
+information about the training set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – The dataframe to be transformed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.data_block.transform.OneHotEncode.apply_train">
+<code class="sig-name descname">apply_train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/transform.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.transform.OneHotEncode.apply_train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the transform on the training set, storing
+information about the number of categories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – The dataframe to be transformed</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fastsom.data_block.transform.Vectorize">
+<em class="property">class </em><code class="sig-prename descclassname">fastsom.data_block.transform.</code><code class="sig-name descname">Vectorize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cat_names</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">cont_names</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/transform.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.transform.Vectorize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses FastText to generate unsupervised embeddings from
+variables in the training set.</p>
+<dl class="py method">
+<dt id="fastsom.data_block.transform.Vectorize.apply_backwards">
+<code class="sig-name descname">apply_backwards</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/transform.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.transform.Vectorize.apply_backwards" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the inverse transform on <cite>data</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.data_block.transform.Vectorize.apply_test">
+<code class="sig-name descname">apply_test</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/transform.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.transform.Vectorize.apply_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function applied to <cite>df</cite> if it’s the test set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.data_block.transform.Vectorize.apply_train">
+<code class="sig-name descname">apply_train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/transform.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.transform.Vectorize.apply_train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function applied to <cite>df</cite> if it’s the train set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.data_block.transform.Vectorize.is_mixed">
+<em class="property">property </em><code class="sig-name descname">is_mixed</code><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/transform.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.transform.Vectorize.is_mixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if this transform encodes all features or if it is mixed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fastsom.data_block.transform.Vectorize.vector_size">
+<em class="property">property </em><code class="sig-name descname">vector_size</code><a class="reference external" href="https://github.com/kireygroup/fastsom/blob/master/fastsom/fastsom/data_block/transform.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fastsom.data_block.transform.Vectorize.vector_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the configured vector size.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          <div class="page-nav">
+            <div class="inner"><ul class="page-nav">
+  <li class="prev">
+    <a href="../core/core.html"
+       title="previous chapter">← fastsom.core</a>
+  </li>
+  <li class="next">
+    <a href="../interp/interp.html"
+       title="next chapter">fastsom.interp →</a>
+  </li>
+</ul><div class="footer" role="contentinfo">
+      &#169; Copyright 2020, Kirey Group.
+    <br>
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+</div>
+            </div>
+          </div>
+      </page>
+    </div>
+    
+    
+  </body>
+</html>
