@@ -1,3 +1,3 @@
-git+https://github.com/rsayn/fastsom
+git+https://github.com/kireygroup/fastsom
 nbsphinx
 sphinx-press-theme
