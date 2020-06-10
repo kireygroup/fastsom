@@ -127,15 +127,15 @@ class Vectorize(ToBeContinuousProc):
         # apply train is the same as apply test + model training
         self.apply_test(df)
 
-    def apply_test(self, df):
+    def apply_test(self, df: pd.DataFrame):
         preds = list(self._sentences_to_vecs(self._get_sentences(df)))
         vector_sizes = [range(self._embedding_model.vector_size) for _ in range(len(self.cat_names))]
         transformed_cat_names = np.array([[f'{col}_feature{i+1}' for i in r]
                                           for col, r in zip(self.cat_names, vector_sizes)]).flatten().tolist()
-        df[transformed_cat_names] = pd.DataFrame(preds, index=df.index)
         self.cont_names = transformed_cat_names + self.cont_names
         self.cat_names = []
         self.transformed_cat_names = transformed_cat_names
+        df[transformed_cat_names] = pd.DataFrame(preds, index=df.index)
 
     def apply_backwards(self, data: torch.Tensor) -> np.ndarray:
         """Applies the inverse transform on `data`."""

@@ -138,15 +138,15 @@ class SomInterpretation():
 
         # Optionally recategorize categorical variables
         if recategorize:
-            w = self.learn.recategorize(self.w, denorm=True)
+            w = self.learn.recategorize(self.w, denorm=False)
         else:
-            w = self.denormalize(self.w).numpy()
+            w = self.w.numpy()
         # gather feature indices from weights
         w = np.take(w, feature_indices, axis=-1)
 
         # Initialize subplots
         cols = min(2, len(feature_indices))
-        rows = max(1, len(feature_indices) // cols + 1)
+        rows = max(1, len(feature_indices) // cols + (1 if len(feature_indices) % cols > 0 else 0))
         fig, axs = plt.subplots(rows, cols, figsize=(figsize[0] * cols, figsize[1] * rows))
         axs = axs.flatten() if isinstance(axs, np.ndarray) else [axs]
 
@@ -178,9 +178,9 @@ class SomInterpretation():
             if self.pca is None:
                 self._init_pca()
             # Calculate the 3-layer PCA of the weights
-            d = self.pca.transform(self.w).reshape(*image_shape)
+            d = self.pca.transform(self.w.numpy()).reshape(*image_shape)
         else:
-            d = self.w
+            d = self.w.numpy()
 
         # Rescale values into the RGB space (0, 255)
         def rescale(d): return ((d - d.min(0)) / d.ptp(0) * 255).astype(int)

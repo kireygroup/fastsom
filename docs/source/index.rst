@@ -26,6 +26,7 @@ Fastsom is a PyTorch and Fastai based implementation of Self-Organizing Maps.
 
    examples/colors
    examples/iris
+   examples/house-prices
 
 
 Links

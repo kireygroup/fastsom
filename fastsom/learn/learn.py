@@ -27,6 +27,8 @@ from fastsom.som import Som, MixedEmbeddingDistance, MixedCategoricalDistance
 
 __all__ = [
     "SomLearner",
+    "ForwardContsCallback",
+    "UnifyDataCallback",
 ]
 
 
@@ -153,6 +155,8 @@ class SomLearner(Learner):
                 # TODO: Implement OneHot-based distance
                 # For now only forward continuous features
                 self.callbacks.append(ForwardContsCallback())
+        else:
+            self.callbacks.append(ForwardContsCallback())
 
     def codebook_to_df(self, recategorize: bool = False) -> pd.DataFrame:
         """
