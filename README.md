@@ -4,6 +4,8 @@ A PyTorch and Fastai based implementation of Self-Organizing Maps.
 
 You can find documentation and examples [here](https://kireygroup.github.io/fastsom/).
 
+![PyPI](https://img.shields.io/pypi/v/fastsom?style=flat-square)
+
 ## Contents
 
 - [Fastsom](#fastsom)
