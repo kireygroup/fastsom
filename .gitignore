@@ -8,3 +8,4 @@ build
 dist
 fastsom.egg-info
 .env
+.vscode
