@@ -6,10 +6,12 @@ from fastai.data_block import ItemList
 from fastai.tabular import TabularDataBunch
 
 
-__all__ = ['get_xy', 'get_xy_batched']
+__all__ = ["get_xy", "get_xy_batched"]
 
 
-def get_xy(data: DataBunch, ds_type: DatasetType = DatasetType.Train) -> Tuple[Union[torch.Tensor, ItemList], Union[torch.Tensor, ItemList]]:
+def get_xy(
+    data: DataBunch, ds_type: DatasetType = DatasetType.Train
+) -> Tuple[Union[torch.Tensor, ItemList], Union[torch.Tensor, ItemList]]:
     """
     Returns `x` and `y` data from various databunch subclasses.
 
@@ -32,11 +34,15 @@ def get_xy(data: DataBunch, ds_type: DatasetType = DatasetType.Train) -> Tuple[U
         y = None  # todo return dl.y.data if
         return x, y
     else:
-        print(f'DataBunch subclass {data.__class__.__name__} not supported directly; defaulting to X and Y')
+        print(
+            f"DataBunch subclass {data.__class__.__name__} not supported directly; defaulting to X and Y"
+        )
         return dl.x, dl.y
 
 
-def get_xy_batched(data: DataBunch, ds_type: DatasetType = DatasetType.Train) -> Generator:
+def get_xy_batched(
+    data: DataBunch, ds_type: DatasetType = DatasetType.Train
+) -> Generator:
     """
     Returns an iterator over dataset with type `ds_type` in `data`.
 

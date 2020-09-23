@@ -34,7 +34,9 @@ class KMeansInitializer(WeightsInitializer):
 
     def __init__(self, distance: str = "euclidean"):
         self.distance = distance
-        self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        self.device = (
+            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        )
 
     def __call__(self, x: Tensor, k: int, **kwargs) -> Tensor:
         """
@@ -48,7 +50,9 @@ class KMeansInitializer(WeightsInitializer):
             The number of weights to be returned.
         """
         # Run the KMeans algorithm over the input
-        _, cluster_centers = _kmeans(X=x, num_clusters=k, distance=self.distance, device=self.device)
+        _, cluster_centers = _kmeans(
+            X=x, num_clusters=k, distance=self.distance, device=self.device
+        )
         # Reshape it to fit the SOM size
         return cluster_centers
 
@@ -75,7 +79,7 @@ class RandomInitializer(WeightsInitializer):
 
 
 som_initializers = {
-    'random': RandomInitializer(),
-    'kmeans': KMeansInitializer(),
-    'kmeans_cosine': KMeansInitializer(distance='cosine'),
+    "random": RandomInitializer(),
+    "kmeans": KMeansInitializer(),
+    "kmeans_cosine": KMeansInitializer(distance="cosine"),
 }

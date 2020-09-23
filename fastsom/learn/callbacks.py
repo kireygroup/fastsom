@@ -3,7 +3,7 @@ Callbacks for SOM.
 """
 import numpy as np
 import torch
-from fastai.callback import Callback
+from fastai.callback.core import Callback
 
 from fastsom.som import Som
 
@@ -42,10 +42,10 @@ class LinearDecaySomTrainer(SomTrainer):
         self.n_epochs = None
 
     def on_train_begin(self, **kwargs):
-        self.n_epochs = kwargs['n_epochs']
+        self.n_epochs = kwargs["n_epochs"]
 
     def on_epoch_begin(self, **kwargs):
-        epoch = kwargs['epoch']
+        epoch = kwargs["epoch"]
         decay = 1.0 - epoch / self.n_epochs
         self.model.alpha = self.alpha * decay
         self.model.sigma = self.sigma * decay
@@ -77,23 +77,29 @@ class TwoPhaseSomTrainer(SomTrainer):
 
     def on_train_begin(self, **kwargs):
         # Initialize parameters for each epoch
-        self.n_epochs = kwargs['n_epochs']
+        self.n_epochs = kwargs["n_epochs"]
         # 50% rough training, 50% finetuning
         rough_pct = 0.5
         rough_epochs = int(rough_pct * self.n_epochs)
         finet_epochs = self.n_epochs - rough_epochs
         # Linear decaying radii for each phase
-        rough_sigmas = np.linspace(self.sigma, max(self.sigma / 6.0, 1.0), num=rough_epochs)
-        finet_sigmas = np.linspace(max(self.sigma / 12.0, 1.0), max(self.sigma / 25.0, 1.0), num=finet_epochs)
+        rough_sigmas = np.linspace(
+            self.sigma, max(self.sigma / 6.0, 1.0), num=rough_epochs
+        )
+        finet_sigmas = np.linspace(
+            max(self.sigma / 12.0, 1.0), max(self.sigma / 25.0, 1.0), num=finet_epochs
+        )
         # Linear decaying alpha
         rough_alphas = np.linspace(self.alpha, self.alpha / 10.0, num=rough_epochs)
-        finet_alphas = np.linspace(self.alpha / 20.0, self.alpha / 100.0, num=finet_epochs)
+        finet_alphas = np.linspace(
+            self.alpha / 20.0, self.alpha / 100.0, num=finet_epochs
+        )
         self.sigmas = np.concatenate([rough_sigmas, finet_sigmas], axis=0)
         self.alphas = np.concatenate([rough_alphas, finet_alphas], axis=0)
 
     def on_epoch_begin(self, **kwargs):
         # Update parameters
-        epoch = kwargs['epoch']
+        epoch = kwargs["epoch"]
         self.model.alpha = torch.tensor(self.alphas[epoch])
         self.model.sigma = torch.tensor(self.sigmas[epoch])
 
@@ -124,7 +130,7 @@ class ExperimentalSomTrainer(SomTrainer):
         self.bs = []
 
     def on_train_begin(self, **kwargs):
-        n_epochs = kwargs['n_epochs']
+        n_epochs = kwargs["n_epochs"]
         phase_1_iters = int(round(n_epochs * 0.16))
         phase_2_iters = int(round(n_epochs * 0.5))
         phase_3_iters = int(round(n_epochs * 0.34))
@@ -147,7 +153,7 @@ class ExperimentalSomTrainer(SomTrainer):
         self.bs = np.concatenate([bs_1, bs_2, bs_3], axis=0).astype(int)
 
     def on_epoch_begin(self, **kwargs):
-        epoch = kwargs['epoch']
+        epoch = kwargs["epoch"]
         self.model.alpha = torch.tensor(self.alphas[epoch])
         self.model.sigma = torch.tensor(self.sigmas[epoch])
         # self.data.batch_size = int(self.bs[epoch])
