@@ -63,7 +63,6 @@ class Som(Module):
         # save batch data
         self._recorder['xb'] = xb.clone()
         self._recorder['bmus'] = bmus
-
         return bmus
 
     def distance(self, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
@@ -94,7 +93,7 @@ class Som(Module):
         n_features = xb.shape[-1]
         elementwise_diffs = expanded(xb, self.weights.view(-1, n_features), lambda a, b: a - b).view(batch_size, self.size[0], self.size[1], n_features)
         neighbourhood_mults = self.neighborhood(bmus, self.sigma)
-        self.weights += (self.alpha * neighbourhood_mults * elementwise_diffs / batch_size).sum(0)
+        self.weights += (self.alpha * neighbourhood_mults * elementwise_diffs // batch_size).sum(0)
 
     def find_bmus(self, distances: torch.Tensor) -> torch.Tensor:
         """
@@ -107,7 +106,7 @@ class Som(Module):
         """
         min_idxs = distances.argmin(-1)
         # Distances are flattened, so we need to transform 1d indices into 2d map locations
-        return torch.stack([min_idxs / self.size[1], min_idxs % self.size[1]], dim=1)
+        return torch.stack([min_idxs // self.size[1], min_idxs % self.size[1]], dim=1).long()
 
     def neighborhood(self, bmus: torch.Tensor, sigma: torch.Tensor) -> torch.Tensor:
         """

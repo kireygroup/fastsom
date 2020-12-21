@@ -32,7 +32,7 @@ class SomLoss(Callable):
 class BackwardRedirectTensor(Tensor):
     "A Tensor that calls a custom function instead of PyTorch's `backward`."
     @staticmethod
-    def __new__(cls, x: Tensor, redir_fn, *args, **kwargs):
+    def __new__(cls, x: Tensor, redir_fn: Callable, *args, **kwargs):
         return super().__new__(cls, x.cpu().numpy(), *args, **kwargs)
 
     def __init__(self, x: Tensor, redir_fn):

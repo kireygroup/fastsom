@@ -5,9 +5,9 @@ with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='fastsom',
-      version='0.1.9',
+      version='0.1.10',
       url='https://github.com/kireygroup/fastsom',
-      download_url='https://github.com/kireygroup/fastsom/archive/v0.1.9.tar.gz',
+      download_url='https://github.com/kireygroup/fastsom/archive/v0.1.10.tar.gz',
       license='MIT',
       author='Riccardo Sayn',
       author_email='riccardo.sayn@kireygroup.com',
@@ -15,7 +15,7 @@ setup(name='fastsom',
       long_description=long_description,
       long_description_content_type='text/markdown',
       packages=find_packages(),
-      install_requires=['fastai', 'sklearn', 'kmeans_pytorch', 'seaborn', 'smart-open==1.8.0', 'gensim==3.7.1'],
+      install_requires=['fastai==1.0.60', 'sklearn', 'kmeans_pytorch', 'seaborn', 'smart-open==1.8.0', 'gensim==3.7.1'],
       keywords=['self-organizing-map', 'fastai', 'pytorch', 'python'],
       zip_safe=False,
       classifiers=[
