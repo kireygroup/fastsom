@@ -161,12 +161,11 @@ class SomLearner(Learner):
         if encoder is None:
             raise ValueError("No CategoryEncode transform found while applying recategorization.")
         # Retrieve original & encoded feature names
-        cont_names, cat_names = encoder.encoder.cont_names, encoder.encoder.cat_names
-        encoded_cat_names = encoder.encoder.get_feature_names()
-        data = data[:, : len(encoded_cat_names)].cpu().numpy()
-        ret = encoder.encoder.inverse_transform(
-            pd.DataFrame(data, columns=encoded_cat_names)
-        ).values
+        cont_names, cat_names = list(encoder.encoder.cont_names), list(encoder.encoder.cat_names)
+        encoded_cat_names = list(encoder.encoder.get_feature_names())
+        ret = encoder.encoder.inverse_transform(pd.DataFrame(data[:, :len(encoded_cat_names)].cpu().numpy(), columns=encoded_cat_names)).values
+        if data.shape[-1] > len(encoded_cat_names):
+            ret = np.concatenate([ret, data[:, len(encoded_cat_names):]], axis=-1)
         return ret if not return_names else (ret, cat_names, cont_names)
 
     def codebook_to_df(self, recategorize: bool = False) -> pd.DataFrame:
@@ -182,12 +181,12 @@ class SomLearner(Learner):
         w = self.model.weights.clone().cpu()
         w = w.view(-1, w.shape[-1])
         if isinstance(self.dls, TabularDataLoaders):
-            if len(self.dls.cat_names) > 0 and recategorize:
+            if find(self.dls.procs, lambda proc: isinstance(proc, CategoryEncode)) is not None and recategorize:
                 w, cat_names, cont_names = self.recategorize(w, return_names=True, denorm=True)
             else:
-                cont_names, cat_names = self.dls.cont_names, self.dls.cat_names
+                cont_names, cat_names = list(self.dls.cont_names), list(self.dls.cat_names)
                 w = w.numpy()
-            cat_features, cont_features = (w[..., : len(cat_names)], w[..., len(cat_names):])
+            cat_features, cont_features = w[..., : len(cat_names)], w[..., len(cat_names):]
             data = np.concatenate([cat_features, cont_features], axis=-1)
             df = pd.DataFrame(data=data, columns=cat_names + cont_names)
             df[cont_names] = df[cont_names].astype(float)
