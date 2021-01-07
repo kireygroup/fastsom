@@ -1,15 +1,14 @@
 """
 SOM statistics for various purpouses.
 """
-import torch
-import numpy as np
-from torch import Tensor
-
 from typing import Tuple
 
-from fastsom.som import Som, pdist
+import numpy as np
+import torch
+from torch import Tensor
 
-from fastsom.core import expanded, idxs_2d_to_1d, idxs_1d_to_2d
+from fastsom.core import expanded, idxs_1d_to_2d, idxs_2d_to_1d
+from fastsom.som import Som, pdist
 
 __all__ = [
     "cluster_stats",
@@ -27,9 +26,7 @@ def cluster_stats(x: Tensor, som: Som) -> Tuple[float]:
     preds = idxs_2d_to_1d(som.forward(x.cuda()), som.weights.shape[0]).cuda()
     w = som.weights.view(-1, som.weights.shape[-1]).cuda()
     # Retrieve unique BMUs with count
-    uniques, inverse, counts = preds.unique(
-        dim=0, return_inverse=True, return_counts=True
-    )
+    uniques, inverse, counts = preds.unique(dim=0, return_inverse=True, return_counts=True)
     # Calculate distance from each input and its BMU
     distances = (w[preds] - x.cuda()).pow(2).sum(-1).sqrt()
     max_distances = []
@@ -69,9 +66,7 @@ def codebook_err(pred_b: Tensor, yb: Tensor, som: Som = None) -> Tensor:
             # Grab the furthest element in the cluster
             max_cluster_distance = cluster_distances[:, cluster_idx].max()
             # Now retrieve the non-cluster distances:
-            non_cluster_distances = distances[
-                (inverse != cluster_idx).nonzero().view(-1)
-            ]
+            non_cluster_distances = distances[(inverse != cluster_idx).nonzero().view(-1)]
             # And check if any of these elements has a distance from cluster_idx less than max_dist
             count += (
                 (non_cluster_distances[:, cluster_idx] < max_cluster_distance)
@@ -90,9 +85,7 @@ def mean_quantization_err(pred_b: Tensor, yb: Tensor, som: Som = None) -> Tensor
     return pdist(xb, w[preds], p=2).mean()
 
 
-def topologic_err(
-    pred_b: Tensor, yb: Tensor, som: Som = None, thresh: int = 4
-) -> Tensor:
+def topologic_err(pred_b: Tensor, yb: Tensor, som: Som = None, thresh: int = 4) -> Tensor:
     """
     Min vec distance of each record with every class and checks if the second-to-min value belongs in the first-best neighborhood.
     If not, it gets added as an error.

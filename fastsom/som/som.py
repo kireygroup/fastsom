@@ -1,13 +1,17 @@
+
+from typing import Callable, Tuple
+
 import torch
-from typing import Tuple, Callable
 from fastai.torch_core import Module
 
 from fastsom.core import expanded, index_tensor
-from .neighborhood import neigh_gauss, neigh_diff_standard
+
+from ..log import has_logger
 from .distance import pdist
-from ..log import get_logger
+from .neighborhood import neigh_diff_standard, neigh_gauss
 
 
+@has_logger
 class Som(Module):
     """
     Self-Organizing Map module.
@@ -32,7 +36,6 @@ class Som(Module):
         neigh_diff_fn: Callable = neigh_diff_standard,
     ) -> None:
         super().__init__()
-        self.logger = get_logger(self)
         self.size = size
         self.alpha = torch.tensor(0.3)
         self.sigma = torch.tensor(max(size[:-1]) / 2.0)
@@ -43,7 +46,6 @@ class Som(Module):
         self.neigh_fn = neigh_fn
         self.neigh_diff_fn = neigh_diff_fn
         self._recorder = dict()
-        self.logger.debug(self.__repr__())
 
     def forward(self, xb: torch.Tensor) -> torch.Tensor:
         """
@@ -61,16 +63,13 @@ class Som(Module):
         """
         self.to_device(device=xb.device)
         n_features = xb.shape[-1]
-        self.logger.debug(
-            f"xb: {xb.shape}, weights: {self.weights.view(-1, n_features).shape}"
-        )
+        self.logger.debug(f"xb: {xb.shape}, weights: {self.weights.view(-1, n_features).shape}")
         distances = self.distance(xb, self.weights.view(-1, n_features))
         bmus = self.find_bmus(distances)
         self.logger.debug(f"bmus: {bmus.shape}")
         # save batch data
         self._recorder["xb"] = xb.clone()
         self._recorder["bmus"] = bmus
-
         return bmus
 
     def distance(self, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
@@ -99,13 +98,9 @@ class Som(Module):
         xb, bmus = self._recorder["xb"], self._recorder["bmus"]
         batch_size = xb.shape[0]
         n_features = xb.shape[-1]
-        elementwise_diffs = expanded(
-            xb, self.weights.view(-1, n_features), lambda a, b: a - b
-        ).view(batch_size, self.size[0], self.size[1], n_features)
+        elementwise_diffs = expanded(xb, self.weights.view(-1, n_features), lambda a, b: a - b).view(batch_size, self.size[0], self.size[1], n_features)
         neighbourhood_mults = self.neighborhood(bmus, self.sigma)
-        self.weights += (
-            self.alpha * neighbourhood_mults * elementwise_diffs / batch_size
-        ).sum(0)
+        self.weights += (self.alpha * neighbourhood_mults * elementwise_diffs / batch_size).sum(0)
 
     def find_bmus(self, distances: torch.Tensor) -> torch.Tensor:
         """

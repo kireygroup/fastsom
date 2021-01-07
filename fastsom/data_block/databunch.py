@@ -7,19 +7,12 @@ This section is obsolete and is kept for retro-compatibility reasons only,
 since it was rewritten for Fastai V2.
 """
 import numpy as np
+from fastai.tabular import (OrderedDict, TabularDataBunch, TabularLine,
+                            TabularList, TabularProc, TabularProcessor)
 
-from fastai.tabular import (
-    TabularLine,
-    TabularList,
-    TabularProcessor,
-    TabularProc,
-    TabularDataBunch,
-    OrderedDict,
-)
+from fastsom.core import find, ifnone
 
-from fastsom.core import ifnone, find
 from .transform import ToBeContinuousProc
-
 
 __all__ = ["SomTabularList", "CustomTabularProcessor"]
 

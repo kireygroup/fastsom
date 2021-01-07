@@ -1,37 +1,29 @@
 """
 This module defines a Fastai `Learner` subclass used to train Self-Organizing Maps.
 """
-import torch
-import pandas as pd
-import numpy as np
 import pathlib
-
-from typing import Callable, Collection, List, Type, Tuple, Dict, Union
 from functools import partial
-from fastai.learner import Learner
-from fastai.data.core import DataLoaders
+from typing import Callable, Collection, Dict, List, Tuple, Type, Union
+
+import numpy as np
+import pandas as pd
+import torch
 from fastai.callback.core import Callback
-
+from fastai.data.core import DataLoaders
+from fastai.learner import Learner
 # from fastai.data_block import EmptyLabelList
-from fastai.tabular.data import TabularDataLoaders, Normalize
+from fastai.tabular.data import Normalize, TabularDataLoaders
+from fastai_category_encoders import CategoryEncode
+from fastcore.meta import delegates
 
-from .callbacks import SomTrainer, ExperimentalSomTrainer
+from fastsom.core import find, ifnone, index_tensor, setify
+from fastsom.interp import get_visualization_callbacks, mean_quantization_err
+from fastsom.som import MixedEmbeddingDistance, Som
+
+from ..log import has_logger
+from .callbacks import ExperimentalSomTrainer, SomTrainer
 from .loss import SomLoss
 from .optim import SplashOptimizer
-
-from fastsom.core import ifnone, setify, index_tensor, find
-from fastsom.interp import (
-    SomVizCallback,
-    SomTrainingViz,
-    SomHyperparamsViz,
-    SomBmuViz,
-    mean_quantization_err,
-)
-from fastsom.som import Som, MixedEmbeddingDistance
-from fastai_category_encoders import CategoryEncode
-
-from ..log import get_logger
-
 
 StrOrPath = Union[str, pathlib.Path]
 
@@ -47,22 +39,7 @@ __all__ = [
 ]
 
 
-def visualization_callbacks(
-    visualize: List[str], visualize_on: str, learn: Learner
-) -> List[Callback]:
-    """Builds a list of visualization callbacks."""
-    cbs = []
-    visualize_on = ifnone(visualize_on, "epoch")
-    s_visualize = setify(visualize)
-    if "weights" in s_visualize:
-        cbs.append(SomTrainingViz(update_on_batch=(visualize_on == "batch")))
-    if "hyperparams" in s_visualize:
-        cbs.append(SomHyperparamsViz())
-    if "bmus" in s_visualize:
-        cbs.append(SomBmuViz(update_on_batch=(visualize_on == "batch")))
-    return cbs
-
-
+@has_logger
 class ForwardContsCallback(Callback):
     """
     Callback for `SomLearner`, automatically added when the
@@ -70,21 +47,13 @@ class ForwardContsCallback(Callback):
     Filters out categorical features, forwarding continous
     features to the SOM model.
     """
-
-    def __init__(self, *args, **kwargs):
-        self.logger = get_logger(self)
-
-    def before_train(self):
-        self.logger.warn(
-            "Categorical variables will NOT be passed to the SOM unless encoded."
-        )
-
     def before_batch(self):
         x_cat, x_cont = self.xb
-        self.logger.info(f"x_cat: {x_cat.shape}, x_cont: {x_cont.shape}")
+        self.logger.debug(f"x_cat: {x_cat.shape}, x_cont: {x_cont.shape}")
         self.learn.xb = [x_cont]
 
 
+@has_logger
 class UnifyDataCallback(Callback):
     """
     Callback for `SomLearner`, automatically added when the
@@ -92,12 +61,9 @@ class UnifyDataCallback(Callback):
     Merges categorical and continuous features into a single tensor.
     """
 
-    def __init__(self, *args, **kwargs):
-        self.logger = get_logger(self)
-
     def before_batch(self):
         x_cat, x_cont = self.xb
-        self.logger.info(f"x_cat: {x_cat.shape}, x_cont: {x_cont.shape}")
+        self.logger.debug(f"x_cat: {x_cat.shape}, x_cont: {x_cont.shape}")
         self.learn.xb = [torch.cat([x_cat.float(), x_cont], dim=-1)]
 
 
@@ -132,7 +98,8 @@ class SomLearner(Learner):
     init_weights : str default='random'
         SOM weight initialization strategy. Defaults to random sampling in the train dataset space.
     """
-
+    @has_logger
+    @delegates(Learner)
     def __init__(
         self,
         dls: DataLoaders,
@@ -145,32 +112,26 @@ class SomLearner(Learner):
         metrics: Collection[Callable] = None,
         visualize: List[str] = [],
         visualize_on: str = "epoch",
-        **learn_kwargs,
+        **kwargs,
     ) -> None:
         n_inputs = dls.train._n_inp
         xb = dls.train.one_batch()[0:n_inputs]
         n_features = sum(map(lambda x: x.shape[-1], xb if n_inputs > 1 else [xb]))
         # Create a new Som using the size, if needed
-        model = model if model is not None else Som((size[0], size[1], n_features))
+        model = ifnone(model, Som((size[0], size[1], n_features)))
         # Pass the LR to the model
         model.alpha = torch.tensor(lr)
         # Wrap the loss function
         loss_func = SomLoss(loss_func, model)
-        # Initialize the trainer with the model
-        cbs.append(trainer(model, dls))
         # Pass model reference to metrics
-        metrics = (
-            list(map(lambda fn: partial(fn, som=model), metrics))
-            if metrics is not None
-            else []
-        )
-        if "opt_func" not in learn_kwargs:
-            learn_kwargs["opt_func"] = SplashOptimizer
-        super().__init__(
-            dls, model, cbs=cbs, loss_func=loss_func, metrics=metrics, **learn_kwargs,
-        )
+        metrics = (list(map(lambda fn: partial(fn, som=model), metrics)) if metrics is not None else [])
+        if "opt_func" not in kwargs:
+            kwargs["opt_func"] = SplashOptimizer
+        super().__init__(dls, model, cbs=cbs, loss_func=loss_func, metrics=metrics, **kwargs)
         # Add visualization callbacks
-        self.add_cbs(visualization_callbacks(visualize, visualize_on, self))
+        self.add_cbs(get_visualization_callbacks(visualize, visualize_on))
+        # Add training callback
+        self.add_cbs(trainer())
         # Add optional data compatibility callback
         if isinstance(dls, TabularDataLoaders):
             self.__maybe_adjust_model_dist_fn()
@@ -181,6 +142,9 @@ class SomLearner(Learner):
         # If no categorizer is provided, append the appropriate callback
         if categorize is None:
             self.add_cb(ForwardContsCallback())
+            if len(self.dls.cat_names) > 0:
+                self.logger.warning("Categorical variables will NOT be passed to the SOM unless encoded with the `CategoryEncode` proc.")
+
         elif categorize.uses_embeddings:
             self.model.dist_fn = MixedEmbeddingDistance(categorize.get_emb_szs())
             self.add_cb(UnifyDataCallback())
@@ -189,19 +153,13 @@ class SomLearner(Learner):
             # For now, just ignore categoricals.
             self.add_cb(ForwardContsCallback())
 
-    def recategorize(
-        self, data: torch.Tensor, return_names: bool = False, denorm: bool = False
-    ) -> np.ndarray:
+    def recategorize(self, data: torch.Tensor, return_names: bool = False, denorm: bool = False) -> np.ndarray:
         """Recategorizes `data`, optionally returning cat/cont names."""
         if not isinstance(self.dls, TabularDataLoaders):
-            raise ValueError(
-                "Recategorization is available only when using TabularDataLoaders"
-            )
+            raise ValueError("Recategorization is available only when using TabularDataLoaders")
         encoder = find(self.dls.procs, lambda proc: isinstance(proc, CategoryEncode))
         if encoder is None:
-            raise ValueError(
-                "No CategoryEncode transform found while applying recategorization."
-            )
+            raise ValueError("No CategoryEncode transform found while applying recategorization.")
         # Retrieve original & encoded feature names
         cont_names, cat_names = encoder.encoder.cont_names, encoder.encoder.cat_names
         encoded_cat_names = encoder.encoder.get_feature_names()
@@ -223,19 +181,13 @@ class SomLearner(Learner):
         # Clone model weights
         w = self.model.weights.clone().cpu()
         w = w.view(-1, w.shape[-1])
-
-        if isinstance(self.data, TabularDataLoaders):
-            if recategorize:
-                w, cat_names, cont_names = self.recategorize(
-                    w, return_names=True, denorm=True
-                )
+        if isinstance(self.dls, TabularDataLoaders):
+            if len(self.dls.cat_names) > 0 and recategorize:
+                w, cat_names, cont_names = self.recategorize(w, return_names=True, denorm=True)
             else:
-                cont_names, cat_names = self.data.cont_names, self.data.cat_names
+                cont_names, cat_names = self.dls.cont_names, self.dls.cat_names
                 w = w.numpy()
-            cat_features, cont_features = (
-                w[..., : len(cat_names)],
-                w[..., len(cat_names) :],
-            )
+            cat_features, cont_features = (w[..., : len(cat_names)], w[..., len(cat_names):])
             data = np.concatenate([cat_features, cont_features], axis=-1)
             df = pd.DataFrame(data=data, columns=cat_names + cont_names)
             df[cont_names] = df[cont_names].astype(float)
@@ -257,11 +209,7 @@ class SomLearner(Learner):
     def export(self, file: StrOrPath = "export.pkl", destroy: bool = False):
         """Exports the Learner to file, removing unneeded callbacks."""
         cbs = list(self.cbs)
-        self.cbs = list(
-            filter(
-                lambda cb: not isinstance(cb, (SomTrainer, SomVizCallback)), self.cbs,
-            )
-        )
+        self.cbs = list(filter(lambda cb: not getattr(cb, 'is_exportable', False), self.cbs))
         super().export(file=file, destroy=destroy)
         if not destroy:
             self.cbs = cbs
@@ -269,24 +217,11 @@ class SomLearner(Learner):
     def denormalize(self, data: torch.Tensor) -> torch.Tensor:
         """Denormalizes `data`."""
         if isinstance(self.dls, TabularDataLoaders):
-            normalize_proc = find(
-                self.dls.procs, lambda proc: isinstance(proc, Normalize)
-            )
+            normalize_proc = find(self.dls.procs, lambda proc: isinstance(proc, Normalize))
             if normalize_proc is not None:
                 if data.shape[-1] > len(normalize_proc.means):
-                    conts, cats = (
-                        data[..., : len(normalize_proc.means)],
-                        data[..., len(normalize_proc.means) :],
-                    )
-                    return torch.cat(
-                        [
-                            cats,
-                            denormalize(
-                                conts, normalize_proc.means, normalize_proc.stds
-                            ),
-                        ],
-                        dim=-1,
-                    )
+                    conts, cats = (data[..., : len(normalize_proc.means)], data[..., len(normalize_proc.means):])
+                    return torch.cat([cats, denormalize(conts, normalize_proc.means, normalize_proc.stds)], dim=-1)
                 else:
                     return denormalize(data, normalize_proc.means, normalize_proc.stds)
         # TODO: implement for other DataLoaders types
@@ -298,14 +233,10 @@ class SomLearner(Learner):
 
 
 def print_stats(t: torch.Tensor, dim: int = -1):
-    print(
-        f"Mean: {t.mean()}, Std: {t.std()}, Min: {t.min()}, Max: {t.max()}, Shape: {t.shape}"
-    )
+    print(f"Mean: {t.mean()}, Std: {t.std()}, Min: {t.min()}, Max: {t.max()}, Shape: {t.shape}")
 
 
-def denormalize(
-    data: torch.Tensor, means: Dict[str, float], stds: Dict[str, float]
-) -> torch.Tensor:
+def denormalize(data: torch.Tensor, means: Dict[str, float], stds: Dict[str, float]) -> torch.Tensor:
     """
     Denormalizes `data` using `means` and `stds`.
 

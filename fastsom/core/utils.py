@@ -3,9 +3,8 @@ This file contains various project-wide utilities.
 
 """
 
-from typing import Collection, Callable, Iterable, Generator
 from functools import reduce
-
+from typing import Callable, Collection, Generator, Iterable
 
 __all__ = [
     "ifnone",

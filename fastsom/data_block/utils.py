@@ -1,10 +1,9 @@
-import torch
+from typing import Generator, Tuple, Union
 
-from typing import Union, Tuple, Generator
+import torch
 from fastai.basic_data import DataBunch, DatasetType
 from fastai.data_block import ItemList
 from fastai.tabular import TabularDataBunch
-
 
 __all__ = ["get_xy", "get_xy_batched"]
 

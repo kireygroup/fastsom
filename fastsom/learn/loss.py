@@ -1,15 +1,17 @@
 """
 """
-import torch
-import numpy as np
-from torch import Tensor
 from functools import partial
 from typing import Callable
 
-from fastsom.core import timeit, idxs_2d_to_1d
-from fastsom.som import Som
-from fastsom.interp import mean_quantization_err, topologic_err, codebook_err
+import numpy as np
+import torch
+from torch import Tensor
 
+from fastsom.core import idxs_2d_to_1d, timeit
+from fastsom.interp import codebook_err, mean_quantization_err, topologic_err
+from fastsom.som import Som
+
+from ..log import has_logger
 
 __all__ = [
     "SomLoss",
@@ -17,6 +19,7 @@ __all__ = [
 ]
 
 
+@has_logger
 class SomLoss(Callable):
     "Wraps a loss function, passing it the som module."
 

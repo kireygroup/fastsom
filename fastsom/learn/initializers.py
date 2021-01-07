@@ -3,9 +3,9 @@ Initializers are used to define
 initial map weights for Self-Organizing Maps.
 """
 
-from torch import Tensor
-from kmeans_pytorch import kmeans as _kmeans
 import torch
+from kmeans_pytorch import kmeans as _kmeans
+from torch import Tensor
 
 __all__ = [
     "som_initializers",
@@ -50,9 +50,7 @@ class KMeansInitializer(WeightsInitializer):
             The number of weights to be returned.
         """
         # Run the KMeans algorithm over the input
-        _, cluster_centers = _kmeans(
-            X=x, num_clusters=k, distance=self.distance, device=self.device
-        )
+        _, cluster_centers = _kmeans(X=x, num_clusters=k, distance=self.distance, device=self.device)
         # Reshape it to fit the SOM size
         return cluster_centers
 

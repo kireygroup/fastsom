@@ -1,45 +1,29 @@
+import functools as ft
 import logging
-
-from .core import ifnone
-
+from typing import Type
 
 __all__ = [
-    "safeget",
-    "getname",
-    "get_logger",
+    'has_logger',
 ]
 
 
-def safeget(o: any, attr: str) -> any:
+def has_logger(cls: Type):
     """
-    
-    Parameters
-    ----------
-    
+    Decorator. Adds a `self.logger` member to `cls`
+    that prefixes messages with the class name.
     """
-    try:
-        return getattr(o, attr)
-    except Exception:
-        return None
+    orig_init = cls.__init__
 
+    @ft.wraps(orig_init)
+    def __init__(self, *args, **kwargs):
+        orig_init(self, *args, **kwargs)
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('[%(levelname)s] - [%(name)s] - %(message)s')
+        handler.setFormatter(formatter)
+        logger = logging.getLogger(cls.__name__)
+        logger.addHandler(handler)
+        self.logger = logger
+        return
 
-def getname(o: any) -> str:
-    """
-    
-    Parameters
-    ----------
-    
-    """
-    o = ifnone(safeget(o, "__class__"), o)
-    return o.__name__
-
-
-def get_logger(o: any) -> logging.Logger:
-    """
-
-    Parameters
-    ----------
-
-    """
-    name = o if isinstance(o, str) else getname(o)
-    return logging.getLogger(name)
+    cls.__init__ = __init__
+    return cls

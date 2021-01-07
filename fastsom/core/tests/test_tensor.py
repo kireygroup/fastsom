@@ -1,10 +1,11 @@
-import torch
 import unittest
-import numpy as np
-
 from typing import Tuple
+
+import numpy as np
+import torch
 from nose2.tools import params
-from fastsom import index_tensor, idxs_1d_to_2d, idxs_2d_to_1d
+
+from fastsom import idxs_1d_to_2d, idxs_2d_to_1d, index_tensor
 
 
 class IndexTensorTest(unittest.TestCase):

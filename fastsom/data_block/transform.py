@@ -1,11 +1,11 @@
-import torch
+from typing import Generator, Iterable, List
+
 import numpy as np
 import pandas as pd
-
-from typing import List, Generator, Iterable
+import torch
 from fastai.tabular import TabularProc
-from fastsom.core import slices, find
 
+from fastsom.core import find, slices
 
 __all__ = [
     "ToBeContinuousProc",

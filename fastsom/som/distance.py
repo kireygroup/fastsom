@@ -1,11 +1,8 @@
+from functools import partial, reduce
+from typing import Callable, Dict, List, Optional, Union
+
 import torch
 import torch.nn.functional as F
-
-from functools import partial, reduce
-from typing import Callable, Union, List, Optional, Dict
-
-from ..log import get_logger
-
 
 __all__ = [
     "pnorm",
@@ -63,8 +60,6 @@ def pdist(a: torch.Tensor, b: torch.Tensor, p: int = 2) -> torch.Tensor:
     p : int default=2
         The order.
     """
-    logger = get_logger("pdist")
-    logger.debug(f"a: {a.shape} b: {b.shape}")
     return pnorm(a - b, p=p)
 
 
@@ -106,8 +101,6 @@ def grouped_distance(
     groups : int
         The number of groups of equal size to be used.
     """
-    logger = get_logger("grouped_distance")
-    logger.debug(f"a: {a.shape} b: {b.shape}")
     # Split `a` and `b` into chunks of equal size or groups of specified size
     split_fn = torch.chunk if isinstance(n_groups, int) else torch.split
     # Zip together pairs of chunks
@@ -145,8 +138,6 @@ def split_distance(
     split_idx : int
         The split point for `a` and `b`
     """
-    logger = get_logger("split_distance")
-    logger.debug(f"a: {a.shape} b: {b.shape}")
     a1, a2 = torch.split(a, [split_idx, a.size(-1) - split_idx], dim=-1)
     b1, b2 = torch.split(b, [split_idx, b.size(-1) - split_idx], dim=-1)
     dist_1 = dist_fn_1(a1, b1)
@@ -168,13 +159,10 @@ class MixedEmbeddingDistance(Callable):
     """
 
     def __init__(self, emb_szs: Dict[str, int]):
-        self.logger = get_logger(self)
         self.emb_szs = emb_szs
         self.split_idx = sum(self.emb_szs.values())
         # Setup embedding and continuous distances
-        self._embs_dist = partial(
-            grouped_distance, dist_fn=pcosdist, n_groups=list(self.emb_szs.values())
-        )
+        self._embs_dist = partial(grouped_distance, dist_fn=pcosdist, n_groups=list(self.emb_szs.values()))
         self._cont_dist = pdist
         # Setup split distance with the above parameters
         self._dist_fn = partial(
@@ -186,7 +174,6 @@ class MixedEmbeddingDistance(Callable):
 
     def __call__(self, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         # Check if `a` and `b` are splittable
-        self.logger.debug(f"a: {a.shape} b: {b.shape}")
         if a.shape[-1] + b.shape[-1] <= (2 * self.split_idx):
             return self._embs_dist(a, b)
         else:
@@ -208,8 +195,11 @@ def mismatch_distance(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
 
 
 class MixedCategoricalDistance(Callable):
+    """
+    Mixed distance for categorical & continuous features.
+    Uses mismatch distance for categoricals and p-distance of order 2 for continuous.
+    """
     def __init__(self, split_idx: Optional[int] = None):
-        self.logger = get_logger(self)
         self.split_idx = split_idx
         self._cats_dist = mismatch_distance
         self._cont_dist = pdist
@@ -221,7 +211,6 @@ class MixedCategoricalDistance(Callable):
         )
 
     def __call__(self, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
-        self.logger.debug(f"a: {a.shape}, b: {b.shape}")
         return self._dist_fn(a, b)
 
     def __repr__(self):

@@ -2,24 +2,21 @@
 This file contains interpretation
 utilities for Self-Organizing Maps.
 """
-import torch
+from typing import List, Optional, Tuple, Union
+
+import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-import matplotlib.pyplot as plt
-
-from typing import Optional, List, Union, Tuple
-
-from fastai.data.load import DataLoader
+import torch
 from fastai.learner import Learner
 from fastai.tabular.data import TabularDataLoaders
 from fastai_category_encoders import CategoryEncode
-
+from fastprogress.fastprogress import progress_bar
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import KBinsDiscretizer
-from fastprogress.fastprogress import progress_bar
-from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
-from fastsom.core import ifnone, idxs_2d_to_1d, find
+from fastsom.core import find, idxs_2d_to_1d, ifnone
 
 
 class ToBeContinuousProc:
@@ -134,21 +131,16 @@ class SomInterpretation:
             feature_indices = list(range(n_features))
         # If the DataLoader is for Tabular, gather feature names
         if isinstance(self.learn.dls, TabularDataLoaders):
-            category_encoder = find(
-                self.learn.dls.procs, lambda p: isinstance(p, CategoryEncode)
-            )
+            category_encoder = find(self.learn.dls.procs, lambda p: isinstance(p, CategoryEncode))
             if category_encoder is not None:
-                labels = (
-                    category_encoder.encoder.cat_names
-                    + category_encoder.encoder.cont_names
-                )
+                labels = category_encoder.encoder.cat_names + category_encoder.encoder.cont_names
             else:
                 labels = self.learn.dls.cat_names + self.learn.dls.cont_names
         # Otherwise, use given features indices as names
         else:
             labels = [f"Feature #{i}" for i in feature_indices]
         # Optionally recategorize categorical variables
-        if recategorize:
+        if len(self.learn.dls.cat_names) > 0 and recategorize:
             w = self.learn.recategorize(self.w, denorm=False)
         else:
             w = self.w.numpy()
@@ -157,14 +149,8 @@ class SomInterpretation:
 
         # Initialize subplots
         cols = min(2, len(feature_indices))
-        rows = max(
-            1,
-            len(feature_indices) // cols
-            + (1 if len(feature_indices) % cols > 0 else 0),
-        )
-        fig, axs = plt.subplots(
-            rows, cols, figsize=(figsize[0] * cols, figsize[1] * rows)
-        )
+        rows = max(1, len(feature_indices) // cols + (1 if len(feature_indices) % cols > 0 else 0))
+        fig, axs = plt.subplots(rows, cols, figsize=(figsize[0] * cols, figsize[1] * rows))
         axs = axs.flatten() if isinstance(axs, np.ndarray) else [axs]
 
         zipped_items = zip(
@@ -178,12 +164,8 @@ class SomInterpretation:
             if data.dtype.kind in ["S", "U", "O"]:
                 # TODO: apply colors to strings
                 data = data.astype(str)
-                numeric_data = (
-                    np.searchsorted(np.unique(data), data, side="left") + 1
-                ).reshape(self.modelsize)
-                sns.heatmap(
-                    numeric_data, ax=ax, annot=data.reshape(self.modelsize), fmt="s"
-                )
+                numeric_data = (np.searchsorted(np.unique(data), data, side="left") + 1).reshape(self.modelsize)
+                sns.heatmap(numeric_data, ax=ax, annot=data.reshape(self.modelsize), fmt="s")
             else:
                 sns.heatmap(data.reshape(self.modelsize), ax=ax, annot=True)
             fig.show()

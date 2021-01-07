@@ -1,7 +1,8 @@
 import unittest
 
 from nose2.tools import params
-from fastsom.core import ifnone, is_iterable, listify, setify, compose
+
+from fastsom.core import compose, ifnone, is_iterable, listify, setify
 
 
 class IfNoneTest(unittest.TestCase):

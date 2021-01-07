@@ -2,9 +2,8 @@
 Experimental.
 Do not use
 """
-import torch
 import numpy as np
-
+import torch
 from fastai.optimizer import Optimizer
 
 __all__ = [

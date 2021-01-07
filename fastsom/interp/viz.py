@@ -3,119 +3,159 @@ This file contains visualization callbacks
 for Self-Organizing Maps.
 """
 
-import torch
-import numpy as np
+import enum
+import functools as ft
+from typing import Callable, List, Type, Union
+
 import matplotlib.pyplot as plt
-
+import numpy as np
+import plotly.graph_objects as go
+import torch
 from fastai.callback.core import Callback
-from fastai.learner import Learner
-
+from fastai.torch_core import ifnone
+from fastcore.meta import delegates
 from sklearn.decomposition import PCA
-from mpl_toolkits.mplot3d import Axes3D
 
 from fastsom.core import idxs_2d_to_1d
-from ..log import get_logger
 
-
-def get_xy(dls):
-    # TabularDataLoaders
-    x, y = [], []
-    for batch in dls.train:
-        x.append(torch.cat([batch[0], batch[1]], dim=-1))
-        y.append(batch[1])
-    return torch.cat(x, dim=0), torch.cat(y, dim=0)
-    # TODO: other types
-
+from ..log import has_logger
+from .plotly_utils import scatter, show_figure
 
 __all__ = [
-    "SomVizCallback",
-    "SomTrainingViz",
-    "SomHyperparamsViz",
-    "SomBmuViz",
+    "PCABasedVisualizationCallback",
+    "SomTrainingVisualizationCallback",
+    "SomTrainingVisualizationCallback2",
+    "SomHyperparamsVisualizationCallback",
+    "SomBmuVisualizationCallback",
+    "get_xy",
+    "SOM_TRAINING_VIZ",
+    "training_only",
+    "get_visualization_callbacks",
 ]
 
 
-class SomVizCallback(Callback):
-    """Base class for SOM visualization callbacks."""
+def get_xy(dls):
+    """Grabs data as tensors from a DataLoaders instance."""
+    x, y = [], []
+    for batch in dls.train:
+        x.append(torch.cat(list(batch)[:-1], dim=-1) if len(batch) > 2 else batch[0])
+        y.append(batch[-1])
+    return torch.cat(x, dim=0), torch.cat(y, dim=0)
 
-    pass
+
+def training_only(fn: Callable):
+    """
+    Decorator for callback methods.
+    Only calls decorated function if the callback is in training mode.
+    """
+    @ft.wraps(fn)
+    def _inner(self, *args, **kwargs):
+        if not self.training:
+            return
+        return fn(self, *args, **kwargs)
+    return _inner
 
 
-class SomTrainingViz(SomVizCallback):
-    """`Callback` used to visualize an approximation of the SOM weight update."""
+def no_export(cls: Type[Callback]):
+    """
+    Decorator for callback classes.
+    Marks the decorated callback not to be exported
+    with the Learner.
+    """
+    old_init = cls.__init__
 
-    # https://jakevdp.github.io/PythonDataScienceHandbook/04.12-three-dimensional-plotting.html
+    @ft.wraps(old_init)
+    def new_init(self, *args, **kwargs):
+        old_init(self, *args, **kwargs)
+        setattr(self, 'is_exportable', False)
+    cls.__init__ = new_init
+    return cls
 
-    def __init__(self, *args, update_on_batch: bool = False, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.logger = get_logger(self)
-        self.dim = 2
-        self.input_el_size = None
-        self.data_color, self.weights_color = "#539dcc", "#e58368"
-        self.pca, self.f, self.ax, self.scatter = None, None, None, None
-        self.update_on_batch = update_on_batch
+
+class PCABasedVisualizationCallback(Callback):
+    """Base class for a callback that can perform 2D/3D PCA operations for visualization purposes."""
+
+    def __init__(self, is_3d: bool = True):
+        super().__init__()
+        self.is_3d = is_3d
+        self.pca = PCA(n_components=3 if is_3d else 2)
+
+    def do_pca(self, data: Union[torch.Tensor, np.ndarray], do_train: bool = False):
+        """Performs PCA over `data`. Trains the PCA model if `do_train` is `True`."""
+        data = data if isinstance(data, np.ndarray) else data.cpu().numpy()
+        data = data if len(data.shape) < 3 else data.reshape(-1, data.shape[-1])
+        if do_train:
+            return self.pca.fit_transform(data)
+        else:
+            return self.pca.transform(data)
+
+
+@no_export
+class SomTrainingVisualizationCallback(PCABasedVisualizationCallback):
+    """Visualize SOM weights VS. dataset during training using Plotly."""
+    @delegates(PCABasedVisualizationCallback.__init__)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.train_pca    : np.ndarray      = None
+        self.weight_pca   : np.ndarray      = None
+        self.train_trace  : go.Scatter      = None
+        self.weight_trace : go.Scatter      = None
+        self.fig          : go.FigureWidget = None
 
     def before_fit(self, **kwargs):
-        """Initializes the PCA on the dataset and creates the plot."""
-        self.model = self.learn.model
-        if not self.model.training:
-            return
-        # Retrieve data
-        data, _ = get_xy(self.learn.dls)
-        data = data.cpu().numpy()
-        self.input_el_size = data.shape[-1]
-        # Init + fit the PCA
-        self.pca = PCA(n_components=self.dim)
-        self.logger.error(self.pca)
-        d = self.pca.fit_transform(data)
-        # Make the chart interactive
+        self.train_pca = ifnone(self.train_pca, self.do_pca(get_xy(self.learn.dls)[0], do_train=True))
+        self.train_trace = scatter(self.train_pca, name='Training data', mode='markers', marker_color='#539dcc', marker_size=1.5)
+        self.weight_pca = self.do_pca(self.learn.model.weights)
+        self.weight_trace = scatter(self.weight_pca, name='SOM weights', mode='markers', marker_color='#e58368', marker_size=3)
+        layout = go.Layout(title=f"SOM Visualization ({self.pca.explained_variance_ratio_ * 100 :.0f}% explained variance)")
+        self.fig = go.FigureWidget([self.train_trace, self.weight_trace], layout=layout)
+        self.fig.update_layout(margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor="LightSteelBlue")
+        show_figure(self.fig)
+
+    def before_epoch(self):
+        self.weight_pca = self.do_pca(self.learn.model.weights)
+        with self.fig.batch_update():
+            self.fig.data[1].x = self.weight_pca[:, 0]
+            self.fig.data[1].y = self.weight_pca[:, 1]
+            if self.is_3d:
+                self.fig.data[1].z = self.weight_pca[:, 2]
+
+
+@no_export
+class SomTrainingVisualizationCallback2(PCABasedVisualizationCallback):
+    """Visualize SOM weights VS. dataset during training using Matplotlib."""
+    @delegates(PCABasedVisualizationCallback.__init__)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.fig            : plt.figure      = None
+        self.train_axis     : plt.axis        = None
+        self.weight_scatter : plt.scatter     = None
+        self.train_pca      : np.ndarray      = None
+        self.weight_pca     : np.ndarray      = None
+
+    def before_fit(self):
+        self.train_pca = ifnone(self.train_pca, self.do_pca(get_xy(self.learn.dls)[0], do_train=True))
+        self.weight_pca = self.do_pca(self.learn.model.weights)
         plt.ion()
-        self.f = plt.figure()
-        self.ax = self.f.add_subplot(111, projection="3d" if self.dim == 3 else None)
-        # Calculate PCA of the weights
-        w = self.pca.transform(
-            self.model.weights.view(-1, self.input_el_size).cpu().numpy()
-        )
-        # Plot weights
-        self.scatter = self.ax.scatter(
-            *tuple([el[i] for el in w] for i in range(self.dim)),
-            c=self.weights_color,
-            zorder=100
-        )
-        # Plot data
-        self.ax.scatter(
-            *tuple([el[i] for el in d] for i in range(self.dim)), c=self.data_color
-        )
-        self.f.show()
+        self.fig = plt.figure()
+        self.train_axis = self.fig.add_subplot(111, projection='3d' if self.is_3d else None)
+        # Draw weights
+        self.weight_scatter = self.train_axis.scatter(*tuple([self.weight_pca[:, i] for i in range(self.weight_pca.shape[-1])]), c="#e58368", zorder=100)
+        # Draw training data (once)
+        self.train_axis.scatter(*tuple([self.train_pca[:, i] for i in range(self.train_pca.shape[-1])]), c="#539dcc")
+        self.fig.show()
 
-    def _update_plot(self):
-        if not self.model.training:
-            return
-        w = self.pca.transform(
-            self.model.weights.view(-1, self.input_el_size).cpu().numpy()
-        )
-        t = tuple([el[i] for el in w] for i in range(self.dim))
-        self.scatter.set_offsets(np.c_[t])
-        self.f.canvas.draw()
-
-    def before_epoch(self, **kwargs):
-        """Updates the plot if needed."""
-        if not self.update_on_batch:
-            self._update_plot()
-
-    def before_batch(self, **kwargs):
-        """Updates the plot if needed."""
-        if self.update_on_batch:
-            self._update_plot()
-
-    def after_fit(self, **kwargs):
-        """Cleanup after training."""
-        if not self.model.training:
-            return
-        del self.pca
+    def before_epoch(self):
+        # Read new weight values, compute PCA and update them on the scatter plot
+        w = self.do_pca(self.learn.model.weights.view(-1, self.learn.model.weights.shape[-1]))
+        w = tuple(w[:, i] for i in range(w.shape[-1]))
+        self.weight_scatter.set_offsets(np.c_[w])
+        self.fig.canvas.draw()
 
 
-class SomHyperparamsViz(SomVizCallback):
+@no_export
+@has_logger
+class SomHyperparamsVisualizationCallback(Callback):
     """
     Displays a lineplot for each SOM hyperparameter.
 
@@ -125,17 +165,13 @@ class SomHyperparamsViz(SomVizCallback):
         The `Learner` instance.
     """
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.fig, self.plots = None, None
-        self.alphas, self.sigmas = [], []
-
     def before_fit(self, **kwargs):
         """Initializes the plots."""
-        n_epochs = kwargs["n_epochs"]
-        self.model = self.learn.model
+        n_epochs = self.learn.n_epoch
+        self.fig, self.plots = None, None
+        self.alphas, self.sigmas = [], []
         plt.ion()
-        self.fig, self.plots = plt.subplots(1, 2, figsize=(12, 10))
+        self.fig, self.plots = plt.subplots(1, 2, figsize=(16, 6))
         self.plots = self.plots.flatten()
 
         self.plots[0].set_title("Alpha Hyperparameter")
@@ -147,21 +183,21 @@ class SomHyperparamsViz(SomVizCallback):
         self.plots[1].set_xlabel("Epoch")
         self.plots[1].set_ylabel("Sigma")
         self.plots[1].set_xlim([0, n_epochs])
-
         self.fig.show()
 
+    @training_only
     def after_epoch(self, **kwargs):
         """Updates hyperparameters and plots."""
-        if not self.model.training:
-            return
-        self.alphas.append(self.model.alpha.cpu().numpy())
-        self.sigmas.append(self.model.sigma.cpu().numpy())
+        self.alphas.append(self.learn.model.alpha.cpu().numpy())
+        self.sigmas.append(self.learn.model.sigma.cpu().numpy())
         self.plots[0].plot(self.alphas, c="#589c7e")
         self.plots[1].plot(self.sigmas, c="#4791c5")
         self.fig.canvas.draw()
 
 
-class SomBmuViz(SomVizCallback):
+@no_export
+@has_logger
+class SomBmuVisualizationCallback(Callback):
     """
     Visualization callback for SOM training.
     Stores BMU locations for each batch and displays them on epoch end.
@@ -171,51 +207,71 @@ class SomBmuViz(SomVizCallback):
     learn : Learner
         The `Learner` instance.
     """
-
-    def __init__(self, *args, update_on_batch: bool = False, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, update_on_batch: bool):
         self.fig, self.ax = None, None
         self.epoch_counts, self.total_counts = 0, 0
         self.update_on_batch = update_on_batch
 
     def before_fit(self, **kwargs):
-        self.model = self.learn.model
-        self.epoch_counts = torch.zeros(self.model.size[0] * self.model.size[1])
-        self.total_counts = torch.zeros(self.model.size[0] * self.model.size[1])
+        self.epoch_counts = torch.zeros(self.learn.model.size[0] * self.learn.model.size[1])
+        self.total_counts = torch.zeros(self.learn.model.size[0] * self.learn.model.size[1])
         self.fig = plt.figure()
 
+    @training_only
     def after_batch(self, **kwargs):
         "Saves BMU hit counts for this batch."
-        bmus = self.model._recorder["bmus"]
-        unique_bmus, bmu_counts = idxs_2d_to_1d(bmus, self.model.size[0]).unique(
-            dim=0, return_counts=True
-        )
+        bmus = self.learn.model._recorder["bmus"]
+        unique_bmus, bmu_counts = idxs_2d_to_1d(bmus, self.learn.model.size[0]).unique(dim=0, return_counts=True)
         self.epoch_counts[unique_bmus] += bmu_counts
         if self.update_on_batch:
             self._update_plot()
 
+    @training_only
     def after_epoch(self, **kwargs):
         "Updates total BMU counter and resets epoch counter."
         if not self.update_on_batch:
             self._update_plot()
         self.total_counts += self.epoch_counts
-        self.epoch_counts = torch.zeros(self.model.size[0] * self.model.size[1])
+        self.epoch_counts = torch.zeros(self.learn.model.size[0] * self.learn.model.size[1])
 
     def after_fit(self, **kwargs):
         "Cleanup after training."
-        self.epoch_counts = torch.zeros(self.model.size[0] * self.model.size[1])
-        self.total_counts = torch.zeros(self.model.size[0] * self.model.size[1])
+        self.epoch_counts = torch.zeros(self.learn.model.size[0] * self.learn.model.size[1])
+        self.total_counts = torch.zeros(self.learn.model.size[0] * self.learn.model.size[1])
         self.fig = None
         self.ax = None
 
+    @training_only
     def _update_plot(self, **kwargs):
         "Updates the plot."
-        if not self.model.training:
-            return
-        imsize = self.model.size[:-1]
+        imsize = self.learn.model.size[:-1]
         if self.ax is None:
             self.ax = plt.imshow(self.epoch_counts.view(imsize).cpu().numpy())
             self.fig.show()
         else:
             self.ax.set_data(self.epoch_counts.view(imsize).cpu().numpy())
             self.fig.canvas.draw()
+
+
+class SOM_TRAINING_VIZ(enum.Enum):
+    """Enumerator class for SOM training visualization."""
+    WEIGHTS_2D      = 'weights-2d'
+    CODEBOOK_2D     = 'codebook-2d'
+    WEIGHTS_3D      = 'weights-3d'
+    CODEBOOK_3D     = 'codebook-3d'
+    BMUS            = 'bmus'
+    HYPERPARAMS     = 'hyperparams'
+
+
+def get_visualization_callbacks(names: List[SOM_TRAINING_VIZ], use_epochs: bool = True) -> List[Callback]:
+    """Maps names to visualization callbacks."""
+    cbs = []
+    if SOM_TRAINING_VIZ.WEIGHTS_2D in names or SOM_TRAINING_VIZ.CODEBOOK_2D in names:
+        cbs.append(SomTrainingVisualizationCallback2(is_3d=False))
+    if SOM_TRAINING_VIZ.WEIGHTS_3D in names or SOM_TRAINING_VIZ.CODEBOOK_3D in names:
+        cbs.append(SomTrainingVisualizationCallback(is_3d=True))
+    if SOM_TRAINING_VIZ.BMUS in names:
+        cbs.append(SomBmuVisualizationCallback(update_on_batch=not use_epochs))
+    if SOM_TRAINING_VIZ.HYPERPARAMS in names:
+        cbs.append(SomHyperparamsVisualizationCallback())
+    return cbs
