@@ -11,7 +11,6 @@ from .distance import pdist
 from .neighborhood import neigh_diff_standard, neigh_gauss
 
 
-@has_logger
 class Som(Module):
     """
     Self-Organizing Map module.
@@ -63,10 +62,10 @@ class Som(Module):
         """
         self.to_device(device=xb.device)
         n_features = xb.shape[-1]
-        self.logger.debug(f"xb: {xb.shape}, weights: {self.weights.view(-1, n_features).shape}")
+        # self.logger.debug(f"xb: {xb.shape}, weights: {self.weights.view(-1, n_features).shape}")
         distances = self.distance(xb, self.weights.view(-1, n_features))
         bmus = self.find_bmus(distances)
-        self.logger.debug(f"bmus: {bmus.shape}")
+        # self.logger.debug(f"bmus: {bmus.shape}")
         # save batch data
         self._recorder["xb"] = xb.clone()
         self._recorder["bmus"] = bmus

@@ -8,24 +8,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import torch
-from fastai.learner import Learner
-from fastai.tabular.data import TabularDataLoaders
-from fastai_category_encoders import CategoryEncode
+from fastai.tabular.data import DataLoader
 from fastprogress.fastprogress import progress_bar
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import KBinsDiscretizer
 
-from fastsom.core import find, idxs_2d_to_1d, ifnone
+from fastsom.core import idxs_2d_to_1d, ifnone
+from fastsom.learn import SomLearner
 
-
-class ToBeContinuousProc:
-    pass
-
-
-__all__ = [
-    "SomInterpretation",
-]
+__all__ = ["SomInterpretation"]
 
 
 class SomInterpretation:
@@ -42,7 +34,7 @@ class SomInterpretation:
         The learner to be used for interpretation.
     """
 
-    def __init__(self, learn: Learner) -> None:
+    def __init__(self, learn: SomLearner) -> None:
         self.learn = learn
         self.pca = None
         self.w = learn.model.weights.clone().view(-1, learn.model.size[-1]).cpu()
@@ -50,7 +42,7 @@ class SomInterpretation:
         self.w = self.learn.denormalize(self.w)
 
     @classmethod
-    def from_learner(cls, learn: Learner):
+    def from_learner(cls, learn: SomLearner):
         """
         Creates a new instance of `SomInterpretation` from a `SomLearner`.\n
 
@@ -75,7 +67,7 @@ class SomInterpretation:
             yield xb, yb
 
     def _init_pca(self):
-        "Initializes and fits the PCA instance."
+        """Initializes and fits the PCA instance."""
         self.pca = PCA(n_components=3)
         self.pca.fit(self.w)
 
@@ -104,6 +96,7 @@ class SomInterpretation:
         self,
         feature_indices: Optional[Union[int, List[int]]] = None,
         recategorize: bool = True,
+        denorm: bool = False,
         figsize: Tuple[int, int] = (12, 12),
         save: bool = False,
     ) -> None:
@@ -130,20 +123,18 @@ class SomInterpretation:
             n_features = self.learn.model.size[-1]
             feature_indices = list(range(n_features))
         # If the DataLoader is for Tabular, gather feature names
-        if isinstance(self.learn.dls, TabularDataLoaders):
-            category_encoder = find(self.learn.dls.procs, lambda p: isinstance(p, CategoryEncode))
-            if category_encoder is not None:
-                labels = category_encoder.encoder.cat_names + category_encoder.encoder.cont_names
+        if self.learn.is_tabular:
+            cat_names, cont_names, encoded_cat_names = self.learn.get_feature_names()
+            labels = encoded_cat_names + cont_names if len(encoded_cat_names) > 0 else cat_names + cont_names
+            # Optionally recategorize categorical variables
+            if len(encoded_cat_names) > 0 and recategorize:
+                w = self.learn.recategorize(self.w, denorm=denorm)
             else:
-                labels = self.learn.dls.cat_names + self.learn.dls.cont_names
-        # Otherwise, use given features indices as names
-        else:
+                w = self.w.numpy()
+        else:  # Otherwise, use given features indices as names
             labels = [f"Feature #{i}" for i in feature_indices]
-        # Optionally recategorize categorical variables
-        if len(self.learn.dls.cat_names) > 0 and recategorize:
-            w = self.learn.recategorize(self.w, denorm=False)
-        else:
             w = self.w.numpy()
+            
         # gather feature indices from weights
         w = np.take(w, feature_indices, axis=-1)
 
@@ -201,7 +192,7 @@ class SomInterpretation:
 
     def show_preds(
         self,
-        dl_idx: int = 0,
+        dl: Optional[DataLoader] = None,
         class_names: List[str] = None,
         n_bins: int = 5,
         save: bool = False,
@@ -212,8 +203,9 @@ class SomInterpretation:
 
         Parameters
         ----------
-        dl_idx : int, default=0
-            The index of the dataloader to use for prediction.
+        dl : DataLoader, default=None
+            The dataloader to use for prediction. Defaults to the validation set,
+            or training set in case validation set is empty.
         n_bins : int default=5
             The number of bins to use when labels are continous.
         save : bool default=False
@@ -225,31 +217,29 @@ class SomInterpretation:
                 Please pass labels when creating the `DataBunch` or use `interp.show_hitmap()`"
             )
         # Run model predictions
-        preds, labels = self.learn.get_preds(dl_idx)
-
-        # Check if labels are continuous
-        continuous_labels = "float" in str(labels.dtype)
-
-        if continuous_labels and n_bins > 0:
-            # Split labels into bins
-            labels = KBinsDiscretizer(n_bins=n_bins, encode="ordinal").fit_transform(
-                labels.unsqueeze(-1).numpy()
-            )
-            labels = torch.tensor(labels)
-
+        dl = ifnone(dl, self.learn.dls.valid if len(self.learn.dls.loaders) > 1 else self.learn.dls.train)
+        preds, labels = self.learn.get_preds(dl=dl)
         map_size = (self.learn.model.size[0], self.learn.model.size[1])
-
         # Data placeholder
         data = torch.zeros(map_size[0] * map_size[1])
 
-        # Transform BMU indices to 1D for easier processing
+        # Check if labels are continuous
+        is_target_continuous = "float" in str(labels.dtype)
+        # Discretize the target
+        if is_target_continuous and n_bins > 0:
+            labels = KBinsDiscretizer(n_bins=n_bins, encode="ordinal").fit_transform(labels.unsqueeze(-1).numpy())
+            labels = torch.tensor(labels)
+
+        # Transform predictions (2D BMU indices) to 1D for easier processing
         preds_1d = idxs_2d_to_1d(preds, map_size[0])
         unique_bmus = preds_1d.unique(dim=0)
 
+        # Count predictions for each Best-Matching Unit
         for idx, bmu in enumerate(unique_bmus):
             # Get labels corresponding to this BMU
             bmu_labels = labels[(preds_1d == bmu).nonzero()]
-            if continuous_labels and n_bins <= 0:
+
+            if is_target_continuous and n_bins <= 0:
                 data[idx] = bmu_labels.mean()
             else:
                 # Calculate unique label counts
@@ -259,12 +249,10 @@ class SomInterpretation:
             # max_label = label_counts.max()
             # data[idx] = float("{:.2f}".format(max_label.float() / float(len(bmu_labels))))
 
-        if not continuous_labels or n_bins > 0:
+        if not is_target_continuous or n_bins > 0:
             # Legend labels
             unique_labels = labels.unique()
-            class_names = ifnone(
-                class_names, [str(label) for label in unique_labels.numpy()]
-            )
+            class_names = ifnone(class_names, [str(label) for label in unique_labels.numpy()])
             # Color map
             colors = plt.cm.Pastel2(np.linspace(0, 1, len(unique_labels)))
             cmap = LinearSegmentedColormap.from_list("Custom", colors, len(colors))
@@ -274,11 +262,9 @@ class SomInterpretation:
 
         f, ax = plt.subplots(figsize=(11, 9))
         # Plot the heatmap
-        ax = sns.heatmap(
-            data.view(map_size), annot=True, cmap=cmap, square=True, linewidths=0.5
-        )
+        ax = sns.heatmap(data.view(map_size), annot=True, cmap=cmap, square=True, linewidths=0.5)
 
-        if not continuous_labels or n_bins > 0:
+        if not is_target_continuous or n_bins > 0:
             # # Manually specify colorbar labelling after it's been generated
             colorbar = ax.collections[0].colorbar
             colorbar.set_ticks(unique_labels.numpy())

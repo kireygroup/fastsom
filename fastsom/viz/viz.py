@@ -113,6 +113,7 @@ class SomTrainingVisualizationCallback(PCABasedVisualizationCallback):
         self.fig.update_layout(margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor="LightSteelBlue")
         show_figure(self.fig)
 
+    @training_only
     def before_epoch(self):
         self.weight_pca = self.do_pca(self.learn.model.weights)
         with self.fig.batch_update():
@@ -146,6 +147,7 @@ class SomTrainingVisualizationCallback2(PCABasedVisualizationCallback):
         self.train_axis.scatter(*tuple([self.train_pca[:, i] for i in range(self.train_pca.shape[-1])]), c="#539dcc")
         self.fig.show()
 
+    @training_only
     def before_epoch(self):
         # Read new weight values, compute PCA and update them on the scatter plot
         w = self.do_pca(self.learn.model.weights.view(-1, self.learn.model.weights.shape[-1]))
@@ -155,7 +157,6 @@ class SomTrainingVisualizationCallback2(PCABasedVisualizationCallback):
 
 
 @no_export
-@has_logger
 class SomHyperparamsVisualizationCallback(Callback):
     """
     Displays a lineplot for each SOM hyperparameter.
@@ -197,7 +198,6 @@ class SomHyperparamsVisualizationCallback(Callback):
 
 
 @no_export
-@has_logger
 class SomBmuVisualizationCallback(Callback):
     """
     Visualization callback for SOM training.
@@ -252,7 +252,6 @@ class SomBmuVisualizationCallback(Callback):
         else:
             self.ax.set_data(self.epoch_counts.view(imsize).cpu().numpy())
             self.fig.canvas.draw()
-
 
 class SOM_TRAINING_VIZ(enum.Enum):
     """Enumerator class for SOM training visualization."""

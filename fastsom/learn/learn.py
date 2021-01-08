@@ -3,8 +3,7 @@ This module defines a Fastai `Learner` subclass used to train Self-Organizing Ma
 """
 import pathlib
 from functools import partial
-from typing import (Callable, Collection, Dict, List, Optional, Tuple, Type,
-                    Union)
+from typing import Callable, Collection, List, Optional, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -12,16 +11,16 @@ import torch
 from fastai.callback.core import Callback
 from fastai.data.core import DataLoaders
 from fastai.learner import Learner
-# from fastai.data_block import EmptyLabelList
 from fastai.tabular.data import Normalize, TabularDataLoaders, TabularProc
 from fastai_category_encoders import CategoryEncode
 from fastcore.meta import delegates
 
-from fastsom.core import find, ifnone, index_tensor, setify
-from fastsom.interp import get_visualization_callbacks, mean_quantization_err
+from fastsom.core import find, ifnone, index_tensor
+from fastsom.log import has_logger
+from fastsom.metrics import mean_quantization_err
 from fastsom.som import MixedEmbeddingDistance, Som
+from fastsom.viz import get_visualization_callbacks
 
-from ..log import has_logger
 from .callbacks import ExperimentalSomTrainer, SomTrainer
 from .loss import SomLoss
 from .optim import SplashOptimizer
@@ -30,6 +29,16 @@ from .utils import denorm_with_proc
 StrOrPath = Union[str, pathlib.Path]
 TensorOrNumpyArray = Union[torch.Tensor, np.ndarray]
 CategoryEncode.order = 100
+
+
+__all__ = [
+    "SomLearner",
+    "ForwardContsCallback",
+    "UnifyDataCallback",
+    "StrOrPath",
+    "TensorOrNumpyArray",
+    "split_torch_numpy",
+]
 
 
 def split_torch_numpy(x: TensorOrNumpyArray, sections: List[int], dim: int = 0):
@@ -41,28 +50,18 @@ def split_torch_numpy(x: TensorOrNumpyArray, sections: List[int], dim: int = 0):
         return torch.split(x, sections, dim=dim)
 
 
-
-class EmptyLabelList:
-    pass
-
-
-__all__ = [
-    "SomLearner",
-    "ForwardContsCallback",
-    "UnifyDataCallback",
-]
-
-
 class ForwardContsCallback(Callback):
     """
     Callback for `SomLearner`, automatically added when the
     data class is `TabularDataLoaders`.
     Filters out categorical features, forwarding continous
     features to the SOM model.
+    Note that if a categorical encoder is used, categoricals
+    will be encoded to continuous features, and as such will
+    be forwarded by this callback.
     """
     def before_batch(self):
         x_cat, x_cont = self.xb
-        self.logger.debug(f"x_cat: {x_cat.shape}, x_cont: {x_cont.shape}")
         self.learn.xb = [x_cont]
 
 
@@ -75,7 +74,6 @@ class UnifyDataCallback(Callback):
 
     def before_batch(self):
         x_cat, x_cont = self.xb
-        self.logger.debug(f"x_cat: {x_cat.shape}, x_cont: {x_cont.shape}")
         self.learn.xb = [torch.cat([x_cat.float(), x_cont], dim=-1)]
 
 
@@ -108,7 +106,6 @@ class SomLearner(Learner):
     visualize_on: str default='epoch'
         Determines when visualizations should be updated ('batch' / 'epoch').
     """
-    @has_logger
     @delegates(Learner)
     def __init__(
         self,
@@ -152,8 +149,8 @@ class SomLearner(Learner):
         # If no categorizer is provided, append the appropriate callback
         if categorize is None:
             self.add_cb(ForwardContsCallback())
-            if len(self.dls.cat_names) > 0:
-                self.logger.warning("Categorical variables will NOT be passed to the SOM unless encoded with the `CategoryEncode` proc.")
+            # if len(self.dls.cat_names) > 0:
+            #     self.logger.warning("Categorical variables will NOT be passed to the SOM unless encoded with the `CategoryEncode` proc.")
 
         elif categorize.uses_embeddings:
             self.model.dist_fn = MixedEmbeddingDistance(categorize.get_emb_szs())
@@ -223,7 +220,7 @@ class SomLearner(Learner):
         """Exports the Learner to file, removing unneeded callbacks."""
         cbs = list(self.cbs)
         self.cbs = list(filter(lambda cb: not getattr(cb, 'is_exportable', False), self.cbs))
-        super().export(file=file, destroy=destroy)
+        super().export(file, destroy)
         if not destroy:
             self.cbs = cbs
 
@@ -242,6 +239,11 @@ class SomLearner(Learner):
         return data
 
     def get_feature_names(self) -> Tuple[List[str], List[str], List[str]]:
+        """
+        Returns three lists containing the categorical, continuous and encoded-categorical feature names.
+        Only works if the associated DataLoaders is a TabularDataLoaders.
+        Also, in case no encoding transform is associated with the dataloaders, the third list will be empty.
+        """
         if self.is_tabular:
             cat_encoder = self._find_categorical_encoder()
             if cat_encoder is None:
