@@ -30,6 +30,7 @@ __all__ = [
     "get_xy",
     "SOM_TRAINING_VIZ",
     "training_only",
+    "no_export",
     "get_visualization_callbacks",
 ]
 
