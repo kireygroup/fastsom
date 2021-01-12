@@ -6,9 +6,9 @@ with open("README.md", encoding="utf-8") as f:
 
 setup(
     name="fastsom",
-    version="1.0.1",
+    version="1.0.2",
     url="https://github.com/kireygroup/fastsom",
-    download_url="https://github.com/kireygroup/fastsom/archive/v1.0.1.tar.gz",
+    download_url="https://github.com/kireygroup/fastsom/archive/v1.0.2.tar.gz",
     license="MIT",
     author="Riccardo Sayn",
     author_email="riccardo.sayn@kireygroup.com",
