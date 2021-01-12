@@ -10,10 +10,10 @@ jobs:
     name: Build docs & push to gh-pages
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Python 3.x
+      - name: Setup Python 3.6
         uses: actions/setup-python@v2
         with:
-          python-version: "3.x"
+          python-version: "3.6"
       - name: Checkout master
         uses: actions/checkout@v2
         with:

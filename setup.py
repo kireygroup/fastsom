@@ -6,9 +6,9 @@ with open("README.md", encoding="utf-8") as f:
 
 setup(
     name="fastsom",
-    version="1.0.0",
+    version="1.0.1",
     url="https://github.com/kireygroup/fastsom",
-    download_url="https://github.com/kireygroup/fastsom/archive/v1.0.0.tar.gz",
+    download_url="https://github.com/kireygroup/fastsom/archive/v1.0.1.tar.gz",
     license="MIT",
     author="Riccardo Sayn",
     author_email="riccardo.sayn@kireygroup.com",
@@ -17,11 +17,12 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(),
     install_requires=[
-        "fastai",
+        "fastai>=2.1.5",
         "sklearn",
         "kmeans_pytorch",
         "seaborn",
         "plotly",
+        "fastai_category_encoders",
     ],
     dependency_links=['https://github.com/kireygroup/fastai-category-encoders/tarball/master#egg=fastai_category_encoders'],
     keywords=["self-organizing-map", "fastai", "pytorch", "python"],
