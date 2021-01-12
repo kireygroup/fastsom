@@ -37,7 +37,7 @@ def index_tensor(*size) -> torch.Tensor:
     """
     if isinstance(size[0], tuple):
         size = size[0]
-    return torch.ones(*size).nonzero().view(*size, -1)
+    return torch.nonzero(torch.ones(*size)).view(*size, -1)
 
 
 def expanded(a: torch.Tensor, b: torch.Tensor, fn: Callable) -> torch.Tensor:

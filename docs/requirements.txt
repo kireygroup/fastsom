@@ -1,3 +1,5 @@
+# for some reason numpy is listed as missing during install in CI
+numpy 
 git+https://github.com/kireygroup/fastsom
 nbsphinx
 sphinx-press-theme
