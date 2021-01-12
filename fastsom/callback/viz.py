@@ -18,7 +18,7 @@ from sklearn.decomposition import PCA
 from fastsom.core import idxs_2d_to_1d
 from fastsom.log import has_logger
 
-from .decorators import no_export
+from .decorators import no_export, training_only
 from .plotly_utils import scatter, show_figure
 
 __all__ = [
@@ -71,6 +71,7 @@ class SomTrainingVisualizationCallback(PCABasedVisualizationCallback):
         self.train_trace  : go.Scatter      = None
         self.weight_trace : go.Scatter      = None
         self.fig          : go.FigureWidget = None
+        self.__show       : bool            = False
 
     def before_fit(self, **kwargs):
         self.train_pca = ifnone(self.train_pca, self.do_pca(get_xy(self.learn.dls)[0], do_train=True))
@@ -81,15 +82,21 @@ class SomTrainingVisualizationCallback(PCABasedVisualizationCallback):
         layout = go.Layout(title=f"SOM Visualization ({expl_var} explained variance)")
         self.fig = go.FigureWidget([self.train_trace, self.weight_trace], layout=layout)
         self.fig.update_layout(margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor="LightSteelBlue")
-        show_figure(self.fig)
 
+    @training_only
     def before_train(self):
+        if not self.__show:
+            show_figure(self.fig)
+            self.__show = True
         self.weight_pca = self.do_pca(self.learn.model.weights)
         with self.fig.batch_update():
             self.fig.data[1].x = self.weight_pca[:, 0]
             self.fig.data[1].y = self.weight_pca[:, 1]
             if self.is_3d:
                 self.fig.data[1].z = self.weight_pca[:, 2]
+
+    def after_fit(self):
+        self.__show = False
 
 
 @no_export
@@ -103,6 +110,7 @@ class SomTrainingVisualizationCallback2(PCABasedVisualizationCallback):
         self.weight_scatter : plt.scatter     = None
         self.train_pca      : np.ndarray      = None
         self.weight_pca     : np.ndarray      = None
+        self.__show         : bool            = False
 
     def before_fit(self):
         self.train_pca = ifnone(self.train_pca, self.do_pca(get_xy(self.learn.dls)[0], do_train=True))
@@ -114,14 +122,20 @@ class SomTrainingVisualizationCallback2(PCABasedVisualizationCallback):
         self.weight_scatter = self.train_axis.scatter(*tuple([self.weight_pca[:, i] for i in range(self.weight_pca.shape[-1])]), c="#e58368", zorder=100)
         # Draw training data (once)
         self.train_axis.scatter(*tuple([self.train_pca[:, i] for i in range(self.train_pca.shape[-1])]), c="#539dcc")
-        self.fig.show()
 
+    @training_only
     def before_train(self):
+        if not self.__show:
+            self.fig.show()
+            self.__show = True
         # Read new weight values, compute PCA and update them on the scatter plot
         w = self.do_pca(self.learn.model.weights.view(-1, self.learn.model.weights.shape[-1]))
         w = tuple(w[:, i] for i in range(w.shape[-1]))
         self.weight_scatter.set_offsets(np.c_[w])
         self.fig.canvas.draw()
+
+    def after_fit(self):
+        self.__show = False
 
 
 @no_export
@@ -134,14 +148,19 @@ class SomHyperparamsVisualizationCallback(Callback):
     learn : Learner
         The `Learner` instance.
     """
+    def __init__(self):
+        self.fig    : plt.figure            = None
+        self.plots  : np.ndarray            = None
+        self.alphas : List[torch.Tensor]    = []
+        self.sigmas : List[torch.Tensor]    = []
+        self.__show : bool                  = False
 
     def before_fit(self, **kwargs):
         """Initializes the plots."""
         n_epochs = self.learn.n_epoch
-        self.fig, self.plots = None, None
-        self.alphas, self.sigmas = [], []
         plt.ion()
         self.fig, self.plots = plt.subplots(1, 2, figsize=(16, 6))
+        self.alphas, self.sigmas = [], []
         self.plots = self.plots.flatten()
 
         self.plots[0].set_title("Alpha Hyperparameter")
@@ -153,15 +172,21 @@ class SomHyperparamsVisualizationCallback(Callback):
         self.plots[1].set_xlabel("Epoch")
         self.plots[1].set_ylabel("Sigma")
         self.plots[1].set_xlim([0, n_epochs])
-        self.fig.show()
 
+    @training_only
     def after_train(self, **kwargs):
         """Updates hyperparameters and plots."""
+        if not self.__show:
+            self.fig.show()
+            self.__show = True
         self.alphas.append(self.learn.model.alpha.cpu().numpy())
         self.sigmas.append(self.learn.model.sigma.cpu().numpy())
         self.plots[0].plot(self.alphas, c="#589c7e")
         self.plots[1].plot(self.sigmas, c="#4791c5")
         self.fig.canvas.draw()
+
+    def after_fit(self, **kwargs):
+        self.__show = False
 
 
 @no_export
@@ -179,12 +204,14 @@ class SomBmuVisualizationCallback(Callback):
         self.fig, self.ax = None, None
         self.epoch_counts, self.total_counts = 0, 0
         self.update_on_batch = update_on_batch
+        self.__show = False
 
     def before_fit(self, **kwargs):
         self.epoch_counts = torch.zeros(self.learn.model.size[0] * self.learn.model.size[1])
         self.total_counts = torch.zeros(self.learn.model.size[0] * self.learn.model.size[1])
         self.fig = plt.figure()
 
+    @training_only
     def after_batch(self, **kwargs):
         "Saves BMU hit counts for this batch."
         bmus = self.learn.model._recorder["bmus"]
@@ -193,6 +220,7 @@ class SomBmuVisualizationCallback(Callback):
         if self.update_on_batch:
             self._update_plot()
 
+    @training_only
     def after_train(self, **kwargs):
         "Updates total BMU counter and resets epoch counter."
         if not self.update_on_batch:
@@ -202,6 +230,7 @@ class SomBmuVisualizationCallback(Callback):
 
     def after_fit(self, **kwargs):
         "Cleanup after training."
+        self.__show = False
         self.epoch_counts = torch.zeros(self.learn.model.size[0] * self.learn.model.size[1])
         self.total_counts = torch.zeros(self.learn.model.size[0] * self.learn.model.size[1])
         self.fig = None
@@ -209,6 +238,9 @@ class SomBmuVisualizationCallback(Callback):
 
     def _update_plot(self, **kwargs):
         "Updates the plot."
+        if not self.__show:
+            self.fig.show()
+            self.__show = True
         imsize = self.learn.model.size[:-1]
         if self.ax is None:
             self.ax = plt.imshow(self.epoch_counts.view(imsize).cpu().numpy())

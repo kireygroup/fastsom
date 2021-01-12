@@ -104,16 +104,7 @@ class Som(Module):
             elementwise_diffs = expanded(xb, self.weights.view(-1, n_features), lambda a, b: a - b).view(batch_size, self.size[0], self.size[1], n_features)
             # neigh shape: [bs, row_sz, col_zs, 1]
             neighbourhood_mults = self.neighborhood(bmus, self.sigma)
-            update = (self.alpha * neighbourhood_mults * elementwise_diffs).sum(0) / batch_size
-            # store update for some example BMUs
-            update_idxs = idxs_2d_to_1d([[0,0], [2,2], [4,4], [6,6], [8,8]], self.size[1]).cuda()
-            if 'tracker' not in self._recorder:
-                self._recorder['tracker'] = []
-            if len(self._recorder['tracker']) < 50:
-                before = self.weights.view(-1, n_features).index_select(0, update_idxs).clone()
-                after  = (self.weights + update).view(-1, n_features).index_select(0, update_idxs).clone()
-                self._recorder['tracker'].append((before, after))
-            self.weights += update
+            self.weights += (self.alpha * neighbourhood_mults * elementwise_diffs).sum(0) / batch_size
 
     def find_bmus(self, distances: torch.Tensor) -> torch.Tensor:
         """
