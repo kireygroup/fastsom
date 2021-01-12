@@ -24,7 +24,6 @@ setup(
         "plotly",
         "fastai_category_encoders",
     ],
-    dependency_links=['https://github.com/kireygroup/fastai-category-encoders/tarball/master#egg=fastai_category_encoders'],
     keywords=["self-organizing-map", "fastai", "pytorch", "python"],
     zip_safe=False,
     classifiers=[
