@@ -82,6 +82,7 @@ class SomInterpretation:
         save : bool default=False
             If True, saves the hitmap into a file.
         """
+        plt.ioff()
         _, ax = plt.subplots(figsize=(10, 10))
         preds, _ = self.learn.get_preds(ds_idx)
         out, counts = preds.unique(return_counts=True, dim=0)
@@ -116,6 +117,7 @@ class SomInterpretation:
         save : bool default=False
             If True, saves the charts into a file.
         """
+        plt.ioff()
         # Transform feature indices to a list
         if isinstance(feature_indices, int):
             feature_indices = [feature_indices]
@@ -171,7 +173,7 @@ class SomInterpretation:
         save : bool default=False
             If True, saves the heatmap into a file.
         """
-
+        plt.ioff()
         image_shape = (self.learn.model.size[0], self.learn.model.size[1], 3)
         if self.w.shape[-1] != 3:
             if self.pca is None:
@@ -211,6 +213,7 @@ class SomInterpretation:
         save : bool default=False
             Whether or not the output chart should be saved on a file.
         """
+        plt.ioff()
         if not self.learn.has_labels:
             raise RuntimeError(
                 "Unable to show predictions for a dataset that has no labels. \
@@ -227,7 +230,7 @@ class SomInterpretation:
         is_target_continuous = "float" in str(labels.dtype)
         # Discretize the target
         if is_target_continuous and n_bins > 0:
-            labels = KBinsDiscretizer(n_bins=n_bins, encode="ordinal").fit_transform(labels.unsqueeze(-1).numpy())
+            labels = KBinsDiscretizer(n_bins=n_bins, encode="ordinal").fit_transform(labels.cpu().numpy())
             labels = torch.tensor(labels)
 
         # Transform predictions (2D BMU indices) to 1D for easier processing

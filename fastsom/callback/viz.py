@@ -75,9 +75,9 @@ class SomTrainingVisualizationCallback(PCABasedVisualizationCallback):
 
     def before_fit(self, **kwargs):
         self.train_pca = ifnone(self.train_pca, self.do_pca(get_xy(self.learn.dls)[0], do_train=True))
-        self.train_trace = scatter(self.train_pca, name='Training data', mode='markers', marker_color='#539dcc', marker_size=1.5)
+        self.train_trace = scatter(self.train_pca, name='Training data', mode='markers', marker_color='#539dcc', marker_size=1.5 if self.is_3d else 4)
         self.weight_pca = self.do_pca(self.learn.model.weights)
-        self.weight_trace = scatter(self.weight_pca, name='SOM weights', mode='markers', marker_color='#e58368', marker_size=3)
+        self.weight_trace = scatter(self.weight_pca, name='SOM weights', mode='markers', marker_color='#e58368', marker_size=3 if self.is_3d else 6)
         expl_var = str(tuple(map(lambda pct: f'{pct:.0f}%', self.pca.explained_variance_ratio_ * 100)))[1:-1]
         layout = go.Layout(title=f"SOM Visualization ({expl_var} explained variance)")
         self.fig = go.FigureWidget([self.train_trace, self.weight_trace], layout=layout)
@@ -264,7 +264,7 @@ def get_visualization_callbacks(names: List[SOM_TRAINING_VIZ], use_epochs: bool 
     """Maps names to visualization callbacks."""
     cbs = []
     if SOM_TRAINING_VIZ.WEIGHTS_2D in names or SOM_TRAINING_VIZ.CODEBOOK_2D in names:
-        cbs.append(SomTrainingVisualizationCallback2(is_3d=False))
+        cbs.append(SomTrainingVisualizationCallback(is_3d=False))
     if SOM_TRAINING_VIZ.WEIGHTS_3D in names or SOM_TRAINING_VIZ.CODEBOOK_3D in names:
         cbs.append(SomTrainingVisualizationCallback(is_3d=True))
     if SOM_TRAINING_VIZ.BMUS in names:
