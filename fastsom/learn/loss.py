@@ -1,15 +1,13 @@
 """
 """
-import torch
-import numpy as np
-from torch import Tensor
 from functools import partial
 from typing import Callable
 
-from fastsom.core import timeit, idxs_2d_to_1d
-from fastsom.som import Som
-from fastsom.interp import mean_quantization_err, topologic_err, codebook_err
+import torch
 
+from fastsom.som import Som
+
+from ..log import has_logger
 
 __all__ = [
     "SomLoss",
@@ -24,18 +22,19 @@ class SomLoss(Callable):
         self.loss_fn = partial(loss_fn, som=som, **kwargs)
         self.som = som
 
-    def __call__(self, *args, **kwargs) -> Tensor:
+    def __call__(self, *args, **kwargs) -> torch.Tensor:
         "Calls the underlying `loss_fn` and wraps the result in a `BackwardRedirectTensor`."
         return BackwardRedirectTensor(self.loss_fn(*args, **kwargs), self.som.backward)
 
 
-class BackwardRedirectTensor(Tensor):
+class BackwardRedirectTensor(torch.Tensor):
     "A Tensor that calls a custom function instead of PyTorch's `backward`."
+
     @staticmethod
-    def __new__(cls, x: Tensor, redir_fn, *args, **kwargs):
+    def __new__(cls, x: torch.Tensor, redir_fn, *args, **kwargs):
         return super().__new__(cls, x.cpu().numpy(), *args, **kwargs)
 
-    def __init__(self, x: Tensor, redir_fn):
+    def __init__(self, x: torch.Tensor, redir_fn):
         super().__init__()
         self.redir_fn = redir_fn
 

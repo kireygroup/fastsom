@@ -1,10 +1,10 @@
 """
 Experimental.
-Do not use
+Do not use!
 """
-from torch import Tensor
-from torch.optim import Optimizer
-from fastai.callback import OptimWrapper
+import numpy as np
+import torch
+from fastai.optimizer import Optimizer
 
 __all__ = [
     "SplashOptimizer",
@@ -15,9 +15,9 @@ __all__ = [
 class SplashOptimizer(Optimizer):
     "Optimizer used `zero_grad`. But, it failed!"
 
-    def __init__(self, params):
-        defaults = dict(momentum=0.1, lr=0.1)
-        super(SplashOptimizer, self).__init__(params, defaults)
+    def __init__(self, params, train_bn=True, **defaults):
+        super().__init__([torch.tensor([0])], defaults)
+        self.hypers = [{"lr": np.random.rand() * 100}]
 
     def __call__(self, *args, **kwargs):
         return
@@ -25,7 +25,10 @@ class SplashOptimizer(Optimizer):
     def zero_grad(self):
         return
 
-    def step(self, closure):
+    def step(self, *args, **kwargs):
+        return
+
+    def set_hypers(self, *args, **kwargs):
         return
 
 
@@ -37,15 +40,10 @@ class SomOptimizer(Optimizer):
         super().__init__(params, defaults)
 
     def __call__(self, *args, **kwargs):
-        print(f'{self.__class__.__name__} has been called')
+        print(f"{self.__class__.__name__} has been called")
 
     def zero_grad(self):
         return
 
     def step(self, closure=None):
         return
-        # print(self.param_groups)
-        # print(self.defaults)
-        # alpha, sigma, w = self.param_groups
-        # alpha = alpha / self.defaults.lr
-        # sigma = sigma / self.defaults.lr

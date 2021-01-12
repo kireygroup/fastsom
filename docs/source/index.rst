@@ -13,11 +13,13 @@ Fastsom is a PyTorch and Fastai based implementation of Self-Organizing Maps.
    :maxdepth: 1
    :caption: API
 
+   callback/callback
    core/core
-   data_block/data_block
    interp/interp
    learn/learn
+   metrics/metrics
    som/som
+   viz/viz
 
 .. toctree::
    :maxdepth: 1
@@ -32,11 +34,12 @@ Fastsom is a PyTorch and Fastai based implementation of Self-Organizing Maps.
 Links
 -----
 - **Fastsom Github repository**: https://github.com/kireygroup/fastsom
-- **Medium articles**: https://medium.com
+- **Medium articles**: https://medium.com/kirey-group/self-organizing-maps-with-fast-ai-4a03f1c7351
 - **Fastai documentation**: https://docs.fast.ai/
 - **PyTorch documentation**: https://pytorch.org/docs/stable/index.html
 - **Gensim**: https://radimrehurek.com/gensim/
 - **K-Means PyTorch**: https://pypi.org/project/kmeans-pytorch/
+- **Fastai-Category-Encoders**: https://github.com/kireygroup/fastai-category-encoders
 
 
 Indices and tables

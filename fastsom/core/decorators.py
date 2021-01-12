@@ -21,4 +21,5 @@ def timeit(log_level=logging.INFO, alternative_title=None):
             return result
 
         return wrapped_f
+
     return wrap

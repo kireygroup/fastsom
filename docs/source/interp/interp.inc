@@ -1,5 +1,5 @@
 
-.. currentmodule:: fastsom.interp.interp
+.. currentmodule:: fastsom.interp
 
 .. autoclass:: SomInterpretation
    :members:

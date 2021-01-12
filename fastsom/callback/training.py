@@ -3,9 +3,7 @@ Callbacks for SOM.
 """
 import numpy as np
 import torch
-from fastai.callback import Callback
-
-from fastsom.som import Som
+from fastai.callback.core import Callback
 
 __all__ = [
     "SomTrainer",
@@ -17,10 +15,7 @@ __all__ = [
 
 class SomTrainer(Callback):
     """Base class for SOM training strategies."""
-
-    def __init__(self, model: Som, data):
-        self.model = model
-        self.data = data
+    pass
 
 
 class LinearDecaySomTrainer(SomTrainer):
@@ -36,19 +31,17 @@ class LinearDecaySomTrainer(SomTrainer):
         The SOM model
     """
 
-    def __init__(self, model: Som):
-        self.alpha = self.model.alpha
-        self.sigma = self.model.sigma
-        self.n_epochs = None
+    def before_fit(self, **kwargs):
+        self.initial_alpha = self.initial_alpha if hasattr(self, 'initial_alpha') else self.learn.model.alpha
+        self.initial_sigma = self.initial_sigma if hasattr(self, 'initial_sigma') else self.learn.model.sigma
+        self.alpha = self.initial_alpha.clone()
+        self.sigma = self.initial_sigma.clone()
 
-    def on_train_begin(self, **kwargs):
-        self.n_epochs = kwargs['n_epochs']
-
-    def on_epoch_begin(self, **kwargs):
-        epoch = kwargs['epoch']
-        decay = 1.0 - epoch / self.n_epochs
+    def before_train(self, **kwargs):
+        decay = 1.0 - self.learn.epoch / self.learn.n_epoch
         self.model.alpha = self.alpha * decay
         self.model.sigma = self.sigma * decay
+        # self.logger.debug(f'alpha: {self.learn.model.alpha}; sigma: {self.learn.model.sigma}')
 
 
 class TwoPhaseSomTrainer(SomTrainer):
@@ -68,20 +61,17 @@ class TwoPhaseSomTrainer(SomTrainer):
         The SOM model
     """
 
-    def __init__(self, model: Som) -> None:
-        self.model = model
-        self.alpha = model.alpha.cpu().numpy()
-        self.sigma = model.sigma.cpu().numpy()
-        self.sigmas, self.alphas = [], []
-        self.n_epochs = None
-
-    def on_train_begin(self, **kwargs):
+    def before_fit(self, **kwargs):
         # Initialize parameters for each epoch
-        self.n_epochs = kwargs['n_epochs']
+        self.initial_alpha = self.initial_alpha if hasattr(self, 'initial_alpha') else self.learn.model.alpha
+        self.initial_sigma = self.initial_sigma if hasattr(self, 'initial_sigma') else self.learn.model.sigma
+        self.alpha = self.initial_alpha.clone()
+        self.sigma = self.initial_sigma.clone()
+        self.sigmas, self.alphas = [], []
         # 50% rough training, 50% finetuning
         rough_pct = 0.5
-        rough_epochs = int(rough_pct * self.n_epochs)
-        finet_epochs = self.n_epochs - rough_epochs
+        rough_epochs = int(rough_pct * self.learn.n_epoch)
+        finet_epochs = self.learn.n_epoch - rough_epochs
         # Linear decaying radii for each phase
         rough_sigmas = np.linspace(self.sigma, max(self.sigma / 6.0, 1.0), num=rough_epochs)
         finet_sigmas = np.linspace(max(self.sigma / 12.0, 1.0), max(self.sigma / 25.0, 1.0), num=finet_epochs)
@@ -91,11 +81,11 @@ class TwoPhaseSomTrainer(SomTrainer):
         self.sigmas = np.concatenate([rough_sigmas, finet_sigmas], axis=0)
         self.alphas = np.concatenate([rough_alphas, finet_alphas], axis=0)
 
-    def on_epoch_begin(self, **kwargs):
+    def before_train(self, **kwargs):
         # Update parameters
-        epoch = kwargs['epoch']
-        self.model.alpha = torch.tensor(self.alphas[epoch])
-        self.model.sigma = torch.tensor(self.sigmas[epoch])
+        self.learn.model.alpha = torch.tensor(self.alphas[self.learn.epoch])
+        self.learn.model.sigma = torch.tensor(self.sigmas[self.learn.epoch])
+        # self.logger.debug(f'alpha: {self.learn.model.alpha}; sigma: {self.learn.model.sigma}')
 
 
 class ExperimentalSomTrainer(SomTrainer):
@@ -115,19 +105,19 @@ class ExperimentalSomTrainer(SomTrainer):
     model : Som
         The SOM model
     """
+    alphas = []
+    sigmas = []
 
-    def __init__(self, model: Som, data):
-        super().__init__(model, data)
-        self.alpha = self.model.alpha.cpu().numpy()
-        self.sigma = self.model.sigma.cpu().numpy()
-        self.alphas, self.sigmas = [], []
+    def before_fit(self, **kwargs):
+        self.initial_alpha = self.initial_alpha if hasattr(self, 'initial_alpha') else self.learn.model.alpha
+        self.initial_sigma = self.initial_sigma if hasattr(self, 'initial_sigma') else self.learn.model.sigma
+        self.alpha = self.initial_alpha.clone()
+        self.sigma = self.initial_sigma.clone()
         self.bs = []
 
-    def on_train_begin(self, **kwargs):
-        n_epochs = kwargs['n_epochs']
-        phase_1_iters = int(round(n_epochs * 0.16))
-        phase_2_iters = int(round(n_epochs * 0.5))
-        phase_3_iters = int(round(n_epochs * 0.34))
+        phase_1_iters = int(round(self.learn.n_epoch * 0.16))
+        phase_2_iters = int(round(self.learn.n_epoch * 0.50))
+        phase_3_iters = int(round(self.learn.n_epoch * 0.34))
 
         alphas_1 = np.linspace(self.alpha, self.alpha, num=phase_1_iters)
         alphas_2 = np.linspace(self.alpha / 2, self.alpha / 2, num=phase_2_iters)
@@ -140,15 +130,13 @@ class ExperimentalSomTrainer(SomTrainer):
         self.alphas = np.concatenate([alphas_1, alphas_2, alphas_3], axis=0)
         self.sigmas = np.concatenate([sigmas_1, sigmas_2, sigmas_3], axis=0)
 
-        bs_1 = [self.data.batch_size for _ in range(phase_1_iters)]
-        bs_2 = [max([8, self.data.batch_size // 2]) for _ in range(phase_2_iters)]
-        bs_3 = [max([1, self.data.batch_size // 6]) for _ in range(phase_3_iters)]
+        bs_1 = [self.learn.dls.bs for _ in range(phase_1_iters)]
+        bs_2 = [max([8, self.learn.dls.bs // 2]) for _ in range(phase_2_iters)]
+        bs_3 = [max([1, self.learn.dls.bs // 6]) for _ in range(phase_3_iters)]
 
         self.bs = np.concatenate([bs_1, bs_2, bs_3], axis=0).astype(int)
 
-    def on_epoch_begin(self, **kwargs):
-        epoch = kwargs['epoch']
-        self.model.alpha = torch.tensor(self.alphas[epoch])
-        self.model.sigma = torch.tensor(self.sigmas[epoch])
-        # self.data.batch_size = int(self.bs[epoch])
-        # print(self.bs[epoch])
+    def before_train(self, **kwargs):
+        self.learn.model.alpha = torch.tensor(self.alphas[self.learn.epoch])
+        self.learn.model.sigma = torch.tensor(self.sigmas[self.learn.epoch])
+        # self.logger.debug(f'alpha: {self.learn.model.alpha}; sigma: {self.learn.model.sigma}')

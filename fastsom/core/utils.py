@@ -3,9 +3,8 @@ This file contains various project-wide utilities.
 
 """
 
-from typing import Collection, Callable, Iterable, Generator
 from functools import reduce
-
+from typing import Callable, Collection, Generator, Iterable
 
 __all__ = [
     "ifnone",
@@ -154,7 +153,9 @@ def setify(o: any) -> set:
     return o if isinstance(o, set) else set(listify(o))
 
 
-def compose(x: any, fns: Collection[Callable], order_key: str = '_order', **kwargs) -> any:
+def compose(
+    x: any, fns: Collection[Callable], order_key: str = "_order", **kwargs
+) -> any:
     """
     Applies each function in `fns` to the output of the previous function.\n
     Function application starts from `x`, and uses `order_key` to sort the `fns` list.
@@ -183,7 +184,7 @@ def enum_eq(enum, value) -> bool:
     value : any
         The value or enumerator instance to be compared.
     """
-    return (enum == value or enum.value == value)
+    return enum == value or enum.value == value
 
 
 def any_matches(iterable: Iterable, cond_fn: Callable = bool) -> bool:

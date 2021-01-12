@@ -1,78 +1,82 @@
 """
 This module defines a Fastai `Learner` subclass used to train Self-Organizing Maps.
 """
-import torch
-import pandas as pd
-import numpy as np
-
-from typing import Callable, Collection, List, Type, Tuple, Dict
+import pathlib
 from functools import partial
-from fastai.basic_train import Learner
-from fastai.basic_data import DataBunch
-from fastai.callback import Callback
-from fastai.data_block import EmptyLabelList
-from fastai.tabular import TabularDataBunch, Normalize
-from fastai.torch_core import PathLikeOrBinaryStream
-from fastai.train import *
+from typing import Callable, Collection, List, Optional, Tuple, Type, Union
 
-from .callbacks import SomTrainer, ExperimentalSomTrainer
+import numpy as np
+import pandas as pd
+import torch
+from fastai.callback.core import Callback
+from fastai.data.core import DataLoaders
+from fastai.learner import Learner
+from fastai.tabular.data import Normalize, TabularDataLoaders, TabularProc
+from fastai_category_encoders import CategoryEncode
+from fastcore.meta import delegates
+from typing_extensions import Literal
+
+from fastsom.callback import (ExperimentalSomTrainer, SomTrainer,
+                              get_visualization_callbacks, get_xy)
+from fastsom.core import find, ifnone, index_tensor
+from fastsom.log import has_logger
+from fastsom.metrics import mean_quantization_err
+from fastsom.som import MixedEmbeddingDistance, Som
+
+from .initializers import som_initializers
 from .loss import SomLoss
-from .optim import SomOptimizer
+from .optim import SplashOptimizer
+from .utils import denorm_with_proc
 
-from fastsom.core import ifnone, setify, index_tensor, find
-from fastsom.data_block import get_xy, ToBeContinuousProc, Vectorize, OneHotEncode
-from fastsom.interp import SomVizCallback, SomTrainingViz, SomHyperparamsViz, SomBmuViz, mean_quantization_err
-from fastsom.som import Som, MixedEmbeddingDistance, MixedCategoricalDistance
+StrOrPath = Union[str, pathlib.Path]
+TensorOrNumpyArray = Union[torch.Tensor, np.ndarray]
+CategoryEncode.order = 100
 
 
 __all__ = [
     "SomLearner",
     "ForwardContsCallback",
     "UnifyDataCallback",
+    "StrOrPath",
+    "TensorOrNumpyArray",
+    "split_torch_numpy",
 ]
 
 
-def visualization_callbacks(visualize: List[str], visualize_on: str, learn: Learner) -> List[Callback]:
-    """Builds a list of visualization callbacks."""
-    cbs = []
-    visualize_on = ifnone(visualize_on, 'epoch')
-    s_visualize = setify(visualize)
-    if 'weights' in s_visualize:
-        cbs.append(SomTrainingViz(learn, update_on_batch=(visualize_on == 'batch')))
-    if 'hyperparams' in s_visualize:
-        cbs.append(SomHyperparamsViz(learn))
-    if 'bmus' in s_visualize:
-        cbs.append(SomBmuViz(learn, update_on_batch=(visualize_on == 'batch')))
-    return cbs
+def split_torch_numpy(x: TensorOrNumpyArray, sections: List[int], dim: int = 0):
+    """Splits `x` in PyTorch fashion, even if it is a Numpy Array."""
+    if isinstance(x, np.ndarray):
+        sections = np.cumsum(sections)[:-1]
+        return np.split(x, sections, axis=dim)
+    else:
+        return torch.split(x, sections, dim=dim)
 
 
 class ForwardContsCallback(Callback):
     """
     Callback for `SomLearner`, automatically added when the
-    data class is a `TabularDataBunch`.
+    data class is `TabularDataLoaders`.
     Filters out categorical features, forwarding continous
     features to the SOM model.
+    Note that if a categorical encoder is used, categoricals
+    will be encoded to continuous features, and as such will
+    be forwarded by this callback.
     """
-    def __init__(self):
-        pass
-
-    def on_batch_begin(self, **kwargs):
-        x_cat, x_cont = kwargs['last_input']
-        return {'last_input': x_cont}
+    def before_batch(self):
+        x_cat, x_cont = self.xb
+        self.learn.xb = [x_cont]
 
 
 class UnifyDataCallback(Callback):
     """
     Callback for `SomLearner`, automatically added when the
-    data class is a `TabularDataBunch`.
+    data class is a `TabularDataLoaders`.
     Merges categorical and continuous features into a single tensor.
     """
-    def __init__(self):
-        pass
 
-    def on_batch_begin(self, **kwargs):
-        x_cat, x_cont = kwargs['last_input']
-        return {'last_input': torch.cat([x_cat.float(), x_cont], dim=-1)}
+    def before_batch(self):
+        x_cat, x_cont = self.xb
+        self.learn.xb = [torch.cat([x_cat.float(), x_cont], dim=-1)]
 
 
 class SomLearner(Learner):
@@ -83,8 +87,8 @@ class SomLearner(Learner):
 
     Parameters
     ----------
-    data : UnsupervisedDataBunch
-        Contains train and validations datasets, along with sampling and normalization utils.
+    dls : DataLoaders
+        Fast.ai data object.
     model : Som default=None
         The Self-Organizing Map model.
     size : Tuple[int, int] default=(10, 10)
@@ -103,171 +107,197 @@ class SomLearner(Learner):
         A list of elements to be visualized while training. Available values are 'weights', 'hyperparams' and 'bmus'.
     visualize_on: str default='epoch'
         Determines when visualizations should be updated ('batch' / 'epoch').
-    init_weights : str default='random'
-        SOM weight initialization strategy. Defaults to random sampling in the train dataset space.
     """
+    @delegates(Learner)
     def __init__(
-            self,
-            data: DataBunch,
-            model: Som = None,
-            size: Tuple[int, int] = (10, 10),
-            lr: float = 0.6,
-            trainer: Type[SomTrainer] = ExperimentalSomTrainer,
-            callbacks: List[Callback] = [],
-            loss_func: Callable = mean_quantization_err,
-            metrics: Collection[Callable] = None,
-            visualize: List[str] = [],
-            visualize_on: str = 'epoch',
-            **learn_kwargs
+        self,
+        dls: DataLoaders,
+        model: Som = None,
+        size: Tuple[int, int] = (10, 10),
+        init_weights: Literal['kmeans', 'kmeans_cosine', 'random'] = 'random',
+        lr: float = 0.6,
+        trainer: Type[SomTrainer] = ExperimentalSomTrainer,
+        cbs: List[Callback] = [],
+        loss_func: Callable = mean_quantization_err,
+        metrics: Collection[Callable] = None,
+        visualize: List[str] = [],
+        visualize_on: str = "epoch",
+        **kwargs,
     ) -> None:
-        x, _ = get_xy(data)
-        n_features = x.shape[-1]
+        n_inputs = dls.train._n_inp
+        xb = dls.train.one_batch()[0:n_inputs]
+        n_features = sum(map(lambda x: x.shape[-1], xb if n_inputs > 1 else [xb]))
         # Create a new Som using the size, if needed
-        model = model if model is not None else Som((size[0], size[1], n_features))
+        model = ifnone(model, Som((size[0], size[1], n_features)))
         # Pass the LR to the model
         model.alpha = torch.tensor(lr)
+        # Optionally initialize weights
+        if init_weights is not None and init_weights in som_initializers:
+            init = som_initializers[init_weights]
+            num_bmus = size[0] * size[1]
+            model.weights = init(get_xy(dls)[0], num_bmus).view(size[0], size[1], n_features)
         # Wrap the loss function
         loss_func = SomLoss(loss_func, model)
-        # Initialize the trainer with the model
-        callbacks.append(trainer(model, data))
         # Pass model reference to metrics
-        metrics = list(map(lambda fn: partial(fn, som=model), metrics)) if metrics is not None else []
-        if 'opt_func' not in learn_kwargs:
-            learn_kwargs['opt_func'] = SomOptimizer
-        super().__init__(data, model, callbacks=callbacks, loss_func=loss_func, metrics=metrics, **learn_kwargs)
+        metrics = (list(map(lambda fn: partial(fn, som=model), metrics)) if metrics is not None else [])
+        if "opt_func" not in kwargs:
+            kwargs["opt_func"] = SplashOptimizer
+        super().__init__(dls, model, cbs=cbs, loss_func=loss_func, metrics=metrics, **kwargs)
         # Add visualization callbacks
-        self.callbacks += visualization_callbacks(visualize, visualize_on, self)
-        # Add optional data compatibility callback
-        if isinstance(data, TabularDataBunch):
+        self.add_cbs(get_visualization_callbacks(visualize, visualize_on))
+        # Add training callback
+        self.add_cbs(trainer())
+        # Adjust SOM distance function + optional data pipelining callbacks
+        if isinstance(dls, TabularDataLoaders):
             self.__maybe_adjust_model_dist_fn()
-        self.callbacks = list(set(self.callbacks))
 
     def __maybe_adjust_model_dist_fn(self):
         """Changes the SOM distance function if the data type requires it."""
-        tobecont_proc = find(self.data.processor[0].procs, lambda p: isinstance(p, ToBeContinuousProc))
-        if tobecont_proc is not None:
-            if isinstance(tobecont_proc, Vectorize):
-                if not isinstance(self.model.dist_fn, MixedEmbeddingDistance):
-                    split_idx = len(tobecont_proc.transformed_cat_names) if tobecont_proc.is_mixed else None
-                    self.model.dist_fn = MixedEmbeddingDistance(tobecont_proc.vector_size, split_idx=split_idx)
-                self.callbacks.append(ForwardContsCallback())
-            elif isinstance(tobecont_proc, OneHotEncode):
-                # TODO: Implement OneHot-based distance
-                # For now only forward continuous features
-                self.callbacks.append(ForwardContsCallback())
+        encoder = self._find_categorical_encoder()
+        # If no categorizer is provided, append the appropriate callback
+        if encoder is None:
+            self.add_cb(ForwardContsCallback())
+            # if len(self.dls.cat_names) > 0:
+            #     self.logger.warning("Categorical variables will NOT be passed to the SOM unless encoded with the `CategoryEncode` proc.")
+        elif encoder.uses_embeddings:
+            self.model.dist_fn = MixedEmbeddingDistance(encoder.get_emb_szs())
+            self.add_cb(UnifyDataCallback())
         else:
-            self.callbacks.append(ForwardContsCallback())
+            # TODO: handle other category encoders.
+            # For now, just ignore categoricals,
+            # expecting them to be encoded as continuous.
+            self.add_cb(ForwardContsCallback())
 
-    def codebook_to_df(self, recategorize: bool = False) -> pd.DataFrame:
+    def recategorize(self, data: torch.Tensor, return_names: bool = False, denorm: bool = False) -> np.ndarray:
+        """Recategorizes `data`, optionally returning cat/cont names."""
+        if not self.is_tabular:
+            raise ValueError("Recategorization is available only when using TabularDataLoaders")
+        encoder = self._find_categorical_encoder()
+        if encoder is None:
+            raise ValueError("No CategoryEncode transform found while applying recategorization.")
+        # Retrieve original & encoded feature names
+        cont_names, cat_names = list(encoder.encoder.cont_names), list(encoder.encoder.cat_names)
+        encoded_cat_names = list(encoder.encoder.get_feature_names())
+        if denorm:
+            data = self.denormalize(data)
+        cats, conts = self.split_cats_conts(data)
+        ret = encoder.encoder.inverse_transform(pd.DataFrame(cats.cpu().numpy(), columns=encoded_cat_names)).values
+        if data.shape[-1] > len(encoded_cat_names):
+            ret = np.concatenate([ret, conts.cpu().numpy()], axis=-1)
+        return ret if not return_names else (ret, cat_names, cont_names)
+
+    def codebook_to_df(self, recategorize: bool = False, denorm: bool = True) -> pd.DataFrame:
         """
         Exports the SOM model codebook as a Pandas DataFrame.
 
         Parameters
         ----------
-        recategorize: bool = False default=False
-            Thether to apply backwards transformation of encoded categorical features. Only works with `TabularDataBunch`.
+        recategorize: bool = False
+            Whether to apply backwards transformation of encoded categorical features. Only works with `TabularDataLoaders`.
+        denorm: bool = True
+            Whether data should be de-normalized.
         """
         # Clone model weights
         w = self.model.weights.clone().cpu()
         w = w.view(-1, w.shape[-1])
-
-        if isinstance(self.data, TabularDataBunch):
-            if recategorize:
-                w, cat_names, cont_names = self.recategorize(w, return_names=True, denorm=True)
+        if self.is_tabular:
+            if self._find_categorical_encoder() is not None and recategorize:
+                w, cat_names, cont_names = self.recategorize(w, return_names=True, denorm=denorm)
+                cats, conts = self.split_cats_conts(w)
             else:
-                cont_names, cat_names = self.data.cont_names, self.data.cat_names
-                w = w.numpy()
-            cat_features, cont_features = w[..., :len(cat_names)], w[..., len(cat_names):]
-            data = np.concatenate([cat_features, cont_features], axis=-1)
-            df = pd.DataFrame(data=data, columns=cat_names+cont_names)
+                cont_names, cat_names = list(self.dls.cont_names), list(self.dls.cat_names)
+                cats, conts = self.split_cats_conts(self.denormalize(w)).cpu().numpy()
+            # cat_features, cont_features = w[..., : len(cat_names)], w[..., len(cat_names):]
+            w = np.concatenate([cats, conts], axis=-1)
+            df = pd.DataFrame(data=w, columns=cat_names + cont_names)
             df[cont_names] = df[cont_names].astype(float)
             df[cat_names] = df[cat_names].astype(str)
         else:
-            # TODO: retrieve column names in some way for other types of DataBunch
+            # TODO: retrieve column names in some way for other types of DataLoaders
             w = w.numpy()
-            columns = list(map(lambda i: f'Feature #{i+1}', range(w.shape[-1])))
+            columns = list(map(lambda i: f"Feature #{i+1}", range(w.shape[-1])))
             df = pd.DataFrame(data=w, columns=columns)
-        # Create the DataFrame
-        # for col in df.columns:
-            # df[col] = df[col].astype(get_type(pd.api.types.infer_dtype(df[col])))
         # Add SOM rows/cols coordinates into the `df`
-        coords = index_tensor(self.model.size[:-1]).cpu().view(-1, 2).numpy()
-        df['som_row'] = coords[:, 0]
-        df['som_col'] = coords[:, 1]
+        coords = index_tensor(self.model.size[:-1]).view(-1, 2).cpu().numpy()
+        df["som_row"] = coords[:, 0]
+        df["som_col"] = coords[:, 1]
         return df
 
-    def export(self, file: PathLikeOrBinaryStream = 'export.pkl', destroy: bool = False):
+    def export(self, file: StrOrPath = "export.pkl", destroy: bool = False):
         """Exports the Learner to file, removing unneeded callbacks."""
-        cbs = list(self.callbacks)
-        self.callbacks = list(filter(lambda cb: not isinstance(cb, (SomTrainer, SomVizCallback)), self.callbacks))
-        super().export(file=file, destroy=destroy)
+        cbs = list(self.cbs)
+        self.cbs = list(filter(lambda cb: not getattr(cb, 'is_exportable', False), self.cbs))
+        super().export(file, destroy)
         if not destroy:
-            self.callbacks = cbs
-
-    def recategorize(self, data: torch.Tensor, return_names: bool = False, denorm: bool = False) -> np.ndarray:
-        """Recategorizes `data`, optionally returning cat/cont names."""
-        if not isinstance(self.data, TabularDataBunch):
-            raise ValueError('Recategorization is available only when using TabularDataBunch')
-        encoding_proc = find(self.data.processor[0].procs, lambda proc: isinstance(proc, ToBeContinuousProc))
-        if encoding_proc is None:
-            raise ValueError('No proc of type ToBeContinuousProc was found during recategorization')
-        cont_names, cat_names = encoding_proc.original_cont_names, encoding_proc.original_cat_names
-        encoded_cat_names = encoding_proc.cont_names[len(cont_names):]
-        if data.shape[-1] == self.model.weights.size(-1):
-            if denorm:
-                # Vectorized categoricals are usually normalized too, so we need to denormalize them
-                if isinstance(encoding_proc, Vectorize):
-                    data = self.denormalize(data)
-                    cats, conts = data[..., :len(encoded_cat_names)], data[..., len(encoded_cat_names):]
-                else:
-                    cats, conts = data[..., :len(encoded_cat_names)], data[..., len(encoded_cat_names):]
-                    conts = self.denormalize(conts)
-            else:
-                cats, conts = data[..., :len(encoded_cat_names)], data[..., len(encoded_cat_names):]
-        else:
-            cats, conts = data, None
-        cats = encoding_proc.apply_backwards(cats)
-        ret = np.concatenate([cats, conts.numpy()], axis=-1) if (conts is not None and conts.shape[-1] > 0) else cats
-        if return_names:
-            return ret, cat_names, cont_names
-        else:
-            return ret
+            self.cbs = cbs
 
     def denormalize(self, data: torch.Tensor) -> torch.Tensor:
         """Denormalizes `data`."""
-        if isinstance(self.data, TabularDataBunch):
-            normalize_proc = find(self.data.processor[0].procs, lambda proc: isinstance(proc, Normalize))
+        if self.is_tabular:
+            normalize_proc = self._find_normalizer()
             if normalize_proc is not None:
                 if data.shape[-1] > len(normalize_proc.means):
-                    conts, cats = data[..., :len(normalize_proc.means)], data[..., len(normalize_proc.means):]
-                    return torch.cat([cats, denormalize(conts, normalize_proc.means, normalize_proc.stds)], dim=-1)
+                    cats, conts = self.split_cats_conts(data)
+                    # conts, cats = (data[..., :len(normalize_proc.means)], data[..., len(normalize_proc.means):])
+                    return torch.cat([cats, denorm_with_proc(conts, normalize_proc)], dim=-1)
                 else:
-                    return denormalize(data, normalize_proc.means, normalize_proc.stds)
-        # TODO: implement for other databunch types
+                    return denorm_with_proc(data, normalize_proc)
+        # TODO: implement for other DataLoaders types
         return data
+
+    def get_feature_names(self) -> Tuple[List[str], List[str], List[str]]:
+        """
+        Returns three lists containing the categorical, continuous and encoded-categorical feature names.
+        Only works if the associated DataLoaders is a TabularDataLoaders.
+        Also, in case no encoding transform is associated with the dataloaders, the third list will be empty.
+        """
+        if self.is_tabular:
+            cat_encoder = self._find_categorical_encoder()
+            if cat_encoder is None:
+                cat_names         = self.dls.cat_names
+                cont_names        = self.dls.cont_names
+                cat_names_encoded = []
+            else:
+                cat_names         = cat_encoder.encoder.cat_names
+                cont_names        = cat_encoder.encoder.cont_names
+                cat_names_encoded = cat_encoder.encoder.get_feature_names()
+            return cat_names, cont_names, cat_names_encoded
+        else:
+            raise RuntimeError('Cannot get feature names of non-tabular dataloader')
+
+    def split_cats_conts(self, x: TensorOrNumpyArray) -> Tuple[TensorOrNumpyArray, TensorOrNumpyArray]:
+        """Splits a Tensor `x` into two parts, i.e. categorical and continuous features."""
+        if self.is_tabular:
+            cat_names, cont_names, cat_names_encoded = self.get_feature_names()
+            if x.shape[-1] == len(cat_names) + len(cont_names):
+                return split_torch_numpy(x, list(map(len, [cat_names, cont_names])), dim=-1)
+            elif len(cat_names_encoded) > 0 and x.shape[-1] == len(cat_names_encoded) + len(cont_names):
+                return split_torch_numpy(x, list(map(len, [cat_names_encoded, cont_names])), dim=-1)
+            else:
+                raise RuntimeError('Tensor size mismatch: cannot split Tensor with either encoded or non-encoded categorical features')
+        else:
+            raise RuntimeError('Cannot split features into categorical and continuous when self.dls is not a TabularDataLoaders')
+
+    def _find_proc(self, proc_cls: Type[TabularProc]) -> Optional[TabularProc]:
+        """
+        If `self.dls` is a `TabularDataLoaders`, this method searches
+        the data transforms for an instance of `proc_cls`.
+        """
+        if self.is_tabular:
+            return find(self.dls.procs, lambda p: isinstance(p, proc_cls))
+        else:
+            raise RuntimeError('Cannot look for CategoryEncode procs in a non-tabular dataloaders')
+
+    def _find_categorical_encoder(self) -> Optional[CategoryEncode]:
+        return self._find_proc(CategoryEncode)
+
+    def _find_normalizer(self) -> Optional[Normalize]:
+        return self._find_proc(Normalize)
 
     @property
     def has_labels(self):
-        return not isinstance(self.data.train_ds.y, EmptyLabelList)
+        return self.dls.train.ys.shape[-1] > 0
 
-
-def print_stats(t: torch.Tensor, dim: int = -1):
-    print(f'Mean: {t.mean()}, Std: {t.std()}, Min: {t.min()}, Max: {t.max()}, Shape: {t.shape}')
-
-
-def denormalize(data: torch.Tensor, means: Dict[str, float], stds: Dict[str, float]) -> torch.Tensor:
-    """
-    Denormalizes `data` using `means` and `stds`.
-
-    Parameters
-    ----------
-    data : torch.Tensor
-        The tensor to be normalized. Features will be picked from the last dimension.
-    means : Dict[str, float]
-        A dict in the form {feature_name: feature_mean}
-    stds : Dict[str, float]
-        A dict in the form {feature_name: feature_std}
-    """
-    means = torch.tensor(list(means.values()))
-    stds = torch.tensor(list(stds.values()))
-    return stds * data + means
+    @property
+    def is_tabular(self):
+        return isinstance(self.dls, TabularDataLoaders)

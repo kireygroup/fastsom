@@ -3,11 +3,10 @@ This module contains core tensor operations.
 """
 
 
-import torch
-import numpy as np
-
 from typing import Callable
 
+import numpy as np
+import torch
 
 __all__ = [
     "index_tensor",

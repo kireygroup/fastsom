@@ -1,5 +1,6 @@
-import torch
 from typing import Tuple
+
+import torch
 
 from .distance import pnorm
 
@@ -76,7 +77,9 @@ def neigh_diff_standard(bmus: torch.Tensor, positions: torch.Tensor) -> torch.Te
     return bmus - positions
 
 
-def neigh_diff_toroidal(bmus: torch.Tensor, positions: torch.Tensor, map_size: Tuple[int, int] = None) -> torch.Tensor:
+def neigh_diff_toroidal(
+    bmus: torch.Tensor, positions: torch.Tensor, map_size: Tuple[int, int] = None
+) -> torch.Tensor:
     """
     Positional difference function.
     Computes toroidal (wraparound) difference between Best Matching Units (`bmus`) and `positions`, where `positions` 

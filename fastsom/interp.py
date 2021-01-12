@@ -2,30 +2,25 @@
 This file contains interpretation
 utilities for Self-Organizing Maps.
 """
-import torch
+from typing import List, Optional, Tuple, Union
+
+import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-import matplotlib.pyplot as plt
-
-from typing import Optional, List, Union, Tuple
-from fastai.basic_data import DatasetType
-from fastai.basic_train import Learner
-from fastai.tabular import TabularDataBunch
+import torch
+from fastai.tabular.data import DataLoader
+from fastprogress.fastprogress import progress_bar
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import KBinsDiscretizer
-from fastprogress.fastprogress import progress_bar
-from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
-from fastsom.core import ifnone, idxs_2d_to_1d, find
-from fastsom.data_block import ToBeContinuousProc
+from fastsom.core import idxs_2d_to_1d, ifnone
+from fastsom.learn import SomLearner
 
-
-__all__ = [
-    "SomInterpretation",
-]
+__all__ = ["SomInterpretation"]
 
 
-class SomInterpretation():
+class SomInterpretation:
     """
     SOM interpretation utility.
 
@@ -39,16 +34,15 @@ class SomInterpretation():
         The learner to be used for interpretation.
     """
 
-    def __init__(self, learn: Learner) -> None:
+    def __init__(self, learn: SomLearner) -> None:
         self.learn = learn
-        self.data = learn.data
         self.pca = None
         self.w = learn.model.weights.clone().view(-1, learn.model.size[-1]).cpu()
         # TODO: denormalization?
         self.w = self.learn.denormalize(self.w)
 
     @classmethod
-    def from_learner(cls, learn: Learner):
+    def from_learner(cls, learn: SomLearner):
         """
         Creates a new instance of `SomInterpretation` from a `SomLearner`.\n
 
@@ -64,47 +58,48 @@ class SomInterpretation():
         return self.learn.model.weights.shape[:-1]
 
     def _get_train_batched(self, progress: bool = True):
+        """Returns an iterator over the training set."""
         iter_fn = progress_bar if progress else iter
-        for xb, yb in iter_fn(self.learn.data.train_dl):
+        for xb, yb in iter_fn(self.learn.dls.train):
+            # If Tabular, grab the continuous part
             if not isinstance(xb, torch.Tensor):
                 xb = xb[1]
             yield xb, yb
 
     def _init_pca(self):
-        "Initializes and fits the PCA instance."
+        """Initializes and fits the PCA instance."""
         self.pca = PCA(n_components=3)
         self.pca.fit(self.w)
 
-    def show_hitmap(self, save: bool = False) -> None:
+    def show_hitmap(self, ds_idx: int = 0, save: bool = False) -> None:
         """
         Shows a hitmap with counts for each codebook unit over the dataset.
 
         Parameters
         ----------
+        ds_idx : int, default=0
+            Dataset index. 0: train, 1: valid, etc.
         save : bool default=False
             If True, saves the hitmap into a file.
         """
+        plt.ioff()
         _, ax = plt.subplots(figsize=(10, 10))
-        preds = torch.zeros(0, 2).cpu().long()
-        for xb, yb in self._get_train_batched():
-            preds = torch.cat([preds, self.learn.model(xb).cpu()], dim=0)
-
+        preds, _ = self.learn.get_preds(ds_idx)
         out, counts = preds.unique(return_counts=True, dim=0)
         z = torch.zeros(self.learn.model.size[:-1]).long()
         for i, c in enumerate(out):
             z[c[0], c[1]] += counts[i]
 
-        sns.heatmap(z.cpu().numpy(), linewidth=0.5, annot=True, ax=ax, fmt='d')
+        sns.heatmap(z.cpu().numpy(), linewidth=0.5, annot=True, ax=ax, fmt="d")
         plt.show()
 
     def show_feature_heatmaps(
         self,
         feature_indices: Optional[Union[int, List[int]]] = None,
-        cat_labels: Optional[List[str]] = None,
-        cont_labels: Optional[List[str]] = None,
         recategorize: bool = True,
+        denorm: bool = False,
         figsize: Tuple[int, int] = (12, 12),
-        save: bool = False
+        save: bool = False,
     ) -> None:
         """
         Shows a heatmap for each feature displaying its value distribution over the codebook.
@@ -122,25 +117,26 @@ class SomInterpretation():
         save : bool default=False
             If True, saves the charts into a file.
         """
-        xb, _ = next(self._get_train_batched(progress=False))
-        n_variables = xb.shape[-1]
-        if isinstance(self.learn.data, TabularDataBunch):
-            tobecont_proc = find(self.learn.data.processor[0].procs, lambda p: isinstance(p, ToBeContinuousProc))
-            if tobecont_proc is not None:
-                cat_labels, cont_labels = tobecont_proc.original_cat_names, tobecont_proc.original_cont_names
+        plt.ioff()
+        # Transform feature indices to a list
+        if isinstance(feature_indices, int):
+            feature_indices = [feature_indices]
+        elif feature_indices is None:
+            n_features = self.learn.model.size[-1]
+            feature_indices = list(range(n_features))
+        # If the DataLoader is for Tabular, gather feature names
+        if self.learn.is_tabular:
+            cat_names, cont_names, encoded_cat_names = self.learn.get_feature_names()
+            labels = encoded_cat_names + cont_names if len(encoded_cat_names) > 0 else cat_names + cont_names
+            # Optionally recategorize categorical variables
+            if len(encoded_cat_names) > 0 and recategorize:
+                w = self.learn.recategorize(self.w, denorm=denorm)
             else:
-                cat_labels, cont_labels = self.learn.data.cat_names, self.learn.data.cont_names
-        else:
-            cat_labels = ifnone(cat_labels, [])
-            cont_labels = ifnone(cont_labels, [])
-        labels = cat_labels+cont_labels if len(cat_labels+cont_labels) > 0 else [f'Feature #{i}' for i in range(n_variables)]
-        feature_indices = list(range(len(labels))) if feature_indices is None else feature_indices if isinstance(feature_indices, list) else [feature_indices]
-
-        # Optionally recategorize categorical variables
-        if recategorize:
-            w = self.learn.recategorize(self.w, denorm=False)
-        else:
+                w = self.w.numpy()
+        else:  # Otherwise, use given features indices as names
+            labels = [f"Feature #{i}" for i in feature_indices]
             w = self.w.numpy()
+
         # gather feature indices from weights
         w = np.take(w, feature_indices, axis=-1)
 
@@ -150,14 +146,19 @@ class SomInterpretation():
         fig, axs = plt.subplots(rows, cols, figsize=(figsize[0] * cols, figsize[1] * rows))
         axs = axs.flatten() if isinstance(axs, np.ndarray) else [axs]
 
-        zipped_items = zip(range(len(feature_indices)), axs[:len(feature_indices)], np.split(w, w.shape[-1], axis=-1), labels)
+        zipped_items = zip(
+            range(len(feature_indices)),
+            axs[: len(feature_indices)],
+            np.split(w, w.shape[-1], axis=-1),
+            labels,
+        )
         for i, ax, data, label in progress_bar(list(zipped_items)):
             ax.set_title(label)
-            if data.dtype.kind == 'S' or data.dtype.kind == 'U':
+            if data.dtype.kind in ["S", "U", "O"]:
                 # TODO: apply colors to strings
                 data = data.astype(str)
-                numeric_data = (np.searchsorted(np.unique(data), data, side='left') + 1).reshape(self.modelsize)
-                sns.heatmap(numeric_data, ax=ax, annot=data.reshape(self.modelsize), fmt='s')
+                numeric_data = (np.searchsorted(np.unique(data), data, side="left") + 1).reshape(self.modelsize)
+                sns.heatmap(numeric_data, ax=ax, annot=data.reshape(self.modelsize), fmt="s")
             else:
                 sns.heatmap(data.reshape(self.modelsize), ax=ax, annot=True)
             fig.show()
@@ -172,7 +173,7 @@ class SomInterpretation():
         save : bool default=False
             If True, saves the heatmap into a file.
         """
-
+        plt.ioff()
         image_shape = (self.learn.model.size[0], self.learn.model.size[1], 3)
         if self.w.shape[-1] != 3:
             if self.pca is None:
@@ -183,7 +184,9 @@ class SomInterpretation():
             d = self.w.numpy()
 
         # Rescale values into the RGB space (0, 255)
-        def rescale(d): return ((d - d.min(0)) / d.ptp(0) * 255).astype(int)
+        def rescale(d):
+            return ((d - d.min(0)) / d.ptp(0) * 255).astype(int)
+
         d = rescale(d)
         # Show weights
         plt.figure(figsize=(10, 10))
@@ -191,51 +194,55 @@ class SomInterpretation():
 
     def show_preds(
         self,
-        ds_type: DatasetType = DatasetType.Train,
+        dl: Optional[DataLoader] = None,
         class_names: List[str] = None,
         n_bins: int = 5,
-        save: bool = False
+        save: bool = False,
     ) -> None:
         """
-        Displays most frequent label for each map position in `ds_type` dataset.
+        Displays most frequent label for each map position in `dl` dataset.
         If labels are countinuous, binning on `n_bins` is performed.
 
         Parameters
         ----------
-        ds_type : DatasetType default=DatasetType.Train
-            The enum of the dataset to be used.
+        dl : DataLoader, default=None
+            The dataloader to use for prediction. Defaults to the validation set,
+            or training set in case validation set is empty.
         n_bins : int default=5
             The number of bins to use when labels are continous.
         save : bool default=False
             Whether or not the output chart should be saved on a file.
         """
+        plt.ioff()
         if not self.learn.has_labels:
-            raise RuntimeError('Unable to show predictions for a dataset that has no labels. \
-                Please pass labels when creating the `DataBunch` or use `interp.show_hitmap()`')
+            raise RuntimeError(
+                "Unable to show predictions for a dataset that has no labels. \
+                Please pass labels when creating the `DataBunch` or use `interp.show_hitmap()`"
+            )
         # Run model predictions
-        preds, labels = self.learn.get_preds(ds_type)
-
-        # Check if labels are continuous
-        continuous_labels = 'float' in str(labels.dtype)
-
-        if continuous_labels and n_bins > 0:
-            # Split labels into bins
-            labels = KBinsDiscretizer(n_bins=n_bins, encode='ordinal').fit_transform(labels.unsqueeze(-1).numpy())
-            labels = torch.tensor(labels)
-
+        dl = ifnone(dl, self.learn.dls.valid if len(self.learn.dls.loaders) > 1 else self.learn.dls.train)
+        preds, labels = self.learn.get_preds(dl=dl)
         map_size = (self.learn.model.size[0], self.learn.model.size[1])
-
         # Data placeholder
         data = torch.zeros(map_size[0] * map_size[1])
 
-        # Transform BMU indices to 1D for easier processing
+        # Check if labels are continuous
+        is_target_continuous = "float" in str(labels.dtype)
+        # Discretize the target
+        if is_target_continuous and n_bins > 0:
+            labels = KBinsDiscretizer(n_bins=n_bins, encode="ordinal").fit_transform(labels.cpu().numpy())
+            labels = torch.tensor(labels)
+
+        # Transform predictions (2D BMU indices) to 1D for easier processing
         preds_1d = idxs_2d_to_1d(preds, map_size[0])
         unique_bmus = preds_1d.unique(dim=0)
 
+        # Count predictions for each Best-Matching Unit
         for idx, bmu in enumerate(unique_bmus):
             # Get labels corresponding to this BMU
             bmu_labels = labels[(preds_1d == bmu).nonzero()]
-            if continuous_labels and n_bins <= 0:
+
+            if is_target_continuous and n_bins <= 0:
                 data[idx] = bmu_labels.mean()
             else:
                 # Calculate unique label counts
@@ -245,22 +252,22 @@ class SomInterpretation():
             # max_label = label_counts.max()
             # data[idx] = float("{:.2f}".format(max_label.float() / float(len(bmu_labels))))
 
-        if not continuous_labels or n_bins > 0:
+        if not is_target_continuous or n_bins > 0:
             # Legend labels
             unique_labels = labels.unique()
             class_names = ifnone(class_names, [str(label) for label in unique_labels.numpy()])
             # Color map
             colors = plt.cm.Pastel2(np.linspace(0, 1, len(unique_labels)))
-            cmap = LinearSegmentedColormap.from_list('Custom', colors, len(colors))
+            cmap = LinearSegmentedColormap.from_list("Custom", colors, len(colors))
         else:
-            palette = sns.palettes.SEABORN_PALETTES['deep6']
+            palette = sns.palettes.SEABORN_PALETTES["deep6"]
             cmap = ListedColormap(palette)
 
         f, ax = plt.subplots(figsize=(11, 9))
         # Plot the heatmap
-        ax = sns.heatmap(data.view(map_size), annot=True, cmap=cmap, square=True, linewidths=.5)
+        ax = sns.heatmap(data.view(map_size), annot=True, cmap=cmap, square=True, linewidths=0.5)
 
-        if not continuous_labels or n_bins > 0:
+        if not is_target_continuous or n_bins > 0:
             # # Manually specify colorbar labelling after it's been generated
             colorbar = ax.collections[0].colorbar
             colorbar.set_ticks(unique_labels.numpy())
