@@ -6,7 +6,7 @@
 
 .. autofunction:: pdist
 
-.. autofunction:: pcosim
+.. autofunction:: pcosdist
 
 .. autofunction:: grouped_distance
 

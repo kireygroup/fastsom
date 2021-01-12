@@ -76,4 +76,6 @@ napoleon_numpy_docstring = True
 
 # Additional setup steps
 def setup(app):
-    app.add_stylesheet("css/notebook_fix.css")
+    # Adds a patch CSS file that fixes visual incompatibilities
+    # between the Sphinx theme and Jupyter Notebooks.
+    app.add_css_file("css/notebook_fix.css")

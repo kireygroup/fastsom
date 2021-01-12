@@ -5,6 +5,7 @@ import torch
 from fastai.torch_core import Module
 
 from fastsom.core import expanded, index_tensor
+from fastsom.core.tensor import idxs_1d_to_2d, idxs_2d_to_1d
 
 from ..log import has_logger
 from .distance import pdist
@@ -60,15 +61,16 @@ class Som(Module):
         xb : torch.Tensor
             The batch data
         """
-        self.to_device(device=xb.device)
-        n_features = xb.shape[-1]
-        # self.logger.debug(f"xb: {xb.shape}, weights: {self.weights.view(-1, n_features).shape}")
-        distances = self.distance(xb, self.weights.view(-1, n_features))
-        bmus = self.find_bmus(distances)
-        # self.logger.debug(f"bmus: {bmus.shape}")
-        # save batch data
-        self._recorder["xb"] = xb.clone()
-        self._recorder["bmus"] = bmus
+        with torch.no_grad():
+            self.to_device(device=xb.device)
+            n_features = xb.shape[-1]
+            # self.logger.debug(f"xb: {xb.shape}, weights: {self.weights.view(-1, n_features).shape}")
+            distances = self.distance(xb, self.weights.view(-1, n_features))
+            bmus = self.find_bmus(distances)
+            # self.logger.debug(f"bmus: {bmus.shape}")
+            # save batch data
+            self._recorder["xb"] = xb.clone()
+            self._recorder["bmus"] = bmus
         return bmus
 
     def distance(self, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
@@ -94,12 +96,24 @@ class Som(Module):
          2. Calculate neighbourhood scaling on index distances
          3. Update weights
         """
-        xb, bmus = self._recorder["xb"], self._recorder["bmus"]
-        batch_size = xb.shape[0]
-        n_features = xb.shape[-1]
-        elementwise_diffs = expanded(xb, self.weights.view(-1, n_features), lambda a, b: a - b).view(batch_size, self.size[0], self.size[1], n_features)
-        neighbourhood_mults = self.neighborhood(bmus, self.sigma)
-        self.weights += (self.alpha * neighbourhood_mults * elementwise_diffs / batch_size).sum(0)
+        with torch.no_grad():
+            xb, bmus = self._recorder["xb"], self._recorder["bmus"]
+            batch_size = xb.shape[0]
+            n_features = xb.shape[-1]
+            # diffs shape: [bs, row_sz, col_sz, n_features]
+            elementwise_diffs = expanded(xb, self.weights.view(-1, n_features), lambda a, b: a - b).view(batch_size, self.size[0], self.size[1], n_features)
+            # neigh shape: [bs, row_sz, col_zs, 1]
+            neighbourhood_mults = self.neighborhood(bmus, self.sigma)
+            update = (self.alpha * neighbourhood_mults * elementwise_diffs).sum(0) / batch_size
+            # store update for some example BMUs
+            update_idxs = idxs_2d_to_1d([[0,0], [2,2], [4,4], [6,6], [8,8]], self.size[1]).cuda()
+            if 'tracker' not in self._recorder:
+                self._recorder['tracker'] = []
+            if len(self._recorder['tracker']) < 50:
+                before = self.weights.view(-1, n_features).index_select(0, update_idxs).clone()
+                after  = (self.weights + update).view(-1, n_features).index_select(0, update_idxs).clone()
+                self._recorder['tracker'].append((before, after))
+            self.weights += update
 
     def find_bmus(self, distances: torch.Tensor) -> torch.Tensor:
         """
@@ -110,9 +124,11 @@ class Som(Module):
         distances : torch.Tensor
             The data-to-codebook distances.
         """
+        # distances shape: [bs, codebook_size]
+        # argmin shape   : [bs, 1]
         min_idxs = distances.argmin(-1)
         # Distances are flattened, so we need to transform 1d indices into 2d map locations
-        return torch.stack([min_idxs // self.size[1], min_idxs % self.size[1]], dim=1)
+        return idxs_1d_to_2d(min_idxs, self.size[1]).to(distances.device)
 
     def neighborhood(self, bmus: torch.Tensor, sigma: torch.Tensor) -> torch.Tensor:
         """

@@ -4,8 +4,7 @@ for Self-Organizing Maps.
 """
 
 import enum
-import functools as ft
-from typing import Callable, List, Type, Union
+from typing import List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,8 +16,9 @@ from fastcore.meta import delegates
 from sklearn.decomposition import PCA
 
 from fastsom.core import idxs_2d_to_1d
+from fastsom.log import has_logger
 
-from ..log import has_logger
+from .decorators import no_export
 from .plotly_utils import scatter, show_figure
 
 __all__ = [
@@ -29,8 +29,6 @@ __all__ = [
     "SomBmuVisualizationCallback",
     "get_xy",
     "SOM_TRAINING_VIZ",
-    "training_only",
-    "no_export",
     "get_visualization_callbacks",
 ]
 
@@ -42,35 +40,6 @@ def get_xy(dls):
         x.append(torch.cat(list(batch)[:-1], dim=-1) if len(batch) > 2 else batch[0])
         y.append(batch[-1])
     return torch.cat(x, dim=0), torch.cat(y, dim=0)
-
-
-def training_only(fn: Callable):
-    """
-    Decorator for callback methods.
-    Only calls decorated function if the callback is in training mode.
-    """
-    @ft.wraps(fn)
-    def _inner(self, *args, **kwargs):
-        if not self.training:
-            return
-        return fn(self, *args, **kwargs)
-    return _inner
-
-
-def no_export(cls: Type[Callback]):
-    """
-    Decorator for callback classes.
-    Marks the decorated callback not to be exported
-    with the Learner.
-    """
-    old_init = cls.__init__
-
-    @ft.wraps(old_init)
-    def new_init(self, *args, **kwargs):
-        old_init(self, *args, **kwargs)
-        setattr(self, 'is_exportable', False)
-    cls.__init__ = new_init
-    return cls
 
 
 class PCABasedVisualizationCallback(Callback):
@@ -108,13 +77,13 @@ class SomTrainingVisualizationCallback(PCABasedVisualizationCallback):
         self.train_trace = scatter(self.train_pca, name='Training data', mode='markers', marker_color='#539dcc', marker_size=1.5)
         self.weight_pca = self.do_pca(self.learn.model.weights)
         self.weight_trace = scatter(self.weight_pca, name='SOM weights', mode='markers', marker_color='#e58368', marker_size=3)
-        layout = go.Layout(title=f"SOM Visualization ({self.pca.explained_variance_ratio_ * 100 :.0f}% explained variance)")
+        expl_var = str(tuple(map(lambda pct: f'{pct:.0f}%', self.pca.explained_variance_ratio_ * 100)))[1:-1]
+        layout = go.Layout(title=f"SOM Visualization ({expl_var} explained variance)")
         self.fig = go.FigureWidget([self.train_trace, self.weight_trace], layout=layout)
         self.fig.update_layout(margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor="LightSteelBlue")
         show_figure(self.fig)
 
-    @training_only
-    def before_epoch(self):
+    def before_train(self):
         self.weight_pca = self.do_pca(self.learn.model.weights)
         with self.fig.batch_update():
             self.fig.data[1].x = self.weight_pca[:, 0]
@@ -147,8 +116,7 @@ class SomTrainingVisualizationCallback2(PCABasedVisualizationCallback):
         self.train_axis.scatter(*tuple([self.train_pca[:, i] for i in range(self.train_pca.shape[-1])]), c="#539dcc")
         self.fig.show()
 
-    @training_only
-    def before_epoch(self):
+    def before_train(self):
         # Read new weight values, compute PCA and update them on the scatter plot
         w = self.do_pca(self.learn.model.weights.view(-1, self.learn.model.weights.shape[-1]))
         w = tuple(w[:, i] for i in range(w.shape[-1]))
@@ -187,8 +155,7 @@ class SomHyperparamsVisualizationCallback(Callback):
         self.plots[1].set_xlim([0, n_epochs])
         self.fig.show()
 
-    @training_only
-    def after_epoch(self, **kwargs):
+    def after_train(self, **kwargs):
         """Updates hyperparameters and plots."""
         self.alphas.append(self.learn.model.alpha.cpu().numpy())
         self.sigmas.append(self.learn.model.sigma.cpu().numpy())
@@ -218,7 +185,6 @@ class SomBmuVisualizationCallback(Callback):
         self.total_counts = torch.zeros(self.learn.model.size[0] * self.learn.model.size[1])
         self.fig = plt.figure()
 
-    @training_only
     def after_batch(self, **kwargs):
         "Saves BMU hit counts for this batch."
         bmus = self.learn.model._recorder["bmus"]
@@ -227,8 +193,7 @@ class SomBmuVisualizationCallback(Callback):
         if self.update_on_batch:
             self._update_plot()
 
-    @training_only
-    def after_epoch(self, **kwargs):
+    def after_train(self, **kwargs):
         "Updates total BMU counter and resets epoch counter."
         if not self.update_on_batch:
             self._update_plot()
@@ -242,7 +207,6 @@ class SomBmuVisualizationCallback(Callback):
         self.fig = None
         self.ax = None
 
-    @training_only
     def _update_plot(self, **kwargs):
         "Updates the plot."
         imsize = self.learn.model.size[:-1]
@@ -252,6 +216,7 @@ class SomBmuVisualizationCallback(Callback):
         else:
             self.ax.set_data(self.epoch_counts.view(imsize).cpu().numpy())
             self.fig.canvas.draw()
+
 
 class SOM_TRAINING_VIZ(enum.Enum):
     """Enumerator class for SOM training visualization."""

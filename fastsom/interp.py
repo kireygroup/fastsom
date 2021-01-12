@@ -134,7 +134,7 @@ class SomInterpretation:
         else:  # Otherwise, use given features indices as names
             labels = [f"Feature #{i}" for i in feature_indices]
             w = self.w.numpy()
-            
+
         # gather feature indices from weights
         w = np.take(w, feature_indices, axis=-1)
 

@@ -1,5 +1,5 @@
 
-.. currentmodule:: fastsom.interp.metrics
+.. currentmodule:: fastsom.metrics
 
 .. autofunction:: cluster_stats
 .. autofunction:: codebook_err

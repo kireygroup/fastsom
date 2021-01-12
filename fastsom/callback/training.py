@@ -5,11 +5,6 @@ import numpy as np
 import torch
 from fastai.callback.core import Callback
 
-from fastsom.core import ifnone
-from fastsom.viz import training_only
-
-from ..log import has_logger
-
 __all__ = [
     "SomTrainer",
     "LinearDecaySomTrainer",
@@ -42,8 +37,7 @@ class LinearDecaySomTrainer(SomTrainer):
         self.alpha = self.initial_alpha.clone()
         self.sigma = self.initial_sigma.clone()
 
-    @training_only
-    def before_epoch(self, **kwargs):
+    def before_train(self, **kwargs):
         decay = 1.0 - self.learn.epoch / self.learn.n_epoch
         self.model.alpha = self.alpha * decay
         self.model.sigma = self.sigma * decay
@@ -87,8 +81,7 @@ class TwoPhaseSomTrainer(SomTrainer):
         self.sigmas = np.concatenate([rough_sigmas, finet_sigmas], axis=0)
         self.alphas = np.concatenate([rough_alphas, finet_alphas], axis=0)
 
-    @training_only
-    def before_epoch(self, **kwargs):
+    def before_train(self, **kwargs):
         # Update parameters
         self.learn.model.alpha = torch.tensor(self.alphas[self.learn.epoch])
         self.learn.model.sigma = torch.tensor(self.sigmas[self.learn.epoch])
@@ -143,8 +136,7 @@ class ExperimentalSomTrainer(SomTrainer):
 
         self.bs = np.concatenate([bs_1, bs_2, bs_3], axis=0).astype(int)
 
-    @training_only
-    def before_epoch(self, **kwargs):
+    def before_train(self, **kwargs):
         self.learn.model.alpha = torch.tensor(self.alphas[self.learn.epoch])
         self.learn.model.sigma = torch.tensor(self.sigmas[self.learn.epoch])
         # self.logger.debug(f'alpha: {self.learn.model.alpha}; sigma: {self.learn.model.sigma}')

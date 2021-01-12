@@ -14,14 +14,16 @@ from fastai.learner import Learner
 from fastai.tabular.data import Normalize, TabularDataLoaders, TabularProc
 from fastai_category_encoders import CategoryEncode
 from fastcore.meta import delegates
+from typing_extensions import Literal
 
+from fastsom.callback import (ExperimentalSomTrainer, SomTrainer,
+                              get_visualization_callbacks, get_xy)
 from fastsom.core import find, ifnone, index_tensor
 from fastsom.log import has_logger
 from fastsom.metrics import mean_quantization_err
 from fastsom.som import MixedEmbeddingDistance, Som
-from fastsom.viz import get_visualization_callbacks
 
-from .callbacks import ExperimentalSomTrainer, SomTrainer
+from .initializers import som_initializers
 from .loss import SomLoss
 from .optim import SplashOptimizer
 from .utils import denorm_with_proc
@@ -112,6 +114,7 @@ class SomLearner(Learner):
         dls: DataLoaders,
         model: Som = None,
         size: Tuple[int, int] = (10, 10),
+        init_weights: Literal['kmeans', 'kmeans_cosine', 'random'] = 'random',
         lr: float = 0.6,
         trainer: Type[SomTrainer] = ExperimentalSomTrainer,
         cbs: List[Callback] = [],
@@ -128,6 +131,11 @@ class SomLearner(Learner):
         model = ifnone(model, Som((size[0], size[1], n_features)))
         # Pass the LR to the model
         model.alpha = torch.tensor(lr)
+        # Optionally initialize weights
+        if init_weights is not None and init_weights in som_initializers:
+            init = som_initializers[init_weights]
+            num_bmus = size[0] * size[1]
+            model.weights = init(get_xy(dls)[0], num_bmus).view(size[0], size[1], n_features)
         # Wrap the loss function
         loss_func = SomLoss(loss_func, model)
         # Pass model reference to metrics
@@ -139,21 +147,20 @@ class SomLearner(Learner):
         self.add_cbs(get_visualization_callbacks(visualize, visualize_on))
         # Add training callback
         self.add_cbs(trainer())
-        # Add optional data compatibility callback
+        # Adjust SOM distance function + optional data pipelining callbacks
         if isinstance(dls, TabularDataLoaders):
             self.__maybe_adjust_model_dist_fn()
 
     def __maybe_adjust_model_dist_fn(self):
         """Changes the SOM distance function if the data type requires it."""
-        categorize = find(self.dls.procs, lambda p: isinstance(p, CategoryEncode))
+        encoder = self._find_categorical_encoder()
         # If no categorizer is provided, append the appropriate callback
-        if categorize is None:
+        if encoder is None:
             self.add_cb(ForwardContsCallback())
             # if len(self.dls.cat_names) > 0:
             #     self.logger.warning("Categorical variables will NOT be passed to the SOM unless encoded with the `CategoryEncode` proc.")
-
-        elif categorize.uses_embeddings:
-            self.model.dist_fn = MixedEmbeddingDistance(categorize.get_emb_szs())
+        elif encoder.uses_embeddings:
+            self.model.dist_fn = MixedEmbeddingDistance(encoder.get_emb_szs())
             self.add_cb(UnifyDataCallback())
         else:
             # TODO: handle other category encoders.

@@ -73,11 +73,11 @@ class RandomInitializer(WeightsInitializer):
         """
         x_min = x.min(dim=0)[0]
         x_max = x.max(dim=0)[0]
-        return (x_max - x_min) * torch.zeros(k, x.shape[-1]).uniform_(0, 1) - x_min
+        return (x_max - x_min) * torch.zeros(k, x.shape[-1]).uniform_(0, 1).to(x.device) - x_min
 
 
 som_initializers = {
-    "random": RandomInitializer(),
-    "kmeans": KMeansInitializer(),
+    "random"       : RandomInitializer(),
+    "kmeans"       : KMeansInitializer(distance="euclidean"),
     "kmeans_cosine": KMeansInitializer(distance="cosine"),
 }

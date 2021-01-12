@@ -1,5 +1,5 @@
 
-.. currentmodule:: fastsom.learn.callbacks
+.. currentmodule:: fastsom.callback.training
 
 .. autoclass:: SomTrainer
    :members:

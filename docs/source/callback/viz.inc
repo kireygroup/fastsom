@@ -1,13 +1,18 @@
 
-.. currentmodule:: fastsom.interp.viz
+.. currentmodule:: fastsom.callback.viz
+
 
 .. autoclass:: PCABasedVisualizationCallback
-   :members
-.. autoclass:: SomWeightsVisualizationCallback
-   :members
+   :members:
+
 .. autoclass:: SomTrainingVisualizationCallback
-   :members
+   :members:
+
+.. autoclass:: SomTrainingVisualizationCallback2
+   :members:
+
 .. autoclass:: SomHyperparamsVisualizationCallback
-   :members
+   :members:
+
 .. autoclass:: SomBmuVisualizationCallback
-   :members
+   :members:
