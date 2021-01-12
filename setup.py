@@ -21,8 +21,9 @@ setup(
         "sklearn",
         "kmeans_pytorch",
         "seaborn",
-        "fastai_category_encoders",
+        "plotly",
     ],
+    dependency_links=['https://github.com/kireygroup/fastai-category-encoders/tarball/master#egg=fastai_category_encoders'],
     keywords=["self-organizing-map", "fastai", "pytorch", "python"],
     zip_safe=False,
     classifiers=[
